@@ -1,9 +1,13 @@
 <?php
 
+use App\Http\Controllers\Technician\QuatationTecController;
+use Illuminate\Http\Request;
+use App\Models\InspectionSheet;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Organization\TicketController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Organization\InspectinSheetController;
+use App\Http\Controllers\Technician\QuatationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,14 +20,24 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
-    Route::post('/profile-update', [AuthController::class, 'updateProfile'])->middleware('auth:api');
-    Route::post('/change-password', [AuthController::class, 'changePassword'])->middleware('auth:api');
+    Route::middleware('auth:api')->group(function(){
+        Route::get('/profile',[AuthController::class, 'profile']);
+        Route::post('/profile-update', [AuthController::class, 'updateProfile']);
+        Route::post('/change-password', [AuthController::class, 'changePassword']);
+    });
     Route::post('logout', [AuthController::class, 'logout']);
 
 });
 Route::middleware(['auth:api', 'Organization'])->group(function () {
+    //ticket
     Route::post('/create-ticket', [TicketController::class, 'createTicket']);
     Route::post('/update-ticket/{id}', [TicketController::class, 'updateTicket']);
     Route::delete('/delete-ticket/{id}', [TicketController::class, 'deleteTicket']);
+
+    //inspection sheet
+    Route::post('/create-inspection',[InspectinSheetController::class,'createSheet']);
+
+    //quatation
+    Route::post('/create-quatation',[QuatationTecController::class,'createQuatation']);
 
  });

@@ -35,7 +35,6 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'image' => 'array',
         ];
     }
     public function getJWTIdentifier()
@@ -47,15 +46,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
-    public function showimage($path)
+    // public function showimage($path)
+    // {
+    //     $imagePath = storage_path('app/public/' . $path);
+    //     if (file_exists($imagePath)) {
+    //         // Generate the full URL for the stored image
+    //         return asset('storage/' . $path);
+    //     } else {
+    //         return response()->json(['status' => 'error', 'message' => 'Image not found.'], 404);
+    //     }
+    // }
+
+    public function getImageAttribute($image)
     {
-        $imagePath = storage_path('app/public/' . $path);
-        if (file_exists($imagePath)) {
-            // Generate the full URL for the stored image
-            return asset('storage/' . $path);
-        } else {
-            return response()->json(['status' => 'error', 'message' => 'Image not found.'], 404);
-        }
+        return asset('uploads/profile_images/' . $image);
     }
 
 }

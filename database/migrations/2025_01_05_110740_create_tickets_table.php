@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('ticket_no');
             $table->json('image')->nullable();
             $table->json('video')->nullable();
+            $table->enum('status',['Check-in','In Progress','Check-out'])->default('In Progress');
             $table->timestamps();
         });
     }

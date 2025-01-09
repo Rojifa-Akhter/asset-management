@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('role',['Super Admin','Support Agent','Location Employee','Third Party','Organization','Technician','User'])->default('User');
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
-            $table->json('image')->nullable();
+            $table->string('image')->nullable();
             $table->string('password');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('otp')->nullable();
