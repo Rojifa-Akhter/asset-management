@@ -12,39 +12,39 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function profile(){
-        $user=Auth::user();
+    public function profile()
+    {
+        $user = Auth::user();
         return $user;
     }
     public function signup(Request $request)
     {
 
-        // $validator = Validator::make($request->all(), [
-        //     'name' => 'required|string|max:255',
-        //     'email' => 'required|string|email|unique:users,email',
-        //     'address' => 'required|string|max:255',
-        //     'phone' => 'nullable|string|max:15',
-        //     'password' => 'required|string|min:6',
-        //     'role' => 'nullable|string|in:Super Admin,Organization,Location Employee,Support Agent,Third Party,Technician,User',
-        //     'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:10240',
-        // ]);
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|unique:users,email',
+            'address' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:15',
+            'password' => 'required|string|min:6',
+            'role' => 'nullable|string|in:Super Admin,Organization,Location Employee,Support Agent,Third Party,Technician,User',
+            'image' => 'nullable|image',
+        ]);
 
-        // if ($validator->fails()) {
-        //     return response()->json(['status' => false, 'message' => $validator->errors()], 400);
-        // }
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 400);
+        }
 
         $path = null;
         if ($request->has('image')) {
             $image = $request->file('image');
             $extension = $image->getClientOriginalExtension();
-            $new_name=time().'.'.$extension;
-            $path = $image->move(public_path('uploads/profile_images'),$new_name);
+            $new_name = time() . '.' . $extension;
+            $path = $image->move(public_path('uploads/profile_images'), $new_name);
         }
 
         $otp = rand(100000, 999999);
@@ -56,7 +56,7 @@ class AuthController extends Controller
             'address' => $request->address,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'role' => $request->role, // Dynamically set the role from the input
+            'role' => $request->role,
             'image' => $new_name,
             'otp' => $otp,
             'otp_expires_at' => $otp_expires_at,
@@ -129,9 +129,6 @@ class AuthController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Invalid password.'], 401);
         }
 
-        $imageUrl = $user->image ?? asset('uploads/profile_images/' . $user->image);
-
-
         return response()->json([
             'status' => 'success',
             'access_token' => $token,
@@ -141,9 +138,10 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'email_verified_at' => $user->email_verified_at,
-                'image' => $imageUrl,
+                'image' => $user->image,
             ],
         ], 200);
+
     }
 
     public function guard()
@@ -177,7 +175,6 @@ class AuthController extends Controller
 
         $validatedData = $validator->validated();
 
-        // Update user data
         $user->name = $validatedData['name'] ?? $user->name;
         $user->address = $validatedData['address'] ?? $user->address;
         $user->phone = $validatedData['phone'] ?? $user->phone;
@@ -187,14 +184,19 @@ class AuthController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            if (!empty($user->image)) {
-                $oldImagePath = str_replace(asset('storage/'), '', $user->image);
-                if (Storage::disk('public')->exists($oldImagePath)) {
-                    Storage::disk('public')->delete($oldImagePath);
+            if (!empty($user->image) && $user->image !== 'default_user.png') {
+                $oldImagePath = public_path('uploads/profile_images/' . $user->image);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
                 }
             }
-            $path = $request->file('image')->store('profile_images', 'public');
-            $user->image = $path;
+
+            $image = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $new_name = time() . '.' . $extension;
+            $image->move(public_path('uploads/profile_images'), $new_name);
+
+            $user->image = $new_name;
         }
 
         $user->save();
@@ -208,7 +210,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'address' => $user->address,
                 'contact' => $user->phone,
-                'image' => $user->image ? asset('storage/' . $user->image) : null,
+                'image' => $user->image,
                 'role' => $user->role,
             ],
         ], 200);

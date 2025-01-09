@@ -8,14 +8,21 @@ class Ticket extends Model
 {
     protected $guarded = ['id'];
 
+    // protected $cast = [
+    //     'iamge'=> 'array'
+    // ];
 
-    // public function ticketimage($path)
-    // {
-    //     $imagePath = storage_path('app/public/' . $path);
-    //     if (file_exists($imagePath)) {
-    //         return asset('storage/' . $path);
-    //     } else {
-    //         return response()->json(['status' => 'error', 'message' => 'Image not found.'], 404);
-    //     }
-    // }
+    public function getImageAttribute($image)
+    {
+        $images = json_decode($image, true) ?? [];
+        return array_map(fn($img) => asset('uploads/ticket_images/' . $img), $images);
+    }
+
+
+    // Accessor for Videos
+    public function getVideoAttribute($video)
+    {
+        $videos = json_decode($video, true) ?? [];
+        return array_map(fn($vid) => asset('uploads/video/' . $vid), $videos);
+    }
 }

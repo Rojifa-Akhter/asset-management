@@ -20,9 +20,7 @@ class TicketController extends Controller
             'comment' => 'required|string',
             'ticket_no' => 'required|string|max:255|unique:tickets,ticket_no',
             'image' => 'nullable|array',
-            // 'image.*' => 'file|mimes:jpeg,png,jpg,gif',
             'video' => 'nullable|array',
-            // 'video.*' => 'file|mimes:mp4,mkv,avi',
         ]);
 
         if ($validator->fails()) {
@@ -30,20 +28,29 @@ class TicketController extends Controller
         }
 
         $images = [];
-        if ($request->has('image')) {
-            foreach ($request->file('image') as $file) {
-                $path = $file->store('ticket-images', 'public');
-                $images[] = $path;
+        if ($request->hasFile('image')) {
+            foreach ($request->file('image') as $image) {
+                if ($image->isValid()) {
+                    $extension = $image->getClientOriginalExtension();
+                    $ticket_image = time() . uniqid() . '.' . $extension;
+                    $image->move(public_path('uploads/ticket_images'), $ticket_image);
+                    $images[] = $ticket_image;
+                }
             }
         }
 
         $videos = [];
-        if ($request->has('video')) {
-            foreach ($request->file('video') as $file) {
-                $path = $file->store('ticket-videos', 'public');
-                $videos[] = $path;
+        if ($request->hasFile('video')) {
+            foreach ($request->file('video') as $video) {
+                if ($video->isValid()) {
+                    $extension = $video->getClientOriginalExtension();
+                    $new_video = time() . uniqid() . '.' . $extension;
+                    $video->move(public_path('uploads/ticket_videos'), $new_video);
+                    $videos[] = $new_video;
+                }
             }
         }
+        // return json_encode($images);
 
         $ticket = Ticket::create([
             'product_name' => $request->product_name,
@@ -56,11 +63,6 @@ class TicketController extends Controller
             'video' => json_encode($videos),
         ]);
 
-        $ticket->save();
-
-        $imageUrls = array_map(fn($path) => asset('storage/' . $path), $images);
-        $videoUrls = array_map(fn($path) => asset('storage/' . $path), $videos);
-
         return response()->json([
             'status' => 'success',
             'message' => 'Ticket created successfully',
@@ -72,8 +74,8 @@ class TicketController extends Controller
                 'location' => $ticket->location,
                 'comment' => $ticket->comment,
                 'ticket_no' => $ticket->ticket_no,
-                'image' => $imageUrls,
-                'video' => $videoUrls,
+                'image' => $ticket->image,
+                'video' => $ticket->video,
             ],
         ], 201);
     }
@@ -92,7 +94,7 @@ class TicketController extends Controller
             'problem' => 'nullable|string',
             'location' => 'nullable|string|max:255',
             'comment' => 'nullable|string',
-            'ticket_no' => 'nullable|string|max:255|unique:tickets,ticket_no,' . $ticket->id,
+            'ticket_no' => 'nullable|string',
             'image' => 'nullable|array',
             'video' => 'nullable|array',
         ]);
@@ -110,51 +112,61 @@ class TicketController extends Controller
         $ticket->comment = $validatedData['comment'] ?? $ticket->comment;
         $ticket->ticket_no = $validatedData['ticket_no'] ?? $ticket->ticket_no;
 
-        //image updates
-        $images = json_decode($ticket->image, true) ?? [];
         if ($request->hasFile('image')) {
-            // Delete old images
-            foreach ($images as $oldImage) {
-                $oldImagePath = str_replace(asset('storage/'), '', $oldImage);
-                if (Storage::disk('public')->exists($oldImagePath)) {
-                    Storage::disk('public')->delete($oldImagePath);
+            // return $existingImages;
+            $existingImages = is_array($ticket->image)
+            ? $ticket->image
+            : json_decode($ticket->image, true) ?? []; // Decode only if it's not already an array
+
+            foreach ($existingImages as $oldImage) {
+                $filePath = public_path('uploads/ticket_images/' . $oldImage);
+                if (file_exists($filePath)) {
+                    unlink($filePath);
                 }
             }
 
-            // Store new images
+            // Handle new images
             $images = [];
-            foreach ($request->file('image') as $file) {
-                $path = $file->store('ticket-images', 'public');
-                $images[] = $path;
+            foreach ($request->file('image') as $image) {
+                if ($image->isValid()) {
+                    $extension = $image->getClientOriginalExtension();
+                    $ticketImage = time() . uniqid() . '.' . $extension;
+                    $image->move(public_path('uploads/ticket_images'), $ticketImage);
+                    $images[] = $ticketImage;
+                }
             }
+
             $ticket->image = json_encode($images);
         }
 
-        // video updates
-        $videos = json_decode($ticket->video, true) ?? [];
+        // Handle video update
         if ($request->hasFile('video')) {
-            // Delete old videos
-            foreach ($videos as $oldVideo) {
-                $oldVideoPath = str_replace(asset('storage/'), '', $oldVideo);
-                if (Storage::disk('public')->exists($oldVideoPath)) {
-                    Storage::disk('public')->delete($oldVideoPath);
+
+            $existingVideos = is_array($ticket->video)
+            ? $ticket->video
+            : json_decode($ticket->video, true) ?? []; // Decode only if it's not already an array
+
+            foreach ($existingVideos as $oldVideo) {
+                $filePath = public_path('uploads/ticket_videos/' . $oldVideo);
+                if (file_exists($filePath)) {
+                    unlink($filePath);
                 }
             }
 
             // Store new videos
             $videos = [];
-            foreach ($request->file('video') as $file) {
-                $path = $file->store('ticket-videos', 'public');
-                $videos[] = $path;
+            foreach ($request->file('video') as $video) {
+                if ($video->isValid()) {
+                    $extension = $video->getClientOriginalExtension();
+                    $newVideo = time() . uniqid() . '.' . $extension;
+                    $video->move(public_path('uploads/ticket_videos'), $newVideo);
+                    $videos[] = $newVideo;
+                }
             }
             $ticket->video = json_encode($videos);
         }
 
         $ticket->save();
-
-        // Prepare URLs for response
-        $imageUrls = array_map(fn($path) => asset('storage/' . $path), $images);
-        $videoUrls = array_map(fn($path) => asset('storage/' . $path), $videos);
 
         return response()->json([
             'status' => 'success',
@@ -167,8 +179,8 @@ class TicketController extends Controller
                 'location' => $ticket->location,
                 'comment' => $ticket->comment,
                 'ticket_no' => $ticket->ticket_no,
-                'image' => $imageUrls,
-                'video' => $videoUrls,
+                'image' => $ticket->image,
+                'video' => $ticket->video,
             ],
         ], 200);
     }
@@ -181,20 +193,22 @@ class TicketController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Ticket not found.'], 404);
         }
 
-        $images = json_decode($ticket->image, true);
+        $images = is_array($ticket->image) ? $ticket->image : json_decode($ticket->image, true);
         if ($images) {
             foreach ($images as $imagePath) {
-                if (Storage::disk('public')->exists($imagePath)) {
-                    Storage::disk('public')->delete($imagePath);
+                $filePath = public_path('uploads/ticket_images/' . $imagePath);
+                if (file_exists($filePath)) {
+                    unlink($filePath);
                 }
             }
         }
 
-        $videos = json_decode($ticket->video, true);
+        $videos = is_array($ticket->video) ? $ticket->video : json_decode($ticket->video, true);
         if ($videos) {
             foreach ($videos as $videoPath) {
-                if (Storage::disk('public')->exists($videoPath)) {
-                    Storage::disk('public')->delete($videoPath);
+                $filePath = public_path('uploads/ticket_videos/' . $videoPath);
+                if (file_exists($filePath)) {
+                    unlink($filePath);
                 }
             }
         }
@@ -203,8 +217,9 @@ class TicketController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Ticket deleted successfully.',
+            'message' => 'Ticket deleted successfully, along with associated images and videos.',
         ], 200);
     }
+
 
 }
