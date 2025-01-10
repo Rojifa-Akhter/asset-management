@@ -77,4 +77,14 @@ class InspectinSheetController extends Controller
         ], 201);
     }
 
+    public function update(Request $request, $id)
+    {
+        $sheet = InspectionSheet::findOrFail($id);
+
+        if (!$sheet) {
+            return response()->json(['status'=> false, 'message'=> 'There have no data in the inspection sheet']);
+        }
+       
+    }
+
 }

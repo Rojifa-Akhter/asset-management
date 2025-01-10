@@ -23,6 +23,6 @@ class Ticket extends Model
     public function getVideoAttribute($video)
     {
         $videos = json_decode($video, true) ?? [];
-        return array_map(fn($vid) => asset('uploads/video/' . $vid), $videos);
+        return array_map(fn($vid) => asset('uploads/ticket_videos/' . $vid), $videos);
     }
 }

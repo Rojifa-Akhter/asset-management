@@ -13,6 +13,7 @@ class QuatationTecController extends Controller
 {
     public function createQuatation(Request $request)
     {
+        
         $validator = Validator::make($request->all(), [
             'ticket_id' => 'required|exists:tickets,id',
             'sheet_id' => 'required|exists:inspection_sheets,id',

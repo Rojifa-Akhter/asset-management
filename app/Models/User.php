@@ -46,21 +46,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
-    // public function showimage($path)
-    // {
-    //     $imagePath = storage_path('app/public/' . $path);
-    //     if (file_exists($imagePath)) {
-    //         // Generate the full URL for the stored image
-    //         return asset('storage/' . $path);
-    //     } else {
-    //         return response()->json(['status' => 'error', 'message' => 'Image not found.'], 404);
-    //     }
-    // }
+
 
     public function getImageAttribute($image)
     {
         $defaultImage = 'default_user.png';
-        return asset('uploads/profile_images/' . ($image ?: $defaultImage));
+        return asset('uploads/profile_images/' . ($image ?? $defaultImage));
     }
 
 

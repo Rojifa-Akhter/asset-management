@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class TicketController extends Controller
@@ -116,15 +115,15 @@ class TicketController extends Controller
             // return $existingImages;
             $existingImages = is_array($ticket->image)
             ? $ticket->image
-            : json_decode($ticket->image, true) ?? []; // Decode only if it's not already an array
+            : json_decode($ticket->image, true) ?? [];
 
             foreach ($existingImages as $oldImage) {
-                $filePath = public_path('uploads/ticket_images/' . $oldImage);
+                $parsedUrl = parse_url($oldImage);
+                $filePath = ltrim($parsedUrl['path'], '/');
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
             }
-
             // Handle new images
             $images = [];
             foreach ($request->file('image') as $image) {
@@ -135,7 +134,6 @@ class TicketController extends Controller
                     $images[] = $ticketImage;
                 }
             }
-
             $ticket->image = json_encode($images);
         }
 
@@ -144,10 +142,11 @@ class TicketController extends Controller
 
             $existingVideos = is_array($ticket->video)
             ? $ticket->video
-            : json_decode($ticket->video, true) ?? []; // Decode only if it's not already an array
-
+            : json_decode($ticket->video, true) ?? [];
             foreach ($existingVideos as $oldVideo) {
-                $filePath = public_path('uploads/ticket_videos/' . $oldVideo);
+                $videoUrl = parse_url($oldVideo);
+                $filePath = ltrim($videoUrl['path'], '/');
+                // return $filePath;
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
@@ -183,6 +182,16 @@ class TicketController extends Controller
                 'video' => $ticket->video,
             ],
         ], 200);
+    }
+    public function ticketList(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $tickets = Ticket::paginate($perPage);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $tickets,
+        ]);
     }
 
     public function deleteTicket($id)
@@ -220,6 +229,5 @@ class TicketController extends Controller
             'message' => 'Ticket deleted successfully, along with associated images and videos.',
         ], 200);
     }
-
 
 }

@@ -24,29 +24,29 @@ class AuthController extends Controller
     }
     public function signup(Request $request)
     {
+        // return $request;
+        // $validator = Validator::make($request->all(), [
+        //     'name' => 'required|string|max:255',
+        //     'email' => 'required|string|email|unique:users,email',
+        //     'address' => 'required|string|max:255',
+        //     'phone' => 'nullable|string|max:15',
+        //     'password' => 'required|string|min:6',
+        //     'role' => 'nullable|string|in:Super Admin,Organization,Location Employee,Support Agent,Third Party,Technician,User',
+        //     'image' => 'nullable|image',
+        // ]);
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users,email',
-            'address' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:15',
-            'password' => 'required|string|min:6',
-            'role' => 'nullable|string|in:Super Admin,Organization,Location Employee,Support Agent,Third Party,Technician,User',
-            'image' => 'nullable|image',
-        ]);
+        // if ($validator->fails()) {
+        //     return response()->json(['status' => false, 'message' => $validator->errors()], 400);
+        // }
 
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()], 400);
-        }
-
-        $path = null;
+        $new_name = null; // Default value
         if ($request->has('image')) {
             $image = $request->file('image');
             $extension = $image->getClientOriginalExtension();
             $new_name = time() . '.' . $extension;
             $path = $image->move(public_path('uploads/profile_images'), $new_name);
         }
-
+// return $new_name;
         $otp = rand(100000, 999999);
         $otp_expires_at = now()->addMinutes(10);
 
@@ -57,7 +57,7 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-            'image' => $new_name,
+            'image' => $new_name, // Can now safely be null
             'otp' => $otp,
             'otp_expires_at' => $otp_expires_at,
             'status' => 'inactive',
@@ -83,8 +83,8 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => $message,
         ], 200);
-
     }
+
     // verify email
     public function verify(Request $request)
     {
@@ -184,19 +184,23 @@ class AuthController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            if (!empty($user->image) && $user->image !== 'default_user.png') {
-                $oldImagePath = public_path('uploads/profile_images/' . $user->image);
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
+            $existingImage = $user->image;
+
+            if ($existingImage) {
+                $oldImage = parse_url($existingImage);
+                $filePath = ltrim($oldImage['path'], '/');
+                if (file_exists($filePath)) {
+                    unlink($filePath); // Delete the existing image
                 }
             }
 
+            // Upload new image
             $image = $request->file('image');
             $extension = $image->getClientOriginalExtension();
-            $new_name = time() . '.' . $extension;
-            $image->move(public_path('uploads/profile_images'), $new_name);
+            $newName = time() . '.' . $extension;
+            $image->move(public_path('uploads/profile_images'), $newName);
 
-            $user->image = $new_name;
+            $user->image = $newName;
         }
 
         $user->save();
