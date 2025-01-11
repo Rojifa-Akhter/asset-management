@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class TicketController extends Controller
 {
+    //create ticket
     public function createTicket(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -78,7 +79,7 @@ class TicketController extends Controller
             ],
         ], 201);
     }
-
+//update ticket
     public function updateTicket(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
@@ -183,6 +184,8 @@ class TicketController extends Controller
             ],
         ], 200);
     }
+
+    //all ticket list
     public function ticketList(Request $request)
     {
         $perPage = $request->input('per_page', 10);
@@ -193,7 +196,17 @@ class TicketController extends Controller
             'data' => $tickets,
         ]);
     }
+//get ticket details
+    public function ticketDetails(Request $request, $id)
+    {
+        $ticket = Ticket::find($id);
 
+        if (!$ticket) {
+            return response()->json(['status'=> false , 'message'=>'Ticket Not Found'],401);
+        }
+        return response()->json(['status'=>true, 'message'=>$ticket]);
+    }
+//delete ticket
     public function deleteTicket($id)
     {
         $ticket = Ticket::find($id);

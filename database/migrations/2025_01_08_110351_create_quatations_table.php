@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('quatations', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('ticket_id')->constrained('tickets')->onDelete('cascade');
+            $table->foreignId('ticket_id')->constrained('tickets')->onDelete('cascade');
             $table->foreignId('sheet_id')->constrained('inspection_sheets')->onDelete('cascade');
             $table->decimal('cost',8,2)->nullable();
             $table->string('comment')->nullable();

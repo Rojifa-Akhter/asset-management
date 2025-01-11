@@ -14,7 +14,7 @@ class InspectionSheet extends Model
 
     public function assignedBy()
     {
-        return $this->belongsTo(User::class, 'assigned_by');
+        return $this->belongsTo(User::class, 'assigned_by', 'id');
     }
 
     public function technician()

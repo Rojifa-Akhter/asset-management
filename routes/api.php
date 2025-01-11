@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Organization\TicketController;
 use App\Http\Controllers\Organization\InspectinSheetController;
+use App\Http\Controllers\Role\UserController;
 use App\Http\Controllers\Technician\QuatationController;
 
 Route::get('/user', function (Request $request) {
@@ -34,6 +35,7 @@ Route::middleware(['auth:api', 'Organization'])->group(function () {
     Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
     Route::delete('delete-ticket/{id}', [TicketController::class, 'deleteTicket']);
     Route::get('ticket-list', [TicketController::class, 'ticketList']);
+    Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
 
     //inspection sheet
     Route::post('create-inspection',[InspectinSheetController::class,'createSheet']);
@@ -41,12 +43,24 @@ Route::middleware(['auth:api', 'Organization'])->group(function () {
     Route::delete('delete-inspection/{id}', [InspectinSheetController::class, 'deleteInspectionSheet']);
 
     Route::get('inspection-list', [InspectinSheetController::class, 'InspectionSheetList']);
+    Route::get('inspection-details/{id}', [InspectinSheetController::class, 'InspectionSheetDetails']);
 
+
+ });
+ Route::middleware(['auth:api', 'Technician'])->group(function () {
 
     //quatation
     Route::post('create-quatation',[QuatationTecController::class,'createQuatation']);
     Route::post('update-quatation/{id}',[QuatationTecController::class,'updateQuatation']);
     Route::delete('delete-quatation/{id}',[QuatationTecController::class,'deleteQuatation']);
-    Route::delete('quatation-list',[QuatationTecController::class,'quatationList']);
+    Route::get('quatation-list',[QuatationTecController::class,'quatationList']);
+    Route::get('quatation-details/{id}', [QuatationTecController::class, 'quatationDetails']);
+
 
  });
+ Route::middleware(['auth:api', 'User'])->group(function () {
+    // Quotation route
+    Route::get('quotation-view/{id}', [UserController::class, 'getQuatation']);
+});
+
+

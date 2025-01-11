@@ -17,11 +17,13 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    //get user profile
     public function profile()
     {
         $user = Auth::user();
         return $user;
     }
+    //signup or registration
     public function signup(Request $request)
     {
         // return $request;
@@ -246,7 +248,7 @@ class AuthController extends Controller
             'status' => true,
             'message' => 'Password changed successfully']);
     }
-    // forgate password
+    // forgote password
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => 'required|email']);
@@ -296,6 +298,8 @@ class AuthController extends Controller
             'status' => true,
             'message' => 'Password reset successful.'], 200);
     }
+
+    //resend otp
     public function resendOtp(Request $request)
     {
         $request->validate(['email' => 'required|email']);
@@ -324,6 +328,7 @@ class AuthController extends Controller
             'status' => true,
             'message' => 'OTP resent to your email.'], 200);
     }
+    //logout
     public function logout()
     {
         if (!auth('api')->check()) {

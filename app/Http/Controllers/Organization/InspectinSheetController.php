@@ -87,7 +87,7 @@ class InspectinSheetController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Inspection Sheet not found.',
-            ], 404);
+            ], 401);
         }
 
         $validator = Validator::make($request->all(), [
@@ -119,7 +119,6 @@ class InspectinSheetController extends Controller
             }
             $sheet->assigned_by = $validatedData['assigned_by'];
         }
-
 
         if (isset($validatedData['technician_id'])) {
             $technician = User::find($validatedData['technician_id']);
@@ -157,20 +156,20 @@ class InspectinSheetController extends Controller
             return [
                 'id' => $sheet->id,
                 'ticket' => [
-                    'id' => $sheet->ticket->id ?? Null,
-                    'product_name' => $sheet->ticket->product_name ?? Null,
-                    'serial_no' => $sheet->ticket->serial_no ?? Null,
-                    'problem' => $sheet->ticket->problem ?? Null,
+                    'id' => $sheet->ticket->id ?? null,
+                    'product_name' => $sheet->ticket->product_name ?? null,
+                    'serial_no' => $sheet->ticket->serial_no ?? null,
+                    'problem' => $sheet->ticket->problem ?? null,
                 ],
                 'assigned_by' => [
-                    'name' => $sheet->assignedBy->name ?? Null,
+                    'name' => $sheet->assignedBy->name ?? null,
                 ],
                 'technician' => [
-                    'name' => $sheet->technician?->name ?? Null,
+                    'name' => $sheet->technician?->name ?? null,
                 ],
-                'location' => $sheet->location ?? Null,
-                'comment' => $sheet->comment ?? Null,
-                'signature' => $sheet->signature ?? Null,
+                'location' => $sheet->location ?? null,
+                'comment' => $sheet->comment ?? null,
+                'signature' => $sheet->signature ?? null,
             ];
         });
 
@@ -185,7 +184,41 @@ class InspectinSheetController extends Controller
             ],
         ]);
     }
+    //inspection sheet details
+    public function InspectionSheetDetails(Request $request, $id)
+    {
+        $sheet = InspectionSheet::with(['ticket', 'assignedBy', 'technician'])->find($id);
 
+        if (!$sheet) {
+            return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 404);
+        }
+
+        $responseData = [
+            'id' => $sheet->id,
+            'ticket' => $sheet->ticket ? [
+                'id' => $sheet->ticket->id,
+                'product_name' => $sheet->ticket->product_name,
+                'serial_no' => $sheet->ticket->serial_no,
+                'problem' => $sheet->ticket->problem,
+            ] : null,
+            'assigned_by' => $sheet->assignedBy ? [
+                'name' => $sheet->assignedBy->name,
+            ] : null,
+            'technician' => $sheet->technician ? [
+                'name' => $sheet->technician->name,
+            ] : null,
+            'location' => $sheet->location,
+            'comment' => $sheet->comment,
+            'signature' => $sheet->signature,
+        ];
+
+        return response()->json([
+            'status' => true,
+            'data' => $responseData,
+        ]);
+    }
+
+//delete inspection data
     public function deleteInspectionSheet(Request $request, $id)
     {
         $sheet = InspectionSheet::find($id);
