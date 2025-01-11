@@ -25,21 +25,21 @@ class AuthController extends Controller
     public function signup(Request $request)
     {
         // return $request;
-        // $validator = Validator::make($request->all(), [
-        //     'name' => 'required|string|max:255',
-        //     'email' => 'required|string|email|unique:users,email',
-        //     'address' => 'required|string|max:255',
-        //     'phone' => 'nullable|string|max:15',
-        //     'password' => 'required|string|min:6',
-        //     'role' => 'nullable|string|in:Super Admin,Organization,Location Employee,Support Agent,Third Party,Technician,User',
-        //     'image' => 'nullable|image',
-        // ]);
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|unique:users,email',
+            'address' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:15',
+            'password' => 'required|string|min:6',
+            'role' => 'nullable|string|in:Super Admin,Organization,Location Employee,Support Agent,Third Party,Technician,User',
+            'image' => 'nullable|image',
+        ]);
 
-        // if ($validator->fails()) {
-        //     return response()->json(['status' => false, 'message' => $validator->errors()], 400);
-        // }
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 400);
+        }
 
-        $new_name = null; // Default value
+        $new_name = null;
         if ($request->has('image')) {
             $image = $request->file('image');
             $extension = $image->getClientOriginalExtension();
@@ -80,7 +80,7 @@ class AuthController extends Controller
         };
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => $message,
         ], 200);
     }
@@ -106,7 +106,7 @@ class AuthController extends Controller
             $token = JWTAuth::fromUser($user);
 
             return response()->json([
-                'status' => 'success',
+                'status' => true,
                 'message' => 'OTP verified successfully.',
             ], 200);
         }
@@ -130,7 +130,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'access_token' => $token,
             'token_type' => 'bearer',
             'user_information' => [
@@ -206,7 +206,7 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'Profile updated successfully.',
             'user' => [
                 'id' => $user->id,
@@ -243,7 +243,7 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'Password changed successfully']);
     }
     // forgate password
@@ -271,7 +271,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'OTP sent to your email.'], 200);
     }
 
@@ -293,7 +293,7 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'Password reset successful.'], 200);
     }
     public function resendOtp(Request $request)
@@ -321,7 +321,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'OTP resent to your email.'], 200);
     }
     public function logout()
@@ -336,7 +336,7 @@ class AuthController extends Controller
         auth('api')->logout();
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'Successfully logged out.',
         ]);
     }

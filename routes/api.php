@@ -37,8 +37,16 @@ Route::middleware(['auth:api', 'Organization'])->group(function () {
 
     //inspection sheet
     Route::post('create-inspection',[InspectinSheetController::class,'createSheet']);
+    Route::post('update-inspection/{id}',[InspectinSheetController::class,'updateInspectionSheet']);
+    Route::delete('delete-inspection/{id}', [InspectinSheetController::class, 'deleteInspectionSheet']);
+
+    Route::get('inspection-list', [InspectinSheetController::class, 'InspectionSheetList']);
+
 
     //quatation
     Route::post('create-quatation',[QuatationTecController::class,'createQuatation']);
+    Route::post('update-quatation/{id}',[QuatationTecController::class,'updateQuatation']);
+    Route::delete('delete-quatation/{id}',[QuatationTecController::class,'deleteQuatation']);
+    Route::delete('quatation-list',[QuatationTecController::class,'quatationList']);
 
  });

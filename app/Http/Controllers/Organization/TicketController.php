@@ -63,7 +63,7 @@ class TicketController extends Controller
         ]);
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'Ticket created successfully',
             'data' => [
                 'id' => $ticket->id,
@@ -168,7 +168,7 @@ class TicketController extends Controller
         $ticket->save();
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'Ticket updated successfully.',
             'data' => [
                 'id' => $ticket->id,
@@ -189,7 +189,7 @@ class TicketController extends Controller
         $tickets = Ticket::paginate($perPage);
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'data' => $tickets,
         ]);
     }
@@ -225,7 +225,7 @@ class TicketController extends Controller
         $ticket->delete();
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'Ticket deleted successfully, along with associated images and videos.',
         ], 200);
     }

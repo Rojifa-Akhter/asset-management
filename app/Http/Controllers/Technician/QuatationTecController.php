@@ -11,9 +11,10 @@ use Illuminate\Support\Facades\Validator;
 
 class QuatationTecController extends Controller
 {
+    //quatation create api
     public function createQuatation(Request $request)
     {
-        
+
         $validator = Validator::make($request->all(), [
             'ticket_id' => 'required|exists:tickets,id',
             'sheet_id' => 'required|exists:inspection_sheets,id',
@@ -68,7 +69,7 @@ class QuatationTecController extends Controller
         ];
 
         return response()->json([
-            'status' => 'success',
+            'status' => true,
             'message' => 'Quotation Created Successfully.',
             'data' => $responseData,
         ], 201);
