@@ -49,23 +49,12 @@ class InspectinSheetController extends Controller
 
         $responseData = [
             'id' => $inspectionSheet->id,
-            'ticket' => [
-                'id' => $inspectionSheet->ticket->id,
-                'product_name' => $inspectionSheet->ticket->product_name,
-                'serial_no' => $inspectionSheet->ticket->serial_no,
-                'problem' => $inspectionSheet->ticket->problem,
-                // 'image' => $inspectionSheet->ticket->image ? asset('storage/' . $ticket->image) : null,
-
-                // 'location' => $inspectionSheet->ticket->location,
-            ],
-            'assigned_by' => [
-                'name' => $supportAgent->name,
-                // 'email' => $supportAgent->email,
-            ],
-            'technician' => [
-                'name' => $technician->name,
-                // 'email' => $technicianUser->email,
-            ],
+            'ticket_id' => $inspectionSheet->ticket->id,
+            'product_name' => $inspectionSheet->ticket->product_name,
+            'serial_no' => $inspectionSheet->ticket->serial_no,
+            'problem' => $inspectionSheet->ticket->problem,
+            'supportAgent' => $supportAgent->name,
+            'technician' => $technician->name,
             'location' => $inspectionSheet->location,
             'comment' => $inspectionSheet->comment,
             'signature' => $inspectionSheet->signature,
@@ -155,18 +144,13 @@ class InspectinSheetController extends Controller
         $transformedSheets = $sheets->getCollection()->map(function ($sheet) {
             return [
                 'id' => $sheet->id,
-                'ticket' => [
-                    'id' => $sheet->ticket->id ?? null,
-                    'product_name' => $sheet->ticket->product_name ?? null,
-                    'serial_no' => $sheet->ticket->serial_no ?? null,
-                    'problem' => $sheet->ticket->problem ?? null,
-                ],
-                'assigned_by' => [
-                    'name' => $sheet->assignedBy->name ?? null,
-                ],
-                'technician' => [
-                    'name' => $sheet->technician?->name ?? null,
-                ],
+                'sheet_id' => $sheet->ticket->id ?? null,
+                'product_name' => $sheet->ticket->product_name ?? null,
+                'serial_no' => $sheet->ticket->serial_no ?? null,
+                'problem' => $sheet->ticket->problem ?? null,
+                'assignedBy' => $sheet->assignedBy->name ?? null,
+                'technician_name' => $sheet->technician?->name ?? null,
+
                 'location' => $sheet->location ?? null,
                 'comment' => $sheet->comment ?? null,
                 'signature' => $sheet->signature ?? null,
@@ -195,18 +179,12 @@ class InspectinSheetController extends Controller
 
         $responseData = [
             'id' => $sheet->id,
-            'ticket' => $sheet->ticket ? [
-                'id' => $sheet->ticket->id,
-                'product_name' => $sheet->ticket->product_name,
-                'serial_no' => $sheet->ticket->serial_no,
-                'problem' => $sheet->ticket->problem,
-            ] : null,
-            'assigned_by' => $sheet->assignedBy ? [
-                'name' => $sheet->assignedBy->name,
-            ] : null,
-            'technician' => $sheet->technician ? [
-                'name' => $sheet->technician->name,
-            ] : null,
+            'ticket_id' => $sheet->ticket->id,
+            'product_name' => $sheet->ticket->product_name,
+            'serial_no' => $sheet->ticket->serial_no,
+            'problem' => $sheet->ticket->problem,
+            'assignedBy' => $sheet->assignedBy->name,
+            'technician_name' => $sheet->technician->name,
             'location' => $sheet->location,
             'comment' => $sheet->comment,
             'signature' => $sheet->signature,

@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('job_cards', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ticket_id')->constrained('tickets')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->longText('comment')->nullable();
-            $table->string('signature')->nullable();
+            $table->foreignId('quatation_id')->constrained('quatations')->onDelete('cascade');
+            $table->string('phone')->nullable();
+            $table->json('image')->nullable();
+            $table->json('video')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('job_cards');
+        Schema::dropIfExists('orders');
     }
 };

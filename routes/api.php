@@ -5,8 +5,10 @@ use Illuminate\Http\Request;
 use App\Models\InspectionSheet;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Organization\TicketController;
 use App\Http\Controllers\Organization\InspectinSheetController;
+use App\Http\Controllers\Organization\JobCardController;
 use App\Http\Controllers\Role\UserController;
 use App\Http\Controllers\Technician\QuatationController;
 
@@ -45,6 +47,17 @@ Route::middleware(['auth:api', 'Organization'])->group(function () {
     Route::get('inspection-list', [InspectinSheetController::class, 'InspectionSheetList']);
     Route::get('inspection-details/{id}', [InspectinSheetController::class, 'InspectionSheetDetails']);
 
+//order list
+    Route::get('order-list', [OrderController::class,'orderList']);
+
+    //job card
+
+    Route::post('create-jobcard',[JobCardController::class,'createJob']);
+    Route::post('update-jobcard/{id}',[JobCardController::class,'updateJob']);
+    Route::delete('delete-jobcard/{id}',[JobCardController::class,'deleteJob']);
+    Route::get('list-jobcard',[JobCardController::class,'listJob']);
+    Route::get('details-jobcard/{id}',[JobCardController::class,'detailsJob']);
+
 
  });
  Route::middleware(['auth:api', 'Technician'])->group(function () {
@@ -58,9 +71,22 @@ Route::middleware(['auth:api', 'Organization'])->group(function () {
 
 
  });
+//  Route::middleware(['auth:api', 'Technician'])->group(function () {
+
+//     //quatation
+//     Route::post('create-quatation',[QuatationTecController::class,'createQuatation']);
+//     Route::post('update-quatation/{id}',[QuatationTecController::class,'updateQuatation']);
+//     Route::delete('delete-quatation/{id}',[QuatationTecController::class,'deleteQuatation']);
+//     Route::get('quatation-list',[QuatationTecController::class,'quatationList']);
+//     Route::get('quatation-details/{id}', [QuatationTecController::class, 'quatationDetails']);
+
+
+//  });
  Route::middleware(['auth:api', 'User'])->group(function () {
     // Quotation route
     Route::get('quotation-view/{id}', [UserController::class, 'getQuatation']);
+    Route::post('order', [OrderController::class, 'createOrder']);
+
 });
 
 

@@ -49,28 +49,23 @@ class QuatationTecController extends Controller
 
         $responseData = [
             'id' => $quatation->id,
-            'ticket' => [
-                'id' => $ticket->id,
-                'product_name' => $ticket->product_name,
-                'serial_no' => $ticket->serial_no,
-                'problem' => $ticket->problem,
-                'status' => $ticket->status,
-                'location' => $ticket->location,
-                'image' => $ticket->image,
-                'video' => $ticket->video,
-            ],
-            'inspection_sheet' => [
-                'assigned_by' => $inspectionSheets->assignedBy->name ?? 'N/A', // Fix here
-                'signature' => $inspectionSheets->signature ?? 'N/A',
-                // 'comment' => $inspectionSheets->comment ?? 'N/A',
-            ],
+            'ticket_id' => $ticket->id,
+            'product_name' => $ticket->product_name,
+            'serial_no' => $ticket->serial_no,
+            'problem' => $ticket->problem,
+            'status' => $ticket->status,
+            'location' => $ticket->location,
+            'image' => $ticket->image,
+            'video' => $ticket->video,
+            'assigned_by' => $inspectionSheets->assignedBy->name ?? 'N/A', // Fix here
+            'signature' => $inspectionSheets->signature ?? 'N/A',
             'cost' => $quatation->cost ?? 0,
             'comment' => $quatation->comment ?? 'No comments provided',
         ];
 
         return response()->json([
             'status' => true,
-            'message' => 'Quotation Created Successfully.',
+            'message' => 'quatation Created Successfully.',
             'data' => $responseData,
         ], 201);
     }
@@ -80,7 +75,7 @@ class QuatationTecController extends Controller
         $quatation = Quatation::find($id);
 
         if (!$quatation) {
-            return response()->json(['status' => false, 'message' => 'Quotation Not Found'], 401);
+            return response()->json(['status' => false, 'message' => 'quatation Not Found'], 401);
         }
 
         $validator = Validator::make($request->all(), [
@@ -117,28 +112,23 @@ class QuatationTecController extends Controller
 
         $responseData = [
             'id' => $quatation->id,
-            'ticket' => [
-                'id' => $ticket->id,
-                'product_name' => $ticket->product_name,
-                'serial_no' => $ticket->serial_no,
-                'problem' => $ticket->problem,
-                'status' => $ticket->status,
-                'location' => $ticket->location,
-                'image' => $ticket->image,
-                'video' => $ticket->video,
-            ],
-            'inspection_sheet' => [
-                'assigned_by' => $inspectionSheets->assignedBy->name ?? 'N/A',
-                'signature' => $inspectionSheets->signature ?? 'N/A',
-                // 'comment' => $inspectionSheets->comment ?? 'N/A',
-            ],
+            'ticket_id' => $ticket->id,
+            'product_name' => $ticket->product_name,
+            'serial_no' => $ticket->serial_no,
+            'problem' => $ticket->problem,
+            'status' => $ticket->status,
+            'location' => $ticket->location,
+            'image' => $ticket->image,
+            'video' => $ticket->video,
+            'assigned_by' => $inspectionSheets->assignedBy->name ?? 'N/A',
+            'signature' => $inspectionSheets->signature ?? 'N/A',
             'cost' => $quatation->cost ?? 0,
             'comment' => $quatation->comment ?? 'No comments provided',
         ];
 
         return response()->json([
             'status' => true,
-            'message' => 'Quotation Updated Successfully.',
+            'message' => 'quatation Updated Successfully.',
             'data' => $responseData,
         ], 200);
     }
@@ -168,41 +158,35 @@ class QuatationTecController extends Controller
             $query->where('ticket_id', $id);
         }
 
-        $quotations = $query->paginate($perPage);
+        $quatations = $query->paginate($perPage);
 
-        $data = $quotations->map(function ($quotation) {
+        $data = $quatations->map(function ($quatation) {
             return [
-                'id' => $quotation->id,
-                'ticket' => $quotation->ticket ? [
-                    'id' => $quotation->ticket->id,
-                    'product_name' => $quotation->ticket->product_name,
-                    'serial_no' => $quotation->ticket->serial_no,
-                    'problem' => $quotation->ticket->problem,
-                    'status' => $quotation->ticket->status,
-                    'location' => $quotation->ticket->location,
-                    'image' => $quotation->ticket->image,
-                    'video' => $quotation->ticket->video,
-                ] : null,
-                'inspection_sheet' => $quotation->inspectionSheet ? [
-                    'assigned_by' => $quotation->inspectionSheet->assignedBy->name ?? 'N/A',
-                    'signature' => $quotation->inspectionSheet->signature ?? 'N/A',
-                    // 'comment' => $quotation->inspectionSheet->comment ?? 'N/A',
-                ] : null,
-                'cost' => $quotation->cost,
-                'comment' => $quotation->comment,
+                'id' => $quatation->id,
+                'ticket_id' => $quatation->ticket->id,
+                'product_name' => $quatation->ticket->product_name,
+                'serial_no' => $quatation->ticket->serial_no,
+                'problem' => $quatation->ticket->problem,
+                'image' => $quatation->ticket->image,
+                'video' => $quatation->ticket->video,
+                'status' => $quatation->ticket->status,
+                'location' => $quatation->ticket->location,
+                'assigned_by' => $quatation->inspectionSheet->assignedBy->name ?? 'N/A',
+                'signature' => $quatation->inspectionSheet->signature ?? 'N/A',
+                'cost' => $quatation->cost,
+                'comment' => $quatation->comment,
             ];
         });
 
-        // Return response
         return response()->json([
             'status' => true,
-            'message' => 'Quotations List.',
+            'message' => 'Quatations List.',
             'data' => $data,
             'pagination' => [
-                'current_page' => $quotations->currentPage(),
-                'total' => $quotations->total(),
-                'per_page' => $quotations->perPage(),
-                'last_page' => $quotations->lastPage(),
+                'current_page' => $quatations->currentPage(),
+                'total' => $quatations->total(),
+                'per_page' => $quatations->perPage(),
+                'last_page' => $quatations->lastPage(),
             ],
         ], 200);
     }
@@ -212,22 +196,19 @@ class QuatationTecController extends Controller
         $quatation = Quatation::with(['ticket', 'inspectionSheet.assignedBy'])->find($id);
 
         if (!$quatation) {
-            return response()->json(['status' => false, 'message' => 'Quotation Not Found'], 404);
+            return response()->json(['status' => false, 'message' => 'Quatation Not Found'], 404);
         }
 
         $responseData = [
             'id' => $quatation->id,
-            'ticket' => $quatation->ticket ? [
-                'id' => $quatation->ticket->id,
-                'product_name' => $quatation->ticket->product_name,
-                'serial_no' => $quatation->ticket->serial_no,
-                'problem' => $quatation->ticket->problem,
-            ] : null,
-            'inspection_sheet' => $quatation->inspectionSheet ? [
-                'assigned_by' => $quatation->inspectionSheet->assignedBy->name,
-                'signature' => $quatation->inspectionSheet->signature,
-                // 'comment' => $quatation->inspectionSheet->comment,
-            ] : null,
+            'ticket_id' => $quatation->ticket->id,
+            'product_name' => $quatation->ticket->product_name,
+            'serial_no' => $quatation->ticket->serial_no,
+            'problem' => $quatation->ticket->problem,
+            'image' => $quatation->ticket->image,
+            'video' => $quatation->ticket->video,
+            'assigned_by' => $quatation->inspectionSheet->assignedBy->name,
+            'signature' => $quatation->inspectionSheet->signature,
             'cost' => $quatation->cost,
             'comment' => $quatation->comment,
         ];

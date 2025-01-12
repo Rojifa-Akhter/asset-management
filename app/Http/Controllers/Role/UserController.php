@@ -38,8 +38,5 @@ class UserController extends Controller
         ], 200);
     }
     //send quatation with user information
-    public function purchaseOrder(Request $request)
-    {
-        $user = auth()->user();
-    }
+   
 }
