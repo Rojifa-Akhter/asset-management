@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('job_cards', function (Blueprint $table) {
             $table->id();
-            $table->string('');
+            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
+            $table->foreignId('sheet_id')->constrained('inspection_sheets')->onDelete('cascade');
+            $table->foreignId('quotation_id')->constrained('quatations')->onDelete('cascade');
             $table->timestamps();
         });
     }

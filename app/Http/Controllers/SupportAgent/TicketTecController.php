@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Organization;
+namespace App\Http\Controllers\SupportAgent;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class TicketController extends Controller
+class TicketTecController extends Controller
 {
     //create ticket
     public function createTicket(Request $request)
@@ -244,3 +244,5 @@ class TicketController extends Controller
     }
 
 }
+
+

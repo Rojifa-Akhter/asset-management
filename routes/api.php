@@ -1,15 +1,15 @@
 <?php
 
+use App\Http\Controllers\SupportAgent\TicketTecController;
 use App\Http\Controllers\Technician\QuatationTecController;
 use Illuminate\Http\Request;
-use App\Models\InspectionSheet;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Order\OrderController;
-use App\Http\Controllers\Organization\TicketController;
-use App\Http\Controllers\Organization\InspectinSheetController;
-use App\Http\Controllers\Organization\JobCardController;
+use App\Http\Controllers\Organization\AssetController;
+use App\Http\Controllers\Organization\InsSheetController;
 use App\Http\Controllers\Role\UserController;
+use App\Http\Controllers\SupportAgent\JobController;
 use App\Http\Controllers\Technician\QuatationController;
 
 Route::get('/user', function (Request $request) {
@@ -32,31 +32,13 @@ Route::group(['prefix' => 'auth'], function ($router) {
 
 });
 Route::middleware(['auth:api', 'Organization'])->group(function () {
-    //ticket
-    Route::post('create-ticket', [TicketController::class, 'createTicket']);
-    Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
-    Route::delete('delete-ticket/{id}', [TicketController::class, 'deleteTicket']);
-    Route::get('ticket-list', [TicketController::class, 'ticketList']);
-    Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
+    //asset
+    Route::get('create-asset',[AssetController::class,'createAsset']);
+    Route::post('update-asset/{id}', [AssetController::class, 'updateAsset']);
+    Route::get('asset-list', [AssetController::class, 'assetList']);
+    Route::get('asset-details/{id}', [AssetController::class, 'assetDetails']);
 
-    //inspection sheet
-    Route::post('create-inspection',[InspectinSheetController::class,'createSheet']);
-    Route::post('update-inspection/{id}',[InspectinSheetController::class,'updateInspectionSheet']);
-    Route::delete('delete-inspection/{id}', [InspectinSheetController::class, 'deleteInspectionSheet']);
-
-    Route::get('inspection-list', [InspectinSheetController::class, 'InspectionSheetList']);
-    Route::get('inspection-details/{id}', [InspectinSheetController::class, 'InspectionSheetDetails']);
-
-//order list
-    Route::get('order-list', [OrderController::class,'orderList']);
-
-    //job card
-
-    Route::post('create-jobcard',[JobCardController::class,'createJob']);
-    Route::post('update-jobcard/{id}',[JobCardController::class,'updateJob']);
-    Route::delete('delete-jobcard/{id}',[JobCardController::class,'deleteJob']);
-    Route::get('list-jobcard',[JobCardController::class,'listJob']);
-    Route::get('details-jobcard/{id}',[JobCardController::class,'detailsJob']);
+    Route::delete('delete-asset/{id}', [AssetController::class, 'deleteAsset']);
 
 
  });
@@ -71,21 +53,36 @@ Route::middleware(['auth:api', 'Organization'])->group(function () {
 
 
  });
-//  Route::middleware(['auth:api', 'Technician'])->group(function () {
+ Route::middleware(['auth:api', 'Support Agent'])->group(function () {
 
-//     //quatation
-//     Route::post('create-quatation',[QuatationTecController::class,'createQuatation']);
-//     Route::post('update-quatation/{id}',[QuatationTecController::class,'updateQuatation']);
-//     Route::delete('delete-quatation/{id}',[QuatationTecController::class,'deleteQuatation']);
-//     Route::get('quatation-list',[QuatationTecController::class,'quatationList']);
-//     Route::get('quatation-details/{id}', [QuatationTecController::class, 'quatationDetails']);
+    //ticket
+    Route::post('create-ticket', [TicketTecController::class,'createTicket']);
+    Route::post('update-ticket/{id}', [TicketTecController::class, 'updateTicket']);
+    Route::delete('delete-ticket/{id}', [TicketTecController::class, 'deleteTicket']);
+    Route::get('ticket-list', [TicketTecController::class, 'ticketList']);
+    Route::get('ticket-details/{id}', [TicketTecController::class, 'ticketDetails']);
 
+        //inspection sheet
+    Route::post('create-inspection',action: [InsSheetController::class,'createSheet']);
+    Route::post('update-inspection/{id}',[InsSheetController::class,'updateInspectionSheet']);
+    Route::delete('delete-inspection/{id}', [InsSheetController::class, 'deleteInspectionSheet']);
 
-//  });
+    Route::get('inspection-list', [InsSheetController::class, 'InspectionSheetList']);
+    Route::get('inspection-details/{id}', [InsSheetController::class, 'InspectionSheetDetails']);
+
+     //job card
+
+     Route::post('create-jobcard',[JobController::class,'createJob']);
+     Route::post('update-jobcard/{id}',[JobController::class,'updateJob']);
+     Route::delete('delete-jobcard/{id}',[JobController::class,'deleteJob']);
+     Route::get('list-jobcard',[JobController::class,'listJob']);
+     Route::get('details-jobcard/{id}',[JobController::class,'detailsJob']);
+
+ });
  Route::middleware(['auth:api', 'User'])->group(function () {
     // Quotation route
     Route::get('quotation-view/{id}', [UserController::class, 'getQuatation']);
-    Route::post('order', [OrderController::class, 'createOrder']);
+    // Route::post('order', [OrderController::class, 'createOrder']);
 
 });
 

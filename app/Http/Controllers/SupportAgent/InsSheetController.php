@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class InspectinSheetController extends Controller
+class InsSheetController extends Controller
 {
     //insprction sheet create
     public function createSheet(Request $request)
