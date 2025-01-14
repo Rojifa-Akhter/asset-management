@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class SettingController extends Controller
 {
+    //create about us , privacy policy , terms and condition
     public function createSetting(Request $request)
     {
         // return $request;
@@ -33,14 +34,16 @@ class SettingController extends Controller
         ]);
 
     }
-    public function listSetting($type)
+    //details about us , privacy policy , terms and condition
+
+    public function listSetting(Request $request)
     {
-        $setting = Setting::where('type', $type)->first();
+        $setting = Setting::where('type', $request->type)->first();
 
         if (!$setting) {
             return response()->json([
                 'status' => false,
-                'message' => "Setting of type '{$type}' not found.",
+                'message' => "Setting not found.",
             ], 404);
         }
 

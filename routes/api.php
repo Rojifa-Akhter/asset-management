@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Organization\AssetController;
+use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\InsSheetController;
 use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\Role\UserController;
@@ -43,8 +44,13 @@ Route::middleware(['auth:api', 'Organization'])->group(function () {
 
     //setting
     Route::post('create-setting',[SettingController::class,'createSetting']);
-    Route::get('/settings/{type}', [SettingController::class, 'listSetting']);
+    Route::get('settings', [SettingController::class, 'listSetting']);
 
+    //faq
+    Route::post('create-faq',[FAQController::class,'createFaq']);
+    Route::post('update-faq/{id}',[FAQController::class,'updateFaq']);
+    Route::get('faq-list',[FAQController::class,'listFaq']);
+    Route::delete('delete-faq/{id}',[FAQController::class,'deleteFaq']);
  });
  Route::middleware(['auth:api', 'Technician'])->group(function () {
 

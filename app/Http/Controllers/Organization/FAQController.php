@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Http\Controllers\Organization;
+
+use App\Http\Controllers\Controller;
+use App\Models\FAQ;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class FAQController extends Controller
+{
+    //create faq
+    public function createFaq(Request $request)
+    {
+        $validator = Validator::make($request->all(),[
+            'question'=>'required|string|max:255',
+            'answer'=>'required|string',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status'=>false, 'message'=> $validator->errors()],401);
+        }
+        $faq = FAQ::create([
+            'question'=>$request->question,
+            'answer'=>$request->answer,
+        ]);
+        $faq->save();
+
+        return response()->json(['status'=>true, 'message'=>$faq],201);
+    }
+    //update faq
+    public function updateFaq(Request $request, $id)
+    {
+        $faq = FAQ::findOrFail($id);
+
+        if (!$faq) {
+            return response()->json(['status'=>false, 'message'=> 'FAQ Not Found'], 401);
+        }
+
+        $validator = Validator::make($request->all(),[
+            'question'=>'nullable|string|max:255',
+            'answer'=>'nullable|string',
+        ]);
+
+        $data = $validator->validated();
+        $faq->question = $data['question'] ?? $faq->question;
+        $faq->answer = $data['answer'] ?? $faq->answer;
+
+        return response()->json(['status'=>true, 'message'=>$faq],201);
+    }
+    // faq list get
+    public function listFaq(Request $request)
+    {
+        $faq = FAQ::all();
+
+        return response()->json(['status'=>true, $faq],201);
+    }
+    //delete faq
+    public function deleteFaq($id)
+    {
+        $faq = Faq::find($id);
+        $faq->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'FAQ deleted successfully.',
+        ], 200);
+    }
+
+}
