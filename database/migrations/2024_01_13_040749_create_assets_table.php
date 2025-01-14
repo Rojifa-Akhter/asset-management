@@ -15,17 +15,17 @@ return new class extends Migration
             $table->id();
             $table->string('asset_name');
             $table->string('brand_name');
-            $table->string('QR_code');
-            $table->string('Unit_Price');
-            $table->string('Current_Spend');
-            $table->string('Max_Spend');
-            $table->string('range');
-            $table->string('location');
-            $table->string('manufacture_sno');
-            $table->string('manufacture_date');
-            $table->string('installation_date');
-            $table->string('warranty_date');
-            $table->string('service_contract');
+            $table->string('QR_code')->nullable();
+            $table->string('Unit_Price')->nullable();
+            $table->string('Current_Spend')->nullable();
+            $table->string('Max_Spend')->nullable();
+            $table->string('range')->nullable();
+            $table->string('location')->nullable();
+            $table->string('manufacture_sno')->nullable();
+            $table->string('manufacture_date')->nullable();
+            $table->string('installation_date')->nullable();
+            $table->string('warranty_date')->nullable();
+            $table->string('service_contract')->nullable();
             $table->timestamps();
         });
     }

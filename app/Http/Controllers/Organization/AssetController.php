@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Organization;
 
-use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class AssetController extends Controller
 {
     //create asset
     public function createAsset(Request $request)
     {
-        $validator = Validator::make($request->all(),[
-            'asset_name' => 'required|string',
+        $validator = Validator::make($request->all(), [
+            'asset_name' => 'required|string|max:255',
             'brand_name' => 'nullable|string',
             'QR_code' => 'nullable|string',
             'Unit_Price' => 'nullable|string',
@@ -22,14 +23,19 @@ class AssetController extends Controller
             'range' => 'nullable|string',
             'location' => 'nullable|string',
             'manufacture_sno' => 'nullable|string',
-            'manufacture_date' => 'nullable|string',
-            'installation_date' => 'nullable|string',
-            'warranty_date' => 'nullable|string',
+            'manufacture_date' => 'nullable|date',
+            'installation_date' => 'nullable|date',
+            'warranty_date' => 'nullable|date',
             'service_contract' => 'nullable|string',
         ]);
-        if ($validator) {
-            return response()->json(['status'=>false,'message'=>$validator->errors()],401);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()
+            ], 422);
         }
+
         $asset = Asset::create([
             'asset_name' => $request->asset_name,
             'brand_name' => $request->brand_name,
@@ -45,18 +51,25 @@ class AssetController extends Controller
             'warranty_date' => $request->warranty_date,
             'service_contract' => $request->service_contract,
         ]);
-        $asset->save();
 
-        return response()->json(['status'=>true, 'message'=>$asset],200);
+        return response()->json([
+            'status' => true,
+            'message' => $asset
+        ], 200);
     }
-    //asset update
-    public function updateAsset(Request $request,$id)
-    {
-        $asset = Asset::findOrFail($id);
 
-        if ($asset) {
-            return response()->json(['status'=>false, 'message'=>'Asset Not Found'],401);
+    //asset update
+    public function updateAsset(Request $request, $id)
+    {
+        try {
+            $asset = Asset::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Asset Not Found',
+            ], 401);
         }
+
         $validator = Validator::make($request->all(), [
             'asset_name' => 'nullable|string',
             'brand_name' => 'nullable|string',
@@ -67,9 +80,9 @@ class AssetController extends Controller
             'range' => 'nullable|string',
             'location' => 'nullable|string',
             'manufacture_sno' => 'nullable|string',
-            'manufacture_date' => 'nullable|string',
-            'installation_date' => 'nullable|string',
-            'warranty_date' => 'nullable|string',
+            'manufacture_date' => 'nullable|date',
+            'installation_date' => 'nullable|date',
+            'warranty_date' => 'nullable|date',
             'service_contract' => 'nullable|string',
         ]);
 
@@ -82,21 +95,7 @@ class AssetController extends Controller
 
         $validatedData = $validator->validated();
 
-        $asset->asset_name = $validatedData['asset_name'] ?? $asset->asset_name;
-        $asset->brand_name = $validatedData['brand_name'] ?? $asset->brand_name;
-        $asset->QR_code = $validatedData['QR_code'] ?? $asset->QR_code;
-        $asset->Unit_Price = $validatedData['Unit_Price'] ?? $asset->Unit_Price;
-        $asset->Current_Spend = $validatedData['Current_Spend'] ?? $asset->Current_Spend;
-        $asset->Max_Spend = $validatedData['Max_Spend'] ?? $asset->Max_Spend;
-        $asset->range = $validatedData['range'] ?? $asset->range;
-        $asset->location = $validatedData['location'] ?? $asset->location;
-        $asset->manufacture_sno = $validatedData['manufacture_sno'] ?? $asset->manufacture_sno;
-        $asset->manufacture_date = $validatedData['manufacture_date'] ?? $asset->manufacture_date;
-        $asset->installation_date = $validatedData['installation_date'] ?? $asset->installation_date;
-        $asset->warranty_date = $validatedData['warranty_date'] ?? $asset->warranty_date;
-        $asset->service_contract = $validatedData['service_contract'] ?? $asset->service_contract;
-
-        $asset->save();
+        $asset->update($validatedData);
 
         return response()->json([
             'status' => true,
@@ -104,6 +103,7 @@ class AssetController extends Controller
             'data' => $asset,
         ], 200);
     }
+
     //asset list
     public function assetList(Request $request)
     {

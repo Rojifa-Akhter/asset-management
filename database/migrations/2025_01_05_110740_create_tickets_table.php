@@ -13,12 +13,9 @@ return new class extends Migration
     {
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
-            $table->string('product_name');
-            $table->string('serial_no');
+            $table->foreignId('asset_id')->constrained('assets')->onDelete('cascade');
             $table->longText('problem');
-            $table->string('location');
             $table->longText('comment');
-            $table->string('ticket_no');
             $table->json('image')->nullable();
             $table->json('video')->nullable();
             $table->enum('status',['Check-in','In Progress','Check-out'])->default('In Progress');

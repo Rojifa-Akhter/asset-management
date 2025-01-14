@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\InsSheetController;
+use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\Role\UserController;
 use App\Http\Controllers\SupportAgent\JobController;
 use App\Http\Controllers\Technician\QuatationController;
@@ -33,13 +34,16 @@ Route::group(['prefix' => 'auth'], function ($router) {
 });
 Route::middleware(['auth:api', 'Organization'])->group(function () {
     //asset
-    Route::get('create-asset',[AssetController::class,'createAsset']);
+    Route::post('create-asset',[AssetController::class,'createAsset']);
     Route::post('update-asset/{id}', [AssetController::class, 'updateAsset']);
     Route::get('asset-list', [AssetController::class, 'assetList']);
     Route::get('asset-details/{id}', [AssetController::class, 'assetDetails']);
 
     Route::delete('delete-asset/{id}', [AssetController::class, 'deleteAsset']);
 
+    //setting
+    Route::post('create-setting',[SettingController::class,'createSetting']);
+    Route::get('/settings/{type}', [SettingController::class, 'listSetting']);
 
  });
  Route::middleware(['auth:api', 'Technician'])->group(function () {
