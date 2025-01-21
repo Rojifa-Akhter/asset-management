@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('asset_id')->constrained('assets')->onDelete('cascade');
             $table->longText('problem');
-            $table->longText('comment');
-            $table->json('image')->nullable();
-            $table->json('video')->nullable();
-            $table->enum('status',['Check-in','In Progress','Check-out'])->default('In Progress');
+            $table->longText('user_comment');
+            $table->foreignId('technician_id')->constrained('users')->onDelete('cascade');
+            $table->string('ticket_status')->default('New');
+            $table->string('price')->nullable();
+            $table->string('order_number')->nullable();
             $table->timestamps();
         });
     }

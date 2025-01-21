@@ -14,11 +14,15 @@ return new class extends Migration
         Schema::create('inspection_sheets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ticket_id')->constrained('tickets')->onDelete('cascade');
-            $table->foreignId('assigned_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade')->comment('support agent id');
             $table->foreignId('technician_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->json('checklist')->nullable();
             $table->string('location')->nullable();
             $table->longText('comment')->nullable();
-            $table->string('signature')->nullable();
+            $table->string('location_employee_signature')->nullable();
+            $table->json('image')->nullable();
+            $table->json('video')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }
