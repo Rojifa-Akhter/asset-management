@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class thirdParty
+class ThirdParty
 {
     /**
      * Handle an incoming request.
@@ -16,10 +16,9 @@ class thirdParty
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->role !== 'Third Party') {
+        if (Auth::user()->role !== 'third_party') {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         return $next($request);
     }
 }
-

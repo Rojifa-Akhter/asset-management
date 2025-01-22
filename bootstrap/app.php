@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Middleware\locationEmployee;
+
+use App\Http\Middleware\LocationEmployee;
 use App\Http\Middleware\Organization;
-use App\Http\Middleware\superAdmin;
-use App\Http\Middleware\supportAgent;
+use App\Http\Middleware\SuperAdmin;
+use App\Http\Middleware\SupportAgent;
 use App\Http\Middleware\Technician;
-use App\Http\Middleware\thirdParty;
+use App\Http\Middleware\ThirdParty;
 use App\Http\Middleware\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,13 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'Super Admin' => superAdmin::class,
-            'Organization' => Organization::class,
-            'Location Employee' => locationEmployee::class,
-            'Support Agent' => supportAgent::class,
-            'Third Party' => thirdParty::class,
-            'Technician' => Technician::class,
-            'User' => User::class,
+            'super_admin' => SuperAdmin::class,
+            'organization' => Organization::class,
+            'location_employee' => LocationEmployee::class,
+            'support_agent' => SupportAgent::class,
+            'third_party' => ThirdParty::class,
+            'technician' => Technician::class,
+            'user' => User::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

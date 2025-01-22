@@ -15,6 +15,7 @@ class TicketController extends Controller
             'asset_id'      => 'required|string|exists:assets,id',
             'technician_id' => 'nullable|string|exists:users,id',
             'problem'       => 'required|string',
+            'ticket_name'   => 'nullable|string',
             'user_comment'  => 'nullable|string',
             'ticket_status' => 'nullable|string',
             'price'         => 'nullable|string',
@@ -30,19 +31,21 @@ class TicketController extends Controller
             'asset_id'      => $request->asset_id,
             'technician_id' => $request->technician_id,
             'problem'       => $request->problem,
+            'ticket_name'   => $request->ticket_name ?? 'New Tickets',
             'user_comment'  => $request->user_comment,
             'ticket_status' => $request->ticket_status ?? 'New',
             'price'         => $request->price,
             'order_number'  => $request->order_number,
         ]);
 
-        $user  = $ticket->user;  //  Ticket model`user` relationship defined.
+        $user  = $ticket->user; //  Ticket model`user` relationship defined.
         $asset = $ticket->asset;
 
         $responseData = [
             'id'           => $ticket->id,
             'asset_id'     => $asset->id ?? null,
             'device_name'  => $asset->asset_name ?? null,
+            'organization' => $asset->brand_name ?? null,
             'serial_no'    => $asset->manufacture_sno ?? null,
             'user_address' => $user->address ?? null,
             'problem'      => $ticket->problem,
@@ -51,7 +54,7 @@ class TicketController extends Controller
         return response()->json([
             'status'  => true,
             'message' => 'Ticket created successfully.',
-            'data'    => $responseData,$ticket
+            'data'    => $responseData, $ticket,
         ], 201);
     }
 
@@ -59,12 +62,14 @@ class TicketController extends Controller
     {
         $ticket = Ticket::findOrFail($id);
 
+        // Validate input data
         $validator = Validator::make($request->all(), [
             'asset_id'      => 'nullable|string|exists:assets,id',
             'technician_id' => 'nullable|string|exists:users,id',
+            'ticket_name'   => 'nullable|string',
             'problem'       => 'nullable|string',
             'user_comment'  => 'nullable|string',
-            'ticket_status' => 'nullable|string',
+            'ticket_status' => 'nullable|string|in:New,Assigned,Inspection,Awaiting PO,Job Card Created,Completed',
             'price'         => 'nullable|string',
             'order_number'  => 'nullable|string',
         ]);
@@ -75,16 +80,27 @@ class TicketController extends Controller
 
         $validatedData = $validator->validated();
 
+        // Check ticket status and update ticket name accordingly
+        if (isset($validatedData['ticket_status'])) {
+            if ($validatedData['ticket_status'] === 'Completed') {
+                $validatedData['ticket_name'] = 'Past Tickets';
+            } else {
+                $validatedData['ticket_name'] = 'Open Tickets';
+            }
+        }
+
         // Update ticket fields
         $ticket->update($validatedData);
 
-        $asset = $ticket->asset;
+        $asset        = $ticket->asset;
         $responseData = [
             'id'            => $ticket->id,
             'asset_id'      => $asset->id ?? null,
             'device_name'   => $asset->asset_name ?? null,
+            'organization'  => $asset->brand_name ?? null,
             'serial_no'     => $asset->manufacture_sno ?? null,
             'problem'       => $ticket->problem,
+            'ticket_name'   => $ticket->ticket_name,
             'user_comment'  => $ticket->user_comment,
             'ticket_status' => $ticket->ticket_status,
             'price'         => $ticket->price,
@@ -98,27 +114,61 @@ class TicketController extends Controller
         ], 200);
     }
 
-    //all ticket list
+    //all ticket list with status
     public function ticketList(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $tickets = Ticket::paginate($perPage);
+        $tickets = Ticket::with(['asset', 'user', 'technician']);
+
+        $data = $tickets->paginate($perPage);
+
+        // Apply the map function on the collection that is returned by paginate
+        $data->getCollection()->transform(function ($ticket) {
+            return [
+                'ticket_number' => $ticket->id,
+                'device_name'   => $ticket->asset->asset_name ?? null,
+                'organization'  => $ticket->asset->brand_name ?? null,
+                'serial_number' => $ticket->asset->manufacture_sno ?? null,
+                'date'          => $ticket->created_at->format('d/m/Y'),
+                'time'          => $ticket->created_at->format('h:i A'),
+                'location'      => $ticket->user->address ?? 'N/A',
+                'technician'    => $ticket->technician->name ?? '--',
+                'ticket_status' => $ticket->ticket_status ?? 'New',
+                'ticket_name'   => $ticket->ticket_name ?? 'New Tickets',
+            ];
+        });
 
         return response()->json([
             'status' => true,
-            'data'   => $tickets,
+            'data'   => [
+                'tickets' => $data,
+            ],
         ]);
     }
-//get ticket details
+
+    //get ticket details
     public function ticketDetails(Request $request, $id)
     {
-        $ticket = Ticket::find($id);
+        $ticket = Ticket::with(['asset', 'user', 'technician'])->find($id);
 
         if (! $ticket) {
-            return response()->json(['status' => false, 'message' => 'Ticket Not Found'], 401);
+            return response()->json(['status' => false, 'message' => 'Ticket Not Found'], 404);
         }
-        return response()->json(['status' => true, 'message' => $ticket]);
+
+        return response()->json([
+            'status' => true,
+            'data'   => [
+                'ticket_number' => $ticket->id,
+                'device_name'   => $ticket->asset->asset_name ?? null,
+                'organization'  => $ticket->asset->brand_name ?? null,
+                'serial_number' => $ticket->asset->manufacture_sno ?? null,
+                'location'      => $ticket->user->address ?? 'N/A',
+                'problem'       => $ticket->problem ?? null,
+
+            ],
+        ]);
     }
+
 //delete ticket
     public function deleteTicket($id)
     {
@@ -128,25 +178,25 @@ class TicketController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Ticket not found.'], 404);
         }
 
-        $images = is_array($ticket->image) ? $ticket->image : json_decode($ticket->image, true);
-        if ($images) {
-            foreach ($images as $imagePath) {
-                $filePath = public_path('uploads/ticket_images/' . $imagePath);
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                }
-            }
-        }
+        // $images = is_array($ticket->image) ? $ticket->image : json_decode($ticket->image, true);
+        // if ($images) {
+        //     foreach ($images as $imagePath) {
+        //         $filePath = public_path('uploads/ticket_images/' . $imagePath);
+        //         if (file_exists($filePath)) {
+        //             unlink($filePath);
+        //         }
+        //     }
+        // }
 
-        $videos = is_array($ticket->video) ? $ticket->video : json_decode($ticket->video, true);
-        if ($videos) {
-            foreach ($videos as $videoPath) {
-                $filePath = public_path('uploads/ticket_videos/' . $videoPath);
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                }
-            }
-        }
+        // $videos = is_array($ticket->video) ? $ticket->video : json_decode($ticket->video, true);
+        // if ($videos) {
+        //     foreach ($videos as $videoPath) {
+        //         $filePath = public_path('uploads/ticket_videos/' . $videoPath);
+        //         if (file_exists($filePath)) {
+        //             unlink($filePath);
+        //         }
+        //     }
+        // }
 
         $ticket->delete();
 

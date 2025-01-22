@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class supportAgent
+class SupportAgent
 {
     /**
      * Handle an incoming request.
@@ -16,10 +16,10 @@ class supportAgent
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->role !== 'Support Agent') {
+
+        if (Auth::user()->role !== 'support_agent') {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         return $next($request);
     }
 }
-

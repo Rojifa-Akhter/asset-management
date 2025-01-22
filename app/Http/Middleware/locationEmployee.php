@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class locationEmployee
+class LocationEmployee
 {
     /**
      * Handle an incoming request.
@@ -16,7 +16,8 @@ class locationEmployee
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->role !== 'Location Employee') {
+
+        if (Auth::user()->role !== 'location_employee') {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         return $next($request);

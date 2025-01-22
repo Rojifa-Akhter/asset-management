@@ -18,25 +18,17 @@ class UserSeeder extends Seeder
          User::create([
             'name' => 'Super Admin',
             'email' => 'admin@gmail.com',
-            'role' => 'Super Admin',
+            'role' => 'super_admin',
             'address' => 'Dhaka, Bangladesh',
             'password' => Hash::make('12345678'),
             'status' => 'active',
             'email_verified_at' => now(),
         ]);
-        User::create([
-            'name' => 'user',
-            'email' => 'user@gmail.com',
-            'role' => 'User',
-            'address' => 'Dhaka, Bangladesh',
-            'password' => Hash::make('12345678'),
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
+
         User::create([
             'name' => 'Support Agent',
             'email' => 'supportAgent@gmail.com',
-            'role' => 'Support Agent',
+            'role' => 'support_agent',
             'address' => 'Dhaka, Bangladesh',
             'password' => Hash::make('12345678'),
             'status' => 'active',
@@ -45,7 +37,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Location Employee',
             'email' => 'locationEmployee@gmail.com',
-            'role' => 'Location Employee',
+            'role' => 'location_employee',
             'address' => 'Dhaka, Bangladesh',
             'password' => Hash::make('12345678'),
             'status' => 'active',
@@ -54,7 +46,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Third Party',
             'email' => 'thirdParty@gmail.com',
-            'role' => 'Third Party',
+            'role' => 'third_party',
             'address' => 'Dhaka, Bangladesh',
             'password' => Hash::make('12345678'),
             'status' => 'active',
@@ -63,7 +55,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Organization',
             'email' => 'Organization@gmail.com',
-            'role' => 'Organization',
+            'role' => 'organization',
             'address' => 'Dhaka, Bangladesh',
             'password' => Hash::make('12345678'),
             'status' => 'active',
@@ -72,7 +64,16 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Technician',
             'email' => 'Technician@gmail.com',
-            'role' => 'Technician',
+            'role' => 'technician',
+            'address' => 'Dhaka, Bangladesh',
+            'password' => Hash::make('12345678'),
+            'status' => 'active',
+            'email_verified_at' => now(),
+        ]);
+        User::create([
+            'name' => 'user',
+            'email' => 'user@gmail.com',
+            'role' => 'user',
             'address' => 'Dhaka, Bangladesh',
             'password' => Hash::make('12345678'),
             'status' => 'active',

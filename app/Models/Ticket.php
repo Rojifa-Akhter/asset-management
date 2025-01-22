@@ -32,5 +32,8 @@ class Ticket extends Model
     {
         return $this->belongsTo(Asset::class);
     }
-
+    public function technician()
+    {
+        return $this->belongsTo(User::class, 'technician_id');
+    }
 }
