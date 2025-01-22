@@ -17,7 +17,7 @@ class CommonMiddleware
     {
         $user = Auth::user();
 
-        if (! in_array($user->role, ['location_employee', 'support_agent'])) {
+        if (! in_array($user->role, ['location_employee', 'support_agent','user','technician'])) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

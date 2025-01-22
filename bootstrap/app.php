@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Middleware\CommonMiddleware;
 use App\Http\Middleware\LocationEmployee;
 use App\Http\Middleware\Organization;
 use App\Http\Middleware\SuperAdmin;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'third_party' => ThirdParty::class,
             'technician' => Technician::class,
             'user' => User::class,
+            'common' => CommonMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -17,7 +17,7 @@ class Organization
     public function handle(Request $request, Closure $next): Response
     {
 
-        if (Auth::user()->role !== 'Organization') {
+        if (Auth::user()->role !== 'organization') {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         return $next($request);

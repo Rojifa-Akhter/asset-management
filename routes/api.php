@@ -3,8 +3,8 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\FAQController;
-use App\Http\Controllers\Organization\InsSheetController;
 use App\Http\Controllers\Organization\SettingController;
+use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use App\Http\Controllers\User\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -58,26 +58,20 @@ Route::middleware(['auth:api', 'user'])->group(function () {
 
 });
 Route::middleware(['auth:api', 'support_agent'])->group(function () {
-
-    //update ticket
-    // Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
-    // Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
-    // Route::get('ticket-list', [TicketController::class, 'ticketList']);
-
     //inspection sheet
-    Route::post('create-inspection', action: [InsSheetController::class, 'createSheet']);
-    Route::post('update-inspection/{id}', [InsSheetController::class, 'updateInspectionSheet']);
-    Route::delete('delete-inspection/{id}', [InsSheetController::class, 'deleteInspectionSheet']);
+    Route::post('create-inspection', action: [InspectionSheetController::class, 'createInspectionSheet']);
+    Route::post('update-inspection/{id}', [InspectionSheetController::class, 'updateInspectionSheet']);
+    Route::delete('delete-inspection/{id}', [InspectionSheetController::class, 'deleteInspectionSheet']);
 
-    Route::get('inspection-list', [InsSheetController::class, 'InspectionSheetList']);
-    Route::get('inspection-details/{id}', [InsSheetController::class, 'InspectionSheetDetails']);
+    Route::get('inspection-list', [InspectionSheetController::class, 'InspectionSheetList']);
+    Route::get('inspection-details/{id}', action: [InspectionSheetController::class, 'InspectionSheetDetails']);
 
 });
-Route::middleware(['auth:api', 'support_agent','location_employee'])->group(function () {
+Route::middleware(['auth:api', 'common'])->group(function () {
 
     //update ticket
     Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
     Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
-    // Route::get('ticket-list', [TicketController::class, 'ticketList']);
+    Route::get('ticket-list', [TicketController::class, 'ticketList']);
 
 });

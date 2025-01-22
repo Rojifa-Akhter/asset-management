@@ -118,11 +118,25 @@ class TicketController extends Controller
     public function ticketList(Request $request)
     {
         $perPage = $request->input('per_page', 10);
+
+        // Filters
+        $ticketName = $request->input('ticket_name');
+        $status     = $request->input('status');
+
         $tickets = Ticket::with(['asset', 'user', 'technician']);
+
+        // Apply filters
+        if ($ticketName) {
+            $tickets->where('ticket_name', $ticketName);
+        }
+
+        if ($status) {
+            $tickets->where('ticket_status', $status);
+        }
 
         $data = $tickets->paginate($perPage);
 
-        // Apply the map function on the collection that is returned by paginate
+        // Transform the paginated collection
         $data->getCollection()->transform(function ($ticket) {
             return [
                 'ticket_number' => $ticket->id,
@@ -135,6 +149,8 @@ class TicketController extends Controller
                 'technician'    => $ticket->technician->name ?? '--',
                 'ticket_status' => $ticket->ticket_status ?? 'New',
                 'ticket_name'   => $ticket->ticket_name ?? 'New Tickets',
+                'problem'      => $ticket->problem ?? 'N/A',
+
             ];
         });
 

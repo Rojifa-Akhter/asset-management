@@ -16,7 +16,7 @@ class User
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->role !== 'User') {
+        if (Auth::user()->role !== 'user') {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         return $next($request);
