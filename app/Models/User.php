@@ -53,6 +53,9 @@ class User extends Authenticatable implements JWTSubject
         $defaultImage = 'default_user.png';
         return asset('uploads/profile_images/' . ($image ?? $defaultImage));
     }
-
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
+    }
 
 }

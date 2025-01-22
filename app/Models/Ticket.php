@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -18,11 +17,20 @@ class Ticket extends Model
         return array_map(fn($img) => asset('uploads/ticket_images/' . $img), $images);
     }
 
-
     // Accessor for Videos
     public function getVideoAttribute($video)
     {
         $videos = json_decode($video, true) ?? [];
         return array_map(fn($vid) => asset('uploads/ticket_videos/' . $vid), $videos);
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function asset()
+    {
+        return $this->belongsTo(Asset::class);
+    }
+
 }
