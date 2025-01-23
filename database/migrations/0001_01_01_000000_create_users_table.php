@@ -15,12 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->enum('role',['super_admin','organization','location_employee','support_agent','third_party','technician','user'])->default('user');
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('image')->nullable();
+            $table->json('document')->nullable();
             $table->string('password');
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('otp')->nullable();
             $table->timestamp('otp_expire_at')->nullable();
             $table->string('google_id')->nullable();

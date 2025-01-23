@@ -35,6 +35,7 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            // 'document' => 'array',
         ];
     }
     public function getJWTIdentifier()
@@ -53,6 +54,16 @@ class User extends Authenticatable implements JWTSubject
         $defaultImage = 'default_user.png';
         return asset('uploads/profile_images/' . ($image ?? $defaultImage));
     }
+    public function getDocumentAttribute($document)
+    {
+        $documents = json_decode($document, true);
+        if (is_array($documents)) {
+            return array_map(function ($doc) {
+                return asset('uploads/documents/' . $doc);
+            }, $documents);
+        }
+    }
+
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
