@@ -6,6 +6,7 @@ use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use App\Http\Controllers\User\AdminController;
+use App\Http\Controllers\User\OrganizationController;
 use App\Http\Controllers\User\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -38,12 +39,19 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::post('third_party_add', [AdminController::class, 'addThirdParty']);
     Route::post('third_party_update/{id}', [AdminController::class, 'updateThirdParty']);
 
-    Route::delete('delete_user/{id}',[AdminController::class,'deleteUser']);
-    Route::get('soft_delete_user',[AdminController::class,'SoftDeletedUsers']);
-
+    Route::delete('delete_user/{id}', [AdminController::class, 'deleteUser']);
+    Route::get('soft_delete_user', [AdminController::class, 'SoftDeletedUsers']);
 
 });
 Route::middleware(['auth:api', 'organization'])->group(function () {
+    //add and update location employee
+    Route::post('location_employee_add', [OrganizationController::class, 'addLocationEmployee']);
+    Route::post('location_employee_update/{id}', [OrganizationController::class, 'updateLocationEmployee']);
+
+    //add and update support agent
+    Route::post('support_agent_add', [OrganizationController::class, 'addSupportAgent']);
+    Route::post('support_agent_update/{id}', [OrganizationController::class, 'updateSupportAgent']);
+
     //asset
     Route::post('create-asset', [AssetController::class, 'createAsset']);
     Route::post('update-asset/{id}', [AssetController::class, 'updateAsset']);
@@ -62,14 +70,7 @@ Route::middleware(['auth:api', 'organization'])->group(function () {
     Route::get('faq-list', [FAQController::class, 'listFaq']);
     Route::delete('delete-faq/{id}', [FAQController::class, 'deleteFaq']);
 });
-
-Route::middleware(['auth:api', 'user'])->group(function () {
-
-    //ticket
-    Route::post('create-ticket', [TicketController::class, 'createTicket']);
-    Route::delete('delete-ticket/{id}', [TicketController::class, 'deleteTicket']);
-    Route::get('ticket-list', [TicketController::class, 'ticketList']);
-    Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
+Route::middleware(['auth:api', 'location_employee'])->group(function () {
 
 });
 Route::middleware(['auth:api', 'support_agent'])->group(function () {
@@ -82,6 +83,17 @@ Route::middleware(['auth:api', 'support_agent'])->group(function () {
     Route::get('inspection-details/{id}', action: [InspectionSheetController::class, 'InspectionSheetDetails']);
 
 });
+
+Route::middleware(['auth:api', 'user'])->group(function () {
+
+    //ticket
+    Route::post('create-ticket', [TicketController::class, 'createTicket']);
+    Route::delete('delete-ticket/{id}', [TicketController::class, 'deleteTicket']);
+    Route::get('ticket-list', [TicketController::class, 'ticketList']);
+    Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
+
+});
+
 Route::middleware(['auth:api', 'common'])->group(function () {
 
     //update ticket

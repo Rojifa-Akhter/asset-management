@@ -52,13 +52,15 @@ class AuthController extends Controller
         $otp            = rand(100000, 999999);
         $otp_expires_at = now()->addMinutes(10);
 
+        $role = $request->role ?? 'user';
+
         $user = User::create([
             'name'           => $request->name,
             'email'          => $request->email,
             'address'        => $request->address,
             'phone'          => $request->phone,
             'password'       => Hash::make($request->password),
-            'role'           => $request->role,
+            'role'           => $role,
             'image'          => $new_name, // Can now safely be null
             'otp'            => $otp,
             'otp_expires_at' => $otp_expires_at,
