@@ -15,12 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('asset_id')->constrained('assets')->onDelete('cascade');
-            $table->foreignId('technician_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('ticket_name')->default('New Tickets');
             $table->longText('problem');
             $table->longText('user_comment')->nullable();
             $table->string('ticket_status')->default('New');
-            $table->string('price')->nullable();
+            $table->string('cost')->nullable();
             $table->string('order_number')->nullable();
             $table->timestamps();
         });

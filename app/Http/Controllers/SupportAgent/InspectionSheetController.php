@@ -16,5 +16,8 @@ class InspectionSheetController extends Controller
             'checklist' => 'nullable|string'
 
         ]);
+        if ($validator->fails()) {
+            return response()->json(['status'=>false,'message'=>$validator->errors()],401);
+        }
     }
 }

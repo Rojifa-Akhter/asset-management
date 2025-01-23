@@ -5,6 +5,7 @@ use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
+use App\Http\Controllers\User\AdminController;
 use App\Http\Controllers\User\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,20 @@ Route::group(['prefix' => 'auth'], function ($router) {
         Route::post('change-password', [AuthController::class, 'changePassword']);
     });
     Route::post('logout', [AuthController::class, 'logout']);
+
+});
+Route::middleware(['auth:api', 'super_admin'])->group(function () {
+
+    //add and update organization
+    Route::post('organization_add', [AdminController::class, 'addOrganization']);
+    Route::post('organization_update/{id}', [AdminController::class, 'updateOrganization']);
+
+    Route::post('third_party_add', [AdminController::class, 'addThirdParty']);
+    Route::post('third_party_update/{id}', [AdminController::class, 'updateThirdParty']);
+
+    Route::delete('delete_user/{id}',[AdminController::class,'deleteUser']);
+    Route::get('soft_delete_user',[AdminController::class,'SoftDeletedUsers']);
+
 
 });
 Route::middleware(['auth:api', 'organization'])->group(function () {
