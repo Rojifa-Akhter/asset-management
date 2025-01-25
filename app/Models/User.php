@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -10,7 +11,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable,SoftDeletes;
 
     protected $dates = ['deleted_at'];
     protected $guarded = ['id'];
@@ -35,6 +36,7 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            // 'document' => 'array',
         ];
     }
     public function getJWTIdentifier()
@@ -53,9 +55,24 @@ class User extends Authenticatable implements JWTSubject
         $defaultImage = 'default_user.png';
         return asset('uploads/profile_images/' . ($image ?? $defaultImage));
     }
+    public function getDocumentAttribute($document)
+    {
+        $documents = json_decode($document, true);
+        if (is_array($documents)) {
+            return array_map(function ($doc) {
+                return asset('uploads/documents/' . $doc);
+            }, $documents);
+        }
+    }
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
     }
+
 
 }

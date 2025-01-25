@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -28,13 +27,14 @@ class AuthController extends Controller
     {
         // return $request;
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users,email',
-            'address' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:15',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|unique:users,email',
+            'address'  => 'required|string|max:255',
+            'phone'    => 'nullable|string|max:15',
             'password' => 'required|string|min:6',
-            'role' => 'nullable|string|in:Super Admin,Organization,Location Employee,Support Agent,Third Party,Technician,User',
-            'image' => 'nullable|image',
+            'role'     => 'nullable|string|in:super_admin,organization,location_employee,support_agent,third_party,technician,user',
+            'image'    => 'nullable|image',
+            'document' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -43,26 +43,28 @@ class AuthController extends Controller
 
         $new_name = null;
         if ($request->has('image')) {
-            $image = $request->file('image');
+            $image     = $request->file('image');
             $extension = $image->getClientOriginalExtension();
-            $new_name = time() . '.' . $extension;
-            $path = $image->move(public_path('uploads/profile_images'), $new_name);
+            $new_name  = time() . '.' . $extension;
+            $path      = $image->move(public_path('uploads/profile_images'), $new_name);
         }
 // return $new_name;
-        $otp = rand(100000, 999999);
+        $otp            = rand(100000, 999999);
         $otp_expires_at = now()->addMinutes(10);
 
+        $role = $request->role ?? 'user';
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'address' => $request->address,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'image' => $new_name, // Can now safely be null
-            'otp' => $otp,
+            'name'           => $request->name,
+            'email'          => $request->email,
+            'address'        => $request->address,
+            'phone'          => $request->phone,
+            'password'       => Hash::make($request->password),
+            'role'           => $role,
+            'image'          => $new_name, // Can now safely be null
+            'otp'            => $otp,
             'otp_expires_at' => $otp_expires_at,
-            'status' => 'inactive',
+            'status'         => 'inactive',
         ]);
 
         try {
@@ -82,7 +84,7 @@ class AuthController extends Controller
         };
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => $message,
         ], 200);
     }
@@ -100,22 +102,22 @@ class AuthController extends Controller
         $user = User::where('otp', $request->otp)->first();
 
         if ($user) {
-            $user->otp = null;
+            $user->otp               = null;
             $user->email_verified_at = now();
-            $user->status = 'active';
+            $user->status            = 'active';
             $user->save();
 
             $token = JWTAuth::fromUser($user);
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'OTP verified successfully.',
             ], 200);
         }
 
         return response()->json([
             'status' => 'error',
-            'error' => 'Invalid OTP.'], 400);
+            'error'  => 'Invalid OTP.'], 400);
     }
     //login
     public function login(Request $request)
@@ -123,24 +125,24 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         $user = User::where('email', $request->email)->first();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['status' => 'error', 'message' => 'Email not found.'], 404);
         }
 
-        if (!$token = Auth::guard('api')->attempt($credentials)) {
+        if (! $token = Auth::guard('api')->attempt($credentials)) {
             return response()->json(['status' => 'error', 'message' => 'Invalid password.'], 401);
         }
 
         return response()->json([
-            'status' => true,
-            'access_token' => $token,
-            'token_type' => 'bearer',
+            'status'           => true,
+            'access_token'     => $token,
+            'token_type'       => 'bearer',
             'user_information' => [
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
+                'name'              => $user->name,
+                'email'             => $user->email,
+                'role'              => $user->role,
                 'email_verified_at' => $user->email_verified_at,
-                'image' => $user->image,
+                'image'             => $user->image,
             ],
         ], 200);
 
@@ -155,33 +157,30 @@ class AuthController extends Controller
     {
         $user = Auth::guard('api')->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['status' => 'error', 'message' => 'User not authenticated.'], 401);
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:16',
-            'password' => 'nullable|string|min:6|confirmed',
-            'image' => 'nullable',
+            'name'        => 'nullable|string|max:255',
+            'address'     => 'nullable|string|max:255',
+            'phone'       => 'nullable|string|max:16',
+            'password'    => 'nullable|string|min:6|confirmed',
+            'image'       => 'nullable|file',
+            'documents.*' => 'nullable|file',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors(),
-            ], 422);
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
 
         $validatedData = $validator->validated();
 
-        $user->name = $validatedData['name'] ?? $user->name;
+        $user->name    = $validatedData['name'] ?? $user->name;
         $user->address = $validatedData['address'] ?? $user->address;
-        $user->phone = $validatedData['phone'] ?? $user->phone;
+        $user->phone   = $validatedData['phone'] ?? $user->phone;
 
-        if (!empty($validatedData['password'])) {
+        if (! empty($validatedData['password'])) {
             $user->password = Hash::make($validatedData['password']);
         }
 
@@ -197,27 +196,53 @@ class AuthController extends Controller
             }
 
             // Upload new image
-            $image = $request->file('image');
+            $image     = $request->file('image');
             $extension = $image->getClientOriginalExtension();
-            $newName = time() . '.' . $extension;
+            $newName   = time() . '.' . $extension;
             $image->move(public_path('uploads/profile_images'), $newName);
 
             $user->image = $newName;
         }
+        //delete old document
+        if ($request->hasFile('documents')) {
+            $existingDocuments = $user->document;
+
+            if (is_array($existingDocuments)) {
+                foreach ($existingDocuments as $document) {
+                    $relativePath = parse_url($document, PHP_URL_PATH);
+                    $relativePath = ltrim($relativePath, '/');
+                    unlink(public_path($relativePath));
+                }
+            }
+
+            // Upload new documents
+            $newDocuments = [];
+            foreach ($request->file('documents') as $document) {
+                $documentName = time() . uniqid() . $document->getClientOriginalName();
+                $document->move(public_path('uploads/documents'), $documentName);
+
+                $newDocuments[] = $documentName;
+            }
+
+            // Save the new documents as a JSON-encoded array
+            $user->document = json_encode($newDocuments);
+        }
+// return $newDocuments;
 
         $user->save();
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Profile updated successfully.',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'address' => $user->address,
-                'contact' => $user->phone,
-                'image' => $user->image,
-                'role' => $user->role,
+            'data'    => [
+                'id'        => $user->id,
+                'name'      => $user->name,
+                'email'     => $user->email,
+                'address'   => $user->address,
+                'contact'   => $user->phone,
+                'image'     => $user->image,
+                'documents' => $user->document, // decoded JSON
+                'role'      => $user->role,
             ],
         ], 200);
 
@@ -228,16 +253,16 @@ class AuthController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'new_password' => 'required|string|min:6|confirmed',
+            'new_password'     => 'required|string|min:6|confirmed',
         ]);
 
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['error' => 'User not authenticated.'], 401);
         }
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return response()->json(['error' => 'Current password is incorrect.'], 403);
         }
 
@@ -245,7 +270,7 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Password changed successfully']);
     }
     // forgote password
@@ -255,7 +280,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['error' => 'Email not registered.'], 404);
         }
         $otp = rand(100000, 999999);
@@ -273,7 +298,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'OTP sent to your email.'], 200);
     }
 
@@ -282,12 +307,12 @@ class AuthController extends Controller
     {
         // return $request;
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user = User::where('email', $request->email)->first();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['error' => 'User not found.'], 404);
         }
 
@@ -295,7 +320,7 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Password reset successful.'], 200);
     }
 
@@ -306,7 +331,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['error' => 'Email not registered.'], 404);
         }
 
@@ -325,15 +350,15 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'OTP resent to your email.'], 200);
     }
     //logout
     public function logout()
     {
-        if (!auth('api')->check()) {
+        if (! auth('api')->check()) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'User is not authenticated.',
             ], 401);
         }
@@ -341,7 +366,7 @@ class AuthController extends Controller
         auth('api')->logout();
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Successfully logged out.',
         ]);
     }

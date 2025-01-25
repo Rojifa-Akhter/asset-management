@@ -13,12 +13,11 @@ class TicketController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'asset_id'      => 'required|string|exists:assets,id',
-            'technician_id' => 'nullable|string|exists:users,id',
             'problem'       => 'required|string',
             'ticket_name'   => 'nullable|string',
             'user_comment'  => 'nullable|string',
             'ticket_status' => 'nullable|string',
-            'price'         => 'nullable|string',
+            'cost'         => 'nullable|string',
             'order_number'  => 'nullable|string',
         ]);
 
@@ -29,12 +28,11 @@ class TicketController extends Controller
         $ticket = Ticket::create([
             'user_id'       => auth()->id(),
             'asset_id'      => $request->asset_id,
-            'technician_id' => $request->technician_id,
             'problem'       => $request->problem,
             'ticket_name'   => $request->ticket_name ?? 'New Tickets',
             'user_comment'  => $request->user_comment,
             'ticket_status' => $request->ticket_status ?? 'New',
-            'price'         => $request->price,
+            'cost'         => $request->cost ?? null,
             'order_number'  => $request->order_number,
         ]);
 
@@ -65,12 +63,11 @@ class TicketController extends Controller
         // Validate input data
         $validator = Validator::make($request->all(), [
             'asset_id'      => 'nullable|string|exists:assets,id',
-            'technician_id' => 'nullable|string|exists:users,id',
             'ticket_name'   => 'nullable|string',
             'problem'       => 'nullable|string',
             'user_comment'  => 'nullable|string',
             'ticket_status' => 'nullable|string|in:New,Assigned,Inspection,Awaiting PO,Job Card Created,Completed',
-            'price'         => 'nullable|string',
+            'cost'         => 'nullable|string',
             'order_number'  => 'nullable|string',
         ]);
 
@@ -99,12 +96,12 @@ class TicketController extends Controller
             'device_name'   => $asset->asset_name ?? null,
             'organization'  => $asset->brand_name ?? null,
             'serial_no'     => $asset->manufacture_sno ?? null,
-            'problem'       => $ticket->problem,
-            'ticket_name'   => $ticket->ticket_name,
-            'user_comment'  => $ticket->user_comment,
+            'problem'       => $ticket->problem ?? null,
+            'ticket_name'   => $ticket->ticket_name ?? null,
+            'user_comment'  => $ticket->user_comment ?? null,
             'ticket_status' => $ticket->ticket_status,
-            'price'         => $ticket->price,
-            'order_number'  => $ticket->order_number,
+            'cost'         => $ticket->cost ?? null,
+            'order_number'  => $ticket->order_number ?? null,
         ];
 
         return response()->json([
@@ -146,19 +143,18 @@ class TicketController extends Controller
                 'date'          => $ticket->created_at->format('d/m/Y'),
                 'time'          => $ticket->created_at->format('h:i A'),
                 'location'      => $ticket->user->address ?? 'N/A',
-                'technician'    => $ticket->technician->name ?? '--',
                 'ticket_status' => $ticket->ticket_status ?? 'New',
                 'ticket_name'   => $ticket->ticket_name ?? 'New Tickets',
                 'problem'      => $ticket->problem ?? 'N/A',
+                'cost'      => $ticket->cost ?? 'N/A',
 
             ];
         });
 
         return response()->json([
             'status' => true,
-            'data'   => [
-                'tickets' => $data,
-            ],
+            'data'   =>  $data,
+
         ]);
     }
 
@@ -180,6 +176,7 @@ class TicketController extends Controller
                 'serial_number' => $ticket->asset->manufacture_sno ?? null,
                 'location'      => $ticket->user->address ?? 'N/A',
                 'problem'       => $ticket->problem ?? null,
+                'cost'       => $ticket->cost ?? null,
 
             ],
         ]);
@@ -218,7 +215,7 @@ class TicketController extends Controller
 
         return response()->json([
             'status'  => true,
-            'message' => 'Ticket deleted successfully, along with associated images and videos.',
+            'message' => 'Ticket deleted successfully',
         ], 200);
     }
 
