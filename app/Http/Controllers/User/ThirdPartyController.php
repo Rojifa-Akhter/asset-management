@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
@@ -7,9 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-class OrganizationController extends Controller
+class ThirdPartyController extends Controller
 {
-    //create or add location employee
     public function addLocationEmployee(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -341,5 +341,4 @@ class OrganizationController extends Controller
 
         return response()->json(['message' => 'User deleted successfully'], 200);
     }
-
 }

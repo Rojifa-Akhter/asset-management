@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,32 +14,34 @@ class AdminController extends Controller
     public function addOrganization(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'address'  => 'required|string',
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|string|email|unique:users,email',
+            'password'    => 'required|string|min:6',
+            'address'     => 'required|string',
             'documents.*' => 'nullable|file',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
         }
-         // Upload new documents
-         $newDocuments = [];
-         if ($request->hasFile('documents')) {
-             foreach ($request->file('documents') as $document) {
-                 $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
-                 $document->move(public_path('uploads/documents'), $documentName);
-                 $newDocuments[] = $documentName;
-             }
-         }
+        // Upload new documents
+        $newDocuments = [];
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $document) {
+                $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
+                $document->move(public_path('uploads/documents'), $documentName);
+                $newDocuments[] = $documentName;
+            }
+        }
 
-         $organization = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => 'organization',
-            'password' => Hash::make($request->password),
-            'address'  => $request->address,
-            'document' => json_encode($newDocuments),
+        $organization = User::create([
+            'user_id'    => Auth::user()->id,
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'role'       => 'organization',
+            'password'   => Hash::make($request->password),
+            'address'    => $request->address,
+            'document'   => json_encode($newDocuments),
+            'creator_id' => auth()->id(),
         ]);
 
         $organization->save();
@@ -46,7 +49,7 @@ class AdminController extends Controller
         return response()->json(['status' => true, 'message' => 'Organization Create Successfully', 'organization' => $organization], 200);
     }
     //update organization
-    public function updateOrganization(Request $request,$id)
+    public function updateOrganization(Request $request, $id)
     {
         $organization = User::findOrFail($id);
 
@@ -59,7 +62,7 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
         }
-        $validatedData = $validator->validated();
+        $validatedData         = $validator->validated();
         $organization->name    = $validatedData['name'] ?? $organization->name;
         $organization->address = $validatedData['address'] ?? $organization->address;
         $organization->phone   = $validatedData['phone'] ?? $organization->phone;
@@ -117,32 +120,34 @@ class AdminController extends Controller
     public function addThirdParty(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'address'  => 'required|string',
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|string|email|unique:users,email',
+            'password'    => 'required|string|min:6',
+            'address'     => 'required|string',
             'documents.*' => 'nullable|file',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
         }
-         // Upload new documents
-         $newDocuments = [];
-         if ($request->hasFile('documents')) {
-             foreach ($request->file('documents') as $document) {
-                 $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
-                 $document->move(public_path('uploads/documents'), $documentName);
-                 $newDocuments[] = $documentName;
-             }
-         }
+        // Upload new documents
+        $newDocuments = [];
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $document) {
+                $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
+                $document->move(public_path('uploads/documents'), $documentName);
+                $newDocuments[] = $documentName;
+            }
+        }
 
-         $third_party = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => 'third_party',
-            'password' => Hash::make($request->password),
-            'address'  => $request->address,
-            'document' => json_encode($newDocuments),
+        $third_party = User::create([
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'role'       => 'third_party',
+            'password'   => Hash::make($request->password),
+            'address'    => $request->address,
+            'document'   => json_encode($newDocuments),
+            'creator_id' => auth()->id(),
+
         ]);
 
         $third_party->save();
@@ -150,7 +155,7 @@ class AdminController extends Controller
         return response()->json(['status' => true, 'message' => 'Third Party Create Successfully', 'third_party' => $third_party], 200);
     }
     //update third party
-    public function updateThirdParty(Request $request,$id)
+    public function updateThirdParty(Request $request, $id)
     {
         $third_party = User::findOrFail($id);
 
@@ -163,7 +168,7 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
         }
-        $validatedData = $validator->validated();
+        $validatedData        = $validator->validated();
         $third_party->name    = $validatedData['name'] ?? $third_party->name;
         $third_party->address = $validatedData['address'] ?? $third_party->address;
         $third_party->phone   = $validatedData['phone'] ?? $third_party->phone;
@@ -221,32 +226,34 @@ class AdminController extends Controller
     public function addEmployee(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'address'  => 'required|string',
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|string|email|unique:users,email',
+            'password'    => 'required|string|min:6',
+            'address'     => 'required|string',
             'documents.*' => 'nullable|file',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
         }
-         // Upload new documents
-         $newDocuments = [];
-         if ($request->hasFile('documents')) {
-             foreach ($request->file('documents') as $document) {
-                 $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
-                 $document->move(public_path('uploads/documents'), $documentName);
-                 $newDocuments[] = $documentName;
-             }
-         }
+        // Upload new documents
+        $newDocuments = [];
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $document) {
+                $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
+                $document->move(public_path('uploads/documents'), $documentName);
+                $newDocuments[] = $documentName;
+            }
+        }
 
-         $location_employee = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => 'location_employee',
-            'password' => Hash::make($request->password),
-            'address'  => $request->address,
-            'document' => json_encode($newDocuments),
+        $location_employee = User::create([
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'role'       => 'location_employee',
+            'password'   => Hash::make($request->password),
+            'address'    => $request->address,
+            'document'   => json_encode($newDocuments),
+            'creator_id' => auth()->id(),
+
         ]);
 
         $location_employee->save();
@@ -254,7 +261,7 @@ class AdminController extends Controller
         return response()->json(['status' => true, 'message' => 'location_employee Create Successfully', 'location employee' => $location_employee], 200);
     }
     //update location mployee
-    public function updateEmployee(Request $request,$id)
+    public function updateEmployee(Request $request, $id)
     {
         $location_employee = User::findOrFail($id);
 
@@ -267,7 +274,7 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
         }
-        $validatedData = $validator->validated();
+        $validatedData              = $validator->validated();
         $location_employee->name    = $validatedData['name'] ?? $location_employee->name;
         $location_employee->address = $validatedData['address'] ?? $location_employee->address;
         $location_employee->phone   = $validatedData['phone'] ?? $location_employee->phone;
@@ -325,32 +332,34 @@ class AdminController extends Controller
     public function addAgent(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'address'  => 'required|string',
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|string|email|unique:users,email',
+            'password'    => 'required|string|min:6',
+            'address'     => 'required|string',
             'documents.*' => 'nullable|file',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
         }
-         // Upload new documents
-         $newDocuments = [];
-         if ($request->hasFile('documents')) {
-             foreach ($request->file('documents') as $document) {
-                 $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
-                 $document->move(public_path('uploads/documents'), $documentName);
-                 $newDocuments[] = $documentName;
-             }
-         }
+        // Upload new documents
+        $newDocuments = [];
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $document) {
+                $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
+                $document->move(public_path('uploads/documents'), $documentName);
+                $newDocuments[] = $documentName;
+            }
+        }
 
-         $support_agent = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => 'support_agent',
-            'password' => Hash::make($request->password),
-            'address'  => $request->address,
-            'document' => json_encode($newDocuments),
+        $support_agent = User::create([
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'role'       => 'support_agent',
+            'password'   => Hash::make($request->password),
+            'address'    => $request->address,
+            'document'   => json_encode($newDocuments),
+            'creator_id' => auth()->id(),
+
         ]);
 
         $support_agent->save();
@@ -358,7 +367,7 @@ class AdminController extends Controller
         return response()->json(['status' => true, 'message' => 'Support Agent Create Successfully', 'support_agent' => $support_agent], 200);
     }
     //update support_agent
-    public function updateSAgent(Request $request,$id)
+    public function updateSAgent(Request $request, $id)
     {
         $support_agent = User::findOrFail($id);
 
@@ -371,7 +380,7 @@ class AdminController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
         }
-        $validatedData = $validator->validated();
+        $validatedData          = $validator->validated();
         $support_agent->name    = $validatedData['name'] ?? $support_agent->name;
         $support_agent->address = $validatedData['address'] ?? $support_agent->address;
         $support_agent->phone   = $validatedData['phone'] ?? $support_agent->phone;
@@ -425,128 +434,238 @@ class AdminController extends Controller
 
         return response()->json(['status' => true, 'message' => 'Support Agent Update Successfully', 'support_agent' => $support_agent], 200);
     }
-     //create or add technicain
-     public function technicianAdd(Request $request)
-     {
-         $validator = Validator::make($request->all(), [
-             'name'     => 'required|string|max:255',
-             'email'    => 'required|string|email|unique:users,email',
-             'password' => 'required|string|min:6',
-             'address'  => 'required|string',
-             'documents.*' => 'nullable|file',
-         ]);
-         if ($validator->fails()) {
-             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
-         }
-          // Upload new documents
-          $newDocuments = [];
-          if ($request->hasFile('documents')) {
-              foreach ($request->file('documents') as $document) {
-                  $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
-                  $document->move(public_path('uploads/documents'), $documentName);
-                  $newDocuments[] = $documentName;
-              }
-          }
+    //create or add technicain
+    public function technicianAdd(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|string|email|unique:users,email',
+            'password'    => 'required|string|min:6',
+            'address'     => 'required|string',
+            'documents.*' => 'nullable|file',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+        }
+        // Upload new documents
+        $newDocuments = [];
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $document) {
+                $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
+                $document->move(public_path('uploads/documents'), $documentName);
+                $newDocuments[] = $documentName;
+            }
+        }
 
-          $technician = User::create([
-             'name'     => $request->name,
-             'email'    => $request->email,
-             'role'     => 'technician',
-             'password' => Hash::make($request->password),
-             'address'  => $request->address,
-             'document' => json_encode($newDocuments),
-         ]);
+        $technician = User::create([
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'role'       => 'technician',
+            'password'   => Hash::make($request->password),
+            'address'    => $request->address,
+            'document'   => json_encode($newDocuments),
+            'creator_id' => auth()->id(),
 
-         $technician->save();
+        ]);
 
-         return response()->json(['status' => true, 'message' => 'Support Agent Create Successfully', 'technician' => $technician], 200);
-     }
-     //update support_agent
-     public function technicianUpdate(Request $request,$id)
-     {
-         $technician = User::findOrFail($id);
+        $technician->save();
 
-         $validator = Validator::make($request->all(), [
-             'name'     => 'nullable|string|max:255',
-             'password' => 'nullable|string|min:6',
-             'address'  => 'nullable|string',
-             'document' => 'nullable|file',
-         ]);
-         if ($validator->fails()) {
-             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
-         }
-         $validatedData = $validator->validated();
-         $technician->name    = $validatedData['name'] ?? $technician->name;
-         $technician->address = $validatedData['address'] ?? $technician->address;
-         $technician->phone   = $validatedData['phone'] ?? $technician->phone;
+        return response()->json(['status' => true, 'message' => 'Support Agent Create Successfully', 'technician' => $technician], 200);
+    }
+    //update support_agent
+    public function technicianUpdate(Request $request, $id)
+    {
+        $technician = User::findOrFail($id);
 
-         if (! empty($validatedData['password'])) {
-             $technician->password = Hash::make($validatedData['password']);
-         }
-         if ($request->hasFile('image')) {
-             $existingImage = $technician->image;
+        $validator = Validator::make($request->all(), [
+            'name'     => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:6',
+            'address'  => 'nullable|string',
+            'document' => 'nullable|file',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+        }
+        $validatedData       = $validator->validated();
+        $technician->name    = $validatedData['name'] ?? $technician->name;
+        $technician->address = $validatedData['address'] ?? $technician->address;
+        $technician->phone   = $validatedData['phone'] ?? $technician->phone;
 
-             if ($existingImage) {
-                 $oldImage = parse_url($existingImage);
-                 $filePath = ltrim($oldImage['path'], '/');
-                 if (file_exists($filePath)) {
-                     unlink($filePath); // Delete the existing image
-                 }
-             }
+        if (! empty($validatedData['password'])) {
+            $technician->password = Hash::make($validatedData['password']);
+        }
+        if ($request->hasFile('image')) {
+            $existingImage = $technician->image;
 
-             // Upload new image
-             $image     = $request->file('image');
-             $extension = $image->getClientOriginalExtension();
-             $newName   = time() . '.' . $extension;
-             $image->move(public_path('uploads/profile_images'), $newName);
+            if ($existingImage) {
+                $oldImage = parse_url($existingImage);
+                $filePath = ltrim($oldImage['path'], '/');
+                if (file_exists($filePath)) {
+                    unlink($filePath); // Delete the existing image
+                }
+            }
 
-             $technician->image = $newName;
-         }
-         //delete old document
-         if ($request->hasFile('documents')) {
-             $existingDocuments = $technician->document;
+            // Upload new image
+            $image     = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $newName   = time() . '.' . $extension;
+            $image->move(public_path('uploads/profile_images'), $newName);
 
-             if (is_array($existingDocuments)) {
-                 foreach ($existingDocuments as $document) {
-                     $relativePath = parse_url($document, PHP_URL_PATH);
-                     $relativePath = ltrim($relativePath, '/');
-                     unlink(public_path($relativePath));
-                 }
-             }
+            $technician->image = $newName;
+        }
+        //delete old document
+        if ($request->hasFile('documents')) {
+            $existingDocuments = $technician->document;
 
-             // Upload new documents
-             $newDocuments = [];
-             foreach ($request->file('documents') as $document) {
-                 $documentName = time() . uniqid() . $document->getClientOriginalName();
-                 $document->move(public_path('uploads/documents'), $documentName);
+            if (is_array($existingDocuments)) {
+                foreach ($existingDocuments as $document) {
+                    $relativePath = parse_url($document, PHP_URL_PATH);
+                    $relativePath = ltrim($relativePath, '/');
+                    unlink(public_path($relativePath));
+                }
+            }
 
-                 $newDocuments[] = $documentName;
-             }
+            // Upload new documents
+            $newDocuments = [];
+            foreach ($request->file('documents') as $document) {
+                $documentName = time() . uniqid() . $document->getClientOriginalName();
+                $document->move(public_path('uploads/documents'), $documentName);
 
-             $technician->document = json_encode($newDocuments);
-         }
-         $technician->save();
+                $newDocuments[] = $documentName;
+            }
 
-         return response()->json(['status' => true, 'message' => 'Support Agent Update Successfully', 'technician' => $technician], 200);
-     }
+            $technician->document = json_encode($newDocuments);
+        }
+        $technician->save();
+
+        return response()->json(['status' => true, 'message' => 'Support Agent Update Successfully', 'technician' => $technician], 200);
+    }
+    //get all user
+    public function userList(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $search  = $request->input('search');
+        $filter  = $request->input('filter');
+        $sortBy  = $request->input('sort_by');
+
+        $userlist = User::with('creator:id,name')->where('role', '!=', 'super_admin');
+
+        // Apply search
+        if (! empty($search)) {
+            $userlist->where(function ($query) use ($search) {
+                $query->where('id', $search)
+                    ->orWhere('name', 'like', "%$search%")
+                    ->orWhere('address', 'like', "%$search%");
+            });
+        }
+
+        // Apply sorting
+        if (! empty($sortBy)) {
+            if ($sortBy == 'id') {
+                $userlist->orderBy('id', 'desc');
+            } elseif ($sortBy == 'name') {
+                $userlist->orderBy('name', 'asc');
+            } elseif ($sortBy == 'address') {
+                $userlist->orderBy('address', 'asc');
+            } elseif ($sortBy == 'organization') {
+                $userlist->orderBy('name', 'asc');
+            }
+        }
+
+        // Apply role filter
+        if (! empty($filter)) {
+            $userlist->where('role', $filter);
+        }
+
+        $users = $userlist->paginate($perPage);
+
+        // Map the paginated data based on the role filter
+        $data = $users->getCollection()->map(function ($user) use ($filter) {
+            if ($filter === 'organization') {
+                return [
+                    'id'              => $user->id,
+                    'name'            => $user->name,
+                    'image'           => $user->image,
+                    'address'         => $user->address,
+                    'total providers' => User::where('creator_id', $user->id)->count(), // Count users created by this organization
+                ];
+            }
+            // elseif (in_array($filter, ['location_employee', 'support_agent', 'technician'])) {
+            //     return [
+            //         'id'       => $user->id,
+            //         'name'     => $user->name,
+            //         'image'   => $user->image,
+            //         'creator'  => $user->creator->name ?? 'N/A',
+            //         'location' => $user->address,
+            //     ];
+            // }
+            else {
+                // Default response
+                return [
+                    'id'      => $user->id,
+                    'name'    => $user->name,
+                    'address' => $user->address,
+                    'image'   => $user->image,
+                    'creator' => $user->creator->name ?? 'N/A',
+                ];
+            }
+        });
+
+        // Replace the original collection with the mapped data
+        $users->setCollection(collect($data));
+
+        return response()->json(['status' => true, 'message' => $users]);
+    }
+    public function userDetails(Request $request, $id)
+    {
+        $user = User::with('creator:id,name')->find($id);
+
+        if (! $user) {
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
+        }
+        $data = [
+            'id'      => $user->id,
+            'name'    => $user->name,
+            'email'   => $user->email,
+            'contact' => $user->phone,
+            'address' => $user->address,
+            'creator' => $user->creator->name ?? 'N/A',
+        ];
+
+        // add role org the count of location_employee or support_agent
+        if (in_array($user->role, ['organization', 'third_party'])) {
+            // Count the number of location_employee, support_agent, technician,
+            $locationEmployeeCount = User::where('role', 'location_employee')->where('creator_id', $user->id)->count();
+            $supportAgentCount     = User::where('role', 'support_agent')->where('creator_id', $user->id)->count();
+            $technicianCount       = User::where('role', 'technician')->where('creator_id', $user->id)->count();
+
+            // Add these $data
+            $data['location employee'] = $locationEmployeeCount;
+            $data['support agent']     = $supportAgentCount;
+            $data['technician']        = $technicianCount;
+        }
+
+        return response()->json(['status' => true, 'message' => $data], 200);
+    }
+
     public function deleteUser($id)
     {
         //  return $request;
         $user = User::find($id);
 
         if (! $user) {
-            return response()->json(['status' => 'error', 'message' => 'User not found.'], 404);
+            return response()->json(['status' => false, 'message' => 'User not found.'], 404);
         }
 
         $user->delete();
 
-        return response()->json(['message' => 'User deleted successfully'], 200);
+        return response()->json(['status' => true, 'message' => 'User deleted successfully'], 200);
     }
 
     public function SoftDeletedUsers()
     {
         $deletedUsers = User::onlyTrashed()->get();
 
-        return response()->json(['message' => $deletedUsers], 200);
+        return response()->json(['status' => true, 'message' => $deletedUsers], 200);
     }
 }

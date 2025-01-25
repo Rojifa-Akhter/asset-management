@@ -64,10 +64,15 @@ class User extends Authenticatable implements JWTSubject
             }, $documents);
         }
     }
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
 
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
     }
+
 
 }

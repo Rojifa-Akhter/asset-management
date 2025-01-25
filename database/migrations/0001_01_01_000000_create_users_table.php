@@ -26,6 +26,7 @@ return new class extends Migration
             $table->timestamp('otp_expire_at')->nullable();
             $table->string('google_id')->nullable();
             $table->enum('status',['active','inactive'])->default('inactive');
+            $table->foreignId('creator_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
