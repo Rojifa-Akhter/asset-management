@@ -216,7 +216,320 @@ class AdminController extends Controller
         $third_party->save();
 
         return response()->json(['status' => true, 'message' => 'third_party Update Successfully', 'third_party' => $third_party], 200);
-    }    public function deleteUser($id)
+    }
+    //location employee add
+    public function addEmployee(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'address'  => 'required|string',
+            'documents.*' => 'nullable|file',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+        }
+         // Upload new documents
+         $newDocuments = [];
+         if ($request->hasFile('documents')) {
+             foreach ($request->file('documents') as $document) {
+                 $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
+                 $document->move(public_path('uploads/documents'), $documentName);
+                 $newDocuments[] = $documentName;
+             }
+         }
+
+         $location_employee = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'role'     => 'location_employee',
+            'password' => Hash::make($request->password),
+            'address'  => $request->address,
+            'document' => json_encode($newDocuments),
+        ]);
+
+        $location_employee->save();
+
+        return response()->json(['status' => true, 'message' => 'location_employee Create Successfully', 'location employee' => $location_employee], 200);
+    }
+    //update location mployee
+    public function updateEmployee(Request $request,$id)
+    {
+        $location_employee = User::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'name'     => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:6',
+            'address'  => 'nullable|string',
+            'document' => 'nullable|file',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+        }
+        $validatedData = $validator->validated();
+        $location_employee->name    = $validatedData['name'] ?? $location_employee->name;
+        $location_employee->address = $validatedData['address'] ?? $location_employee->address;
+        $location_employee->phone   = $validatedData['phone'] ?? $location_employee->phone;
+
+        if (! empty($validatedData['password'])) {
+            $location_employee->password = Hash::make($validatedData['password']);
+        }
+        if ($request->hasFile('image')) {
+            $existingImage = $location_employee->image;
+
+            if ($existingImage) {
+                $oldImage = parse_url($existingImage);
+                $filePath = ltrim($oldImage['path'], '/');
+                if (file_exists($filePath)) {
+                    unlink($filePath); // Delete the existing image
+                }
+            }
+
+            // Upload new image
+            $image     = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $newName   = time() . '.' . $extension;
+            $image->move(public_path('uploads/profile_images'), $newName);
+
+            $location_employee->image = $newName;
+        }
+        //delete old document
+        if ($request->hasFile('documents')) {
+            $existingDocuments = $location_employee->document;
+
+            if (is_array($existingDocuments)) {
+                foreach ($existingDocuments as $document) {
+                    $relativePath = parse_url($document, PHP_URL_PATH);
+                    $relativePath = ltrim($relativePath, '/');
+                    unlink(public_path($relativePath));
+                }
+            }
+
+            // Upload new documents
+            $newDocuments = [];
+            foreach ($request->file('documents') as $document) {
+                $documentName = time() . uniqid() . $document->getClientOriginalName();
+                $document->move(public_path('uploads/documents'), $documentName);
+
+                $newDocuments[] = $documentName;
+            }
+
+            $location_employee->document = json_encode($newDocuments);
+        }
+        $location_employee->save();
+
+        return response()->json(['status' => true, 'message' => 'Location Employee Update Successfully', 'location_employee' => $location_employee], 200);
+    }
+    //create or add Support agent
+    public function addAgent(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'address'  => 'required|string',
+            'documents.*' => 'nullable|file',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+        }
+         // Upload new documents
+         $newDocuments = [];
+         if ($request->hasFile('documents')) {
+             foreach ($request->file('documents') as $document) {
+                 $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
+                 $document->move(public_path('uploads/documents'), $documentName);
+                 $newDocuments[] = $documentName;
+             }
+         }
+
+         $support_agent = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'role'     => 'support_agent',
+            'password' => Hash::make($request->password),
+            'address'  => $request->address,
+            'document' => json_encode($newDocuments),
+        ]);
+
+        $support_agent->save();
+
+        return response()->json(['status' => true, 'message' => 'Support Agent Create Successfully', 'support_agent' => $support_agent], 200);
+    }
+    //update support_agent
+    public function updateSAgent(Request $request,$id)
+    {
+        $support_agent = User::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'name'     => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:6',
+            'address'  => 'nullable|string',
+            'document' => 'nullable|file',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+        }
+        $validatedData = $validator->validated();
+        $support_agent->name    = $validatedData['name'] ?? $support_agent->name;
+        $support_agent->address = $validatedData['address'] ?? $support_agent->address;
+        $support_agent->phone   = $validatedData['phone'] ?? $support_agent->phone;
+
+        if (! empty($validatedData['password'])) {
+            $support_agent->password = Hash::make($validatedData['password']);
+        }
+        if ($request->hasFile('image')) {
+            $existingImage = $support_agent->image;
+
+            if ($existingImage) {
+                $oldImage = parse_url($existingImage);
+                $filePath = ltrim($oldImage['path'], '/');
+                if (file_exists($filePath)) {
+                    unlink($filePath); // Delete the existing image
+                }
+            }
+
+            // Upload new image
+            $image     = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $newName   = time() . '.' . $extension;
+            $image->move(public_path('uploads/profile_images'), $newName);
+
+            $support_agent->image = $newName;
+        }
+        //delete old document
+        if ($request->hasFile('documents')) {
+            $existingDocuments = $support_agent->document;
+
+            if (is_array($existingDocuments)) {
+                foreach ($existingDocuments as $document) {
+                    $relativePath = parse_url($document, PHP_URL_PATH);
+                    $relativePath = ltrim($relativePath, '/');
+                    unlink(public_path($relativePath));
+                }
+            }
+
+            // Upload new documents
+            $newDocuments = [];
+            foreach ($request->file('documents') as $document) {
+                $documentName = time() . uniqid() . $document->getClientOriginalName();
+                $document->move(public_path('uploads/documents'), $documentName);
+
+                $newDocuments[] = $documentName;
+            }
+
+            $support_agent->document = json_encode($newDocuments);
+        }
+        $support_agent->save();
+
+        return response()->json(['status' => true, 'message' => 'Support Agent Update Successfully', 'support_agent' => $support_agent], 200);
+    }
+     //create or add technicain
+     public function technicianAdd(Request $request)
+     {
+         $validator = Validator::make($request->all(), [
+             'name'     => 'required|string|max:255',
+             'email'    => 'required|string|email|unique:users,email',
+             'password' => 'required|string|min:6',
+             'address'  => 'required|string',
+             'documents.*' => 'nullable|file',
+         ]);
+         if ($validator->fails()) {
+             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+         }
+          // Upload new documents
+          $newDocuments = [];
+          if ($request->hasFile('documents')) {
+              foreach ($request->file('documents') as $document) {
+                  $documentName = time() . uniqid() . '_' . $document->getClientOriginalName();
+                  $document->move(public_path('uploads/documents'), $documentName);
+                  $newDocuments[] = $documentName;
+              }
+          }
+
+          $technician = User::create([
+             'name'     => $request->name,
+             'email'    => $request->email,
+             'role'     => 'technician',
+             'password' => Hash::make($request->password),
+             'address'  => $request->address,
+             'document' => json_encode($newDocuments),
+         ]);
+
+         $technician->save();
+
+         return response()->json(['status' => true, 'message' => 'Support Agent Create Successfully', 'technician' => $technician], 200);
+     }
+     //update support_agent
+     public function technicianUpdate(Request $request,$id)
+     {
+         $technician = User::findOrFail($id);
+
+         $validator = Validator::make($request->all(), [
+             'name'     => 'nullable|string|max:255',
+             'password' => 'nullable|string|min:6',
+             'address'  => 'nullable|string',
+             'document' => 'nullable|file',
+         ]);
+         if ($validator->fails()) {
+             return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+         }
+         $validatedData = $validator->validated();
+         $technician->name    = $validatedData['name'] ?? $technician->name;
+         $technician->address = $validatedData['address'] ?? $technician->address;
+         $technician->phone   = $validatedData['phone'] ?? $technician->phone;
+
+         if (! empty($validatedData['password'])) {
+             $technician->password = Hash::make($validatedData['password']);
+         }
+         if ($request->hasFile('image')) {
+             $existingImage = $technician->image;
+
+             if ($existingImage) {
+                 $oldImage = parse_url($existingImage);
+                 $filePath = ltrim($oldImage['path'], '/');
+                 if (file_exists($filePath)) {
+                     unlink($filePath); // Delete the existing image
+                 }
+             }
+
+             // Upload new image
+             $image     = $request->file('image');
+             $extension = $image->getClientOriginalExtension();
+             $newName   = time() . '.' . $extension;
+             $image->move(public_path('uploads/profile_images'), $newName);
+
+             $technician->image = $newName;
+         }
+         //delete old document
+         if ($request->hasFile('documents')) {
+             $existingDocuments = $technician->document;
+
+             if (is_array($existingDocuments)) {
+                 foreach ($existingDocuments as $document) {
+                     $relativePath = parse_url($document, PHP_URL_PATH);
+                     $relativePath = ltrim($relativePath, '/');
+                     unlink(public_path($relativePath));
+                 }
+             }
+
+             // Upload new documents
+             $newDocuments = [];
+             foreach ($request->file('documents') as $document) {
+                 $documentName = time() . uniqid() . $document->getClientOriginalName();
+                 $document->move(public_path('uploads/documents'), $documentName);
+
+                 $newDocuments[] = $documentName;
+             }
+
+             $technician->document = json_encode($newDocuments);
+         }
+         $technician->save();
+
+         return response()->json(['status' => true, 'message' => 'Support Agent Update Successfully', 'technician' => $technician], 200);
+     }
+    public function deleteUser($id)
     {
         //  return $request;
         $user = User::find($id);

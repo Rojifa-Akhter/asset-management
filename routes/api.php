@@ -39,6 +39,19 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::post('third_party_add', [AdminController::class, 'addThirdParty']);
     Route::post('third_party_update/{id}', [AdminController::class, 'updateThirdParty']);
 
+    //add and update location employee
+    Route::post('employee_add', [AdminController::class, 'addEmployee']);
+    Route::post('employee_update/{id}', [AdminController::class, 'updateEmployee']);
+
+    //add and update support agent
+    Route::post('agent_add', [AdminController::class, 'addAgent']);
+    Route::post('agent_update/{id}', [AdminController::class, 'updateSAgent']);
+
+    //add and update technician
+    Route::post('add_technician', [AdminController::class, 'technicianAdd']);
+    Route::post('update_technician/{id}', [AdminController::class, 'technicianUpdate']);
+
+
     Route::delete('delete_user/{id}', [AdminController::class, 'deleteUser']);
     Route::get('soft_delete_user', [AdminController::class, 'SoftDeletedUsers']);
 
@@ -51,6 +64,14 @@ Route::middleware(['auth:api', 'organization'])->group(function () {
     //add and update support agent
     Route::post('support_agent_add', [OrganizationController::class, 'addSupportAgent']);
     Route::post('support_agent_update/{id}', [OrganizationController::class, 'updateSupportAgent']);
+
+    //add and update technician
+    Route::post('technician_add', [OrganizationController::class, 'addTechnician']);
+    Route::post('technician_update/{id}', [OrganizationController::class, 'updateTechnician']);
+
+    //just delete supportagent, location employee and technician
+    Route::delete('delete_user/{id}', [OrganizationController::class, 'deleteUser']);
+
 
     //asset
     Route::post('create-asset', [AssetController::class, 'createAsset']);
