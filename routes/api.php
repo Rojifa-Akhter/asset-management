@@ -54,6 +54,10 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::delete('delete_user/{id}', [AdminController::class, 'deleteUser']);
     Route::get('soft_delete_user', [AdminController::class, 'SoftDeletedUsers']);
 
+    //assetlist
+    Route::get('get_asset_list', [AssetController::class, 'assetListAdmin']);
+
+
 });
 Route::middleware(['auth:api', 'organization'])->group(function () {
 
@@ -115,7 +119,7 @@ Route::middleware(['auth:api', 'creator'])->group(function () {
     Route::get('asset-list', [AssetController::class, 'assetList']);
     Route::get('asset-details/{id}', [AssetController::class, 'assetDetails']);
 
-    Route::delete('delete-asset/{id}', [AssetController::class, 'deleteAsset']);
+    // Route::delete('delete-asset/{id}', [AssetController::class, 'deleteAsset']);
 
     //setting
     Route::post('create-setting', [SettingController::class, 'createSetting']);

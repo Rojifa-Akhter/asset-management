@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('organization_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('asset_name');
             $table->string('brand_name');
-            $table->string('QR_code')->nullable();
-            $table->string('Unit_Price')->nullable();
-            $table->string('Current_Spend')->nullable();
-            $table->string('Max_Spend')->nullable();
+            $table->string('qr_code')->nullable();
+            $table->string('unit_price')->nullable();
+            $table->string('current_spend')->nullable();
+            $table->string('max_spend')->nullable();
             $table->string('range')->nullable();
             $table->string('location')->nullable();
             $table->string('manufacture_sno')->nullable();
