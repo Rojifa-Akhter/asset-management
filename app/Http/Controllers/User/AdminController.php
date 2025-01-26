@@ -548,10 +548,22 @@ class AdminController extends Controller
         $filter  = $request->input('filter');
         $sortBy  = $request->input('sort_by');
 
-        $userlist = User::with('creator:id,name')->where('role', '!=', 'super_admin');
+        // Get the authenticated user
+        $currentUser = auth()->user();
+        $userlist = User::query();
+
+        // Logic for 'super_admin': Exclude their own data
+        if ($currentUser->role === 'super_admin') {
+            $userlist->where('id', '!=', $currentUser->id);
+        }
+
+        // Logic for 'organization' or 'third_party': Show only their created users
+        elseif (in_array($currentUser->role, ['organization', 'third_party'])) {
+            $userlist->where('creator_id', $currentUser->id);
+        }
 
         // Apply search
-        if (! empty($search)) {
+        if (!empty($search)) {
             $userlist->where(function ($query) use ($search) {
                 $query->where('id', $search)
                     ->orWhere('name', 'like', "%$search%")
@@ -560,7 +572,7 @@ class AdminController extends Controller
         }
 
         // Apply sorting
-        if (! empty($sortBy)) {
+        if (!empty($sortBy)) {
             if ($sortBy == 'id') {
                 $userlist->orderBy('id', 'desc');
             } elseif ($sortBy == 'name') {
@@ -568,39 +580,33 @@ class AdminController extends Controller
             } elseif ($sortBy == 'address') {
                 $userlist->orderBy('address', 'asc');
             } elseif ($sortBy == 'organization') {
-                $userlist->orderBy('name', 'asc');
+                $userlist->orderBy('organization', 'asc');
             }
         }
 
         // Apply role filter
-        if (! empty($filter)) {
+        if (!empty($filter)) {
             $userlist->where('role', $filter);
         }
 
+        // Paginate the results
         $users = $userlist->paginate($perPage);
 
-        // Map the paginated data based on the role filter
-        $data = $users->getCollection()->map(function ($user) use ($filter) {
-            if ($filter === 'organization') {
+        // Map the paginated data based on the role and filter
+        $data = $users->getCollection()->map(function ($user) use ($filter, $currentUser) {
+            if ($currentUser->role === 'organization' || $currentUser->role === 'third_party') {
+                // Organization/Third Party: Show counts of related roles
                 return [
-                    'id'              => $user->id,
-                    'name'            => $user->name,
-                    'image'           => $user->image,
-                    'address'         => $user->address,
-                    'total providers' => User::where('creator_id', $user->id)->count(), // Count users created by this organization
+                    'id'                => $user->id,
+                    'name'              => $user->name,
+                    'image'             => $user->image,
+                    'address'           => $user->address,
+                    // 'location_employee' => User::where('role', 'location_employee')->where('creator_id', $user->id)->count(),
+                    // 'support_agent'     => User::where('role', 'support_agent')->where('creator_id', $user->id)->count(),
+                    // 'technician'        => User::where('role', 'technician')->where('creator_id', $user->id)->count(),
                 ];
-            }
-            // elseif (in_array($filter, ['location_employee', 'support_agent', 'technician'])) {
-            //     return [
-            //         'id'       => $user->id,
-            //         'name'     => $user->name,
-            //         'image'   => $user->image,
-            //         'creator'  => $user->creator->name ?? 'N/A',
-            //         'location' => $user->address,
-            //     ];
-            // }
-            else {
-                // Default response
+            } else {
+                // Default response for super_admin and others
                 return [
                     'id'      => $user->id,
                     'name'    => $user->name,
@@ -616,6 +622,7 @@ class AdminController extends Controller
 
         return response()->json(['status' => true, 'message' => $users]);
     }
+
     public function userDetails(Request $request, $id)
     {
         $user = User::with('creator:id,name')->find($id);

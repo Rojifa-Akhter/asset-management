@@ -7,7 +7,6 @@ use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use App\Http\Controllers\User\AdminController;
 use App\Http\Controllers\User\OrganizationController;
-use App\Http\Controllers\User\ThirdPartyController;
 use App\Http\Controllers\User\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -54,60 +53,13 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 
     Route::delete('delete_user/{id}', [AdminController::class, 'deleteUser']);
     Route::get('soft_delete_user', [AdminController::class, 'SoftDeletedUsers']);
-    Route::get('all_user', [AdminController::class, 'userList']);
-    Route::get('user_details/{id}', [AdminController::class, 'userDetails']);
 
 });
 Route::middleware(['auth:api', 'organization'])->group(function () {
-    //add and update location employee
-    Route::post('location_employee_add', [OrganizationController::class, 'addLocationEmployee']);
-    Route::post('location_employee_update/{id}', [OrganizationController::class, 'updateLocationEmployee']);
 
-    //add and update support agent
-    Route::post('support_agent_add', [OrganizationController::class, 'addSupportAgent']);
-    Route::post('support_agent_update/{id}', [OrganizationController::class, 'updateSupportAgent']);
 
-    //add and update technician
-    Route::post('technician_add', [OrganizationController::class, 'addTechnician']);
-    Route::post('technician_update/{id}', [OrganizationController::class, 'updateTechnician']);
-
-    //just delete supportagent, location employee and technician
-    Route::delete('delete_user/{id}', [OrganizationController::class, 'deleteUser']);
-
-    //asset
-    Route::post('create-asset', [AssetController::class, 'createAsset']);
-    Route::post('update-asset/{id}', [AssetController::class, 'updateAsset']);
-    Route::get('asset-list', [AssetController::class, 'assetList']);
-    Route::get('asset-details/{id}', [AssetController::class, 'assetDetails']);
-
-    Route::delete('delete-asset/{id}', [AssetController::class, 'deleteAsset']);
-
-    //setting
-    Route::post('create-setting', [SettingController::class, 'createSetting']);
-    Route::get('settings', [SettingController::class, 'listSetting']);
-
-    //faq
-    Route::post('create-faq', [FAQController::class, 'createFaq']);
-    Route::post('update-faq/{id}', [FAQController::class, 'updateFaq']);
-    Route::get('faq-list', [FAQController::class, 'listFaq']);
-    Route::delete('delete-faq/{id}', [FAQController::class, 'deleteFaq']);
 });
-Route::middleware(['auth:api', 'third_party'])->group(function () {
-    //add and update location employee
-    Route::post('LE_add', [ThirdPartyController::class, 'addLocationEmployee']);
-    Route::post('LE_update/{id}', [ThirdPartyController::class, 'updateLocationEmployee']);
 
-    //add and update support agent
-    Route::post('SA_add', [ThirdPartyController::class, 'addSupportAgent']);
-    Route::post('SA_update/{id}', [ThirdPartyController::class, 'updateSupportAgent']);
-
-    //add and update technician
-    Route::post('tec_add', [ThirdPartyController::class, 'addTechnician']);
-    Route::post('tec_update/{id}', [ThirdPartyController::class, 'updateTechnician']);
-
-    //just delete supportagent, location employee and technician
-    Route::delete('delete_user/{id}', [ThirdPartyController::class, 'deleteUser']);
-});
 Route::middleware(['auth:api', 'support_agent'])->group(function () {
     //inspection sheet
     Route::post('create-inspection', action: [InspectionSheetController::class, 'createInspectionSheet']);
@@ -135,5 +87,44 @@ Route::middleware(['auth:api', 'common'])->group(function () {
     Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
     Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
     Route::get('ticket-list', [TicketController::class, 'ticketList']);
+
+});
+Route::middleware(['auth:api', 'creator'])->group(function () {
+
+    //add and update location employee
+    Route::post('location_employee_add', [OrganizationController::class, 'addLocationEmployee']);
+    Route::post('location_employee_update/{id}', [OrganizationController::class, 'updateLocationEmployee']);
+
+    //add and update support agent
+    Route::post('support_agent_add', [OrganizationController::class, 'addSupportAgent']);
+    Route::post('support_agent_update/{id}', [OrganizationController::class, 'updateSupportAgent']);
+
+    //add and update technician
+    Route::post('technician_add', [OrganizationController::class, 'addTechnician']);
+    Route::post('technician_update/{id}', [OrganizationController::class, 'updateTechnician']);
+
+    //just delete supportagent, location employee and technician
+    Route::delete('delete_user/{id}', [OrganizationController::class, 'deleteUser']);
+    Route::get('all_user', [AdminController::class, 'userList']);
+    Route::get('user_details/{id}', [AdminController::class, 'userDetails']);
+    Route::get('get_user_details/{id}', [OrganizationController::class, 'getuserDetails']);
+
+    //asset
+    Route::post('create-asset', [AssetController::class, 'createAsset']);
+    Route::post('update-asset/{id}', [AssetController::class, 'updateAsset']);
+    Route::get('asset-list', [AssetController::class, 'assetList']);
+    Route::get('asset-details/{id}', [AssetController::class, 'assetDetails']);
+
+    Route::delete('delete-asset/{id}', [AssetController::class, 'deleteAsset']);
+
+    //setting
+    Route::post('create-setting', [SettingController::class, 'createSetting']);
+    Route::get('settings', [SettingController::class, 'listSetting']);
+
+    //faq
+    Route::post('create-faq', [FAQController::class, 'createFaq']);
+    Route::post('update-faq/{id}', [FAQController::class, 'updateFaq']);
+    Route::get('faq-list', [FAQController::class, 'listFaq']);
+    Route::delete('delete-faq/{id}', [FAQController::class, 'deleteFaq']);
 
 });

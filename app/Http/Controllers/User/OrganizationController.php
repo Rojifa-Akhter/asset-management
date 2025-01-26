@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+//this controller for organization and third party
 class OrganizationController extends Controller
 {
     //create or add location employee
@@ -33,12 +34,12 @@ class OrganizationController extends Controller
         }
 
         $location_employee = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => 'location_employee',
-            'password' => Hash::make($request->password),
-            'address'  => $request->address,
-            'document' => json_encode($newDocuments),
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'role'       => 'location_employee',
+            'password'   => Hash::make($request->password),
+            'address'    => $request->address,
+            'document'   => json_encode($newDocuments),
             'creator_id' => auth()->id(),
         ]);
 
@@ -49,7 +50,16 @@ class OrganizationController extends Controller
     //update location_employee
     public function updateLocationEmployee(Request $request, $id)
     {
-        $location_employee = User::findOrFail($id);
+
+        $currentUser = auth()->user();
+
+        $location_employee = User::where('id', $id)
+            ->where('creator_id', $currentUser->id)
+            ->first();
+
+        if (! $location_employee) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized Access or User Not Found'], 403);
+        }
 
         $validator = Validator::make($request->all(), [
             'name'     => 'nullable|string|max:255',
@@ -138,12 +148,12 @@ class OrganizationController extends Controller
         }
 
         $support_agent = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => 'support_agent',
-            'password' => Hash::make($request->password),
-            'address'  => $request->address,
-            'document' => json_encode($newDocuments),
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'role'       => 'support_agent',
+            'password'   => Hash::make($request->password),
+            'address'    => $request->address,
+            'document'   => json_encode($newDocuments),
             'creator_id' => auth()->id(),
         ]);
 
@@ -154,7 +164,16 @@ class OrganizationController extends Controller
     //update support_agent
     public function updateSupportAgent(Request $request, $id)
     {
-        $support_agent = User::findOrFail($id);
+        $currentUser = auth()->user();
+
+        $support_agent = User::where('id', $id)
+            ->where('creator_id', $currentUser->id)
+            ->first();
+
+        if (! $support_agent) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized Access or User Not Found'], 403);
+        }
+        // $support_agent = User::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
             'name'     => 'nullable|string|max:255',
@@ -243,12 +262,12 @@ class OrganizationController extends Controller
         }
 
         $technician = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => 'technician',
-            'password' => Hash::make($request->password),
-            'address'  => $request->address,
-            'document' => json_encode($newDocuments),
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'role'       => 'technician',
+            'password'   => Hash::make($request->password),
+            'address'    => $request->address,
+            'document'   => json_encode($newDocuments),
             'creator_id' => auth()->id(),
         ]);
 
@@ -259,6 +278,15 @@ class OrganizationController extends Controller
     //update support_agent
     public function updateTechnician(Request $request, $id)
     {
+        $currentUser = auth()->user();
+
+        $technician = User::where('id', $id)
+            ->where('creator_id', $currentUser->id)
+            ->first();
+
+        if (! $technician) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized Access or User Not Found'], 403);
+        }
         $technician = User::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
@@ -324,6 +352,35 @@ class OrganizationController extends Controller
 
         return response()->json(['status' => true, 'message' => 'Support Agent Update Successfully', 'technician' => $technician], 200);
     }
+    //get specifiq user
+    public function getuserDetails(Request $request, $id)
+    {
+        $currentUser = auth()->user();
+
+        $user = User::with('creator:id,name')->find($id);
+
+        if (! $user) {
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
+        }
+
+        // Restrict access for "organization" and "third_party" roles
+        if (in_array($currentUser->role, ['organization', 'third_party']) && $user->creator_id != $currentUser->id) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized Access'], 403);
+        }
+
+        $data = [
+            'id'           => $user->id,
+            'name'         => $user->name,
+            'image'        => $user->image,
+            'email'        => $user->email,
+            'contact'      => $user->phone,
+            'address'      => $user->address,
+            'organization' => $user->creator->name ?? 'N/A',
+        ];
+
+        return response()->json(['status' => true, 'message' => $data], 200);
+    }
+
     //   delete location employee, technician and support agent
     public function deleteUser($id)
     {
