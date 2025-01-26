@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\SettingController;
@@ -136,4 +137,15 @@ Route::middleware(['auth:api', 'common'])->group(function () {
     Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
     Route::get('ticket-list', [TicketController::class, 'ticketList']);
 
+
+
+
+
+
+    //message routes
+    Route::post('send-message',[MessageController::class,'sendMessage']);
+    Route::get('get-message',[MessageController::class,'getMessage']);
+    Route::get('mark-read',[MessageController::class,'markRead']);
+    Route::get('search-new-user',[MessageController::class,'searchNewUser']);
+    Route::get('chat-list',[MessageController::class,'chatList']);
 });
