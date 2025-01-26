@@ -108,6 +108,9 @@ class AssetController extends Controller
     public function assetList(Request $request)
     {
         $perPage = $request->input('per_page', 10);
+        $search  = $request->input('search');
+        $sortBy  = $request->input('sort_by');
+
         $assets = Asset::paginate($perPage);
 
         return response()->json([

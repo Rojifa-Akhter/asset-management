@@ -2,6 +2,7 @@
 
 
 use App\Http\Middleware\CommonMiddleware;
+use App\Http\Middleware\CreatorMiddleware;
 use App\Http\Middleware\LocationEmployee;
 use App\Http\Middleware\Organization;
 use App\Http\Middleware\SuperAdmin;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'technician' => Technician::class,
             'user' => User::class,
             'common' => CommonMiddleware::class,
+            'creator' => CreatorMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
