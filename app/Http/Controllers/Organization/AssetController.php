@@ -2,14 +2,36 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
+use App\Imports\AssetImport;
 use App\Models\Asset;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AssetController extends Controller
 {
+    //import
+    public function importAssets(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:xlsx,csv',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
+        }
+
+        try {
+            Excel::import(new AssetImport, $request->file('file'));
+
+            return response()->json(['status' => true, 'message' => 'Assets imported successfully.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => 'Failed to import assets. ' . $e->getMessage()], 500);
+        }
+    }
+
     //create asset
     public function createAsset(Request $request)
     {
@@ -196,7 +218,8 @@ class AssetController extends Controller
                     ->orWhere('warranty_date', 'like', "%$search%")
                     ->orWhere('unit_price', 'like', "%$search%")
                     ->orWhere('current_spend', 'like', "%$search%")
-                    ->orWhere('max_spend', 'like', "%$search%");            });
+                    ->orWhere('max_spend', 'like', "%$search%");
+            });
         }
 
         // Apply sorting
@@ -211,7 +234,7 @@ class AssetController extends Controller
                 $assetlist->orderBy('unit_price', 'asc');
             } elseif ($sortBy == 'current_spend') {
                 $assetlist->orderBy('current_spend', 'asc');
-            }elseif ($sortBy == 'organization') {
+            } elseif ($sortBy == 'organization') {
                 $assetlist->orderBy('max_spend', 'asc');
             }
         }
@@ -221,14 +244,14 @@ class AssetController extends Controller
         // Map customized response with organization name
         $data = $assets->getCollection()->map(function ($asset) {
             return [
-                'id'                => $asset->id,
-                'name'              => $asset->asset_name,
-                'qr_code'           => $asset->qr_code,
-                'warranty_date'     => $asset->warranty_date,
-                'unit_price'        => $asset->unit_price,
-                'current_spend'     => $asset->current_spend,
-                'max_spend'         => $asset->max_spend,
-                'organization' => $asset->organization->name ?? 'N/A', // Organization or third party name
+                'id'            => $asset->id,
+                'name'          => $asset->asset_name,
+                'qr_code'       => $asset->qr_code,
+                'warranty_date' => $asset->warranty_date,
+                'unit_price'    => $asset->unit_price,
+                'current_spend' => $asset->current_spend,
+                'max_spend'     => $asset->max_spend,
+                'organization'  => $asset->organization->name ?? 'N/A', // Organization or third party name
             ];
         });
 
