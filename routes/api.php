@@ -57,6 +57,16 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //assetlist
     Route::get('get_asset_list', [AssetController::class, 'assetListAdmin']);
 
+     //setting
+     Route::post('create_setting', [SettingController::class, 'createSetting']);
+     Route::get('settings', [SettingController::class, 'listSetting']);
+
+     //faq
+     Route::post('create_faq', [FAQController::class, 'createFaq']);
+     Route::post('update_faq/{id}', [FAQController::class, 'updateFaq']);
+     Route::get('faq_list', [FAQController::class, 'listFaq']);
+     Route::delete('delete_faq/{id}', [FAQController::class, 'deleteFaq']);
+
 
 });
 Route::middleware(['auth:api', 'organization'])->group(function () {
@@ -121,15 +131,4 @@ Route::middleware(['auth:api', 'creator'])->group(function () {
     Route::delete('delete_asset/{id}', [AssetController::class, 'deleteAsset']);
 
     Route::post('import_asset', [AssetController::class, 'importAssets']);
-
-    //setting
-    Route::post('create_setting', [SettingController::class, 'createSetting']);
-    Route::get('settings', [SettingController::class, 'listSetting']);
-
-    //faq
-    Route::post('create_faq', [FAQController::class, 'createFaq']);
-    Route::post('update_faq/{id}', [FAQController::class, 'updateFaq']);
-    Route::get('faq_list', [FAQController::class, 'listFaq']);
-    Route::delete('delete_faq/{id}', [FAQController::class, 'deleteFaq']);
-
 });
