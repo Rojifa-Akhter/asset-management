@@ -5,10 +5,16 @@
         "This file is @generated automatically"
     ],
 <<<<<<< HEAD
+<<<<<<< HEAD
     "content-hash": "93dd4f2b759dbb49f350f0211971983d",
 =======
     "content-hash": "5408ac7af8f4a4ada33f391dd9a9dd5a",
 >>>>>>> 40b2f55a717f5639f0f157efbe6cf0fb81341bbf
+=======
+
+    "content-hash": "93dd4f2b759dbb49f350f0211971983d",
+
+>>>>>>> 1be1b4ebb86aae5a90f83aeeb4b0b0548917cbf4
     "packages": [
         {
             "name": "brick/math",
@@ -1282,6 +1288,10 @@
         {
             "name": "laravel/framework",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1be1b4ebb86aae5a90f83aeeb4b0b0548917cbf4
             "version": "v11.40.0",
             "source": {
                 "type": "git",
@@ -1292,6 +1302,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/599a28196d284fee158cc10086fd56ac625ad7a3",
                 "reference": "599a28196d284fee158cc10086fd56ac625ad7a3",
+<<<<<<< HEAD
 =======
             "version": "v11.38.2",
             "source": {
@@ -1304,6 +1315,8 @@
                 "url": "https://api.github.com/repos/laravel/framework/zipball/9d290aa90fcad44048bedca5219d2b872e98772a",
                 "reference": "9d290aa90fcad44048bedca5219d2b872e98772a",
 >>>>>>> 40b2f55a717f5639f0f157efbe6cf0fb81341bbf
+=======
+>>>>>>> 1be1b4ebb86aae5a90f83aeeb4b0b0548917cbf4
                 "shasum": ""
             },
             "require": {
@@ -1506,10 +1519,15 @@
                 "source": "https://github.com/laravel/framework"
             },
 <<<<<<< HEAD
+<<<<<<< HEAD
             "time": "2025-01-24T16:17:42+00:00"
 =======
             "time": "2025-01-15T00:06:46+00:00"
 >>>>>>> 40b2f55a717f5639f0f157efbe6cf0fb81341bbf
+=======
+            "time": "2025-01-24T16:17:42+00:00"
+
+>>>>>>> 1be1b4ebb86aae5a90f83aeeb4b0b0548917cbf4
         },
         {
             "name": "laravel/prompts",
@@ -3286,6 +3304,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 1be1b4ebb86aae5a90f83aeeb4b0b0548917cbf4
             "name": "phpoffice/phpspreadsheet",
             "version": "1.29.9",
             "source": {
@@ -3347,6 +3368,7 @@
             "autoload": {
                 "psr-4": {
                     "PhpOffice\\PhpSpreadsheet\\": "src/PhpSpreadsheet"
+<<<<<<< HEAD
 =======
             "name": "php-open-source-saver/jwt-auth",
             "version": "2.3.0",
@@ -3400,6 +3422,9 @@
                 "psr-4": {
                     "PHPOpenSourceSaver\\JWTAuth\\": "src/"
 >>>>>>> 40b2f55a717f5639f0f157efbe6cf0fb81341bbf
+=======
+
+>>>>>>> 1be1b4ebb86aae5a90f83aeeb4b0b0548917cbf4
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -3409,6 +3434,10 @@
             "authors": [
                 {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1be1b4ebb86aae5a90f83aeeb4b0b0548917cbf4
                     "name": "Maarten Balliauw",
                     "homepage": "https://blog.maartenballiauw.be"
                 },
@@ -3444,6 +3473,7 @@
                 "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.29.9"
             },
             "time": "2025-01-26T04:55:00+00:00"
+<<<<<<< HEAD
 =======
                     "name": "Sean Tymon",
                     "email": "tymon148@gmail.com",
@@ -3476,6 +3506,8 @@
             },
             "time": "2024-04-08T11:22:39+00:00"
 >>>>>>> 40b2f55a717f5639f0f157efbe6cf0fb81341bbf
+=======
+>>>>>>> 1be1b4ebb86aae5a90f83aeeb4b0b0548917cbf4
         },
         {
             "name": "phpoption/phpoption",
