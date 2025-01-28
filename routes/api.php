@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\MaintainanceController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\FAQController;
@@ -143,4 +144,9 @@ Route::middleware(['auth:api', 'creator'])->group(function () {
     Route::delete('delete_asset/{id}', [AssetController::class, 'deleteAsset']);
 
     Route::post('import_asset', [AssetController::class, 'importAssets']);
+});
+
+Route::middleware(['auth:api','super_admin.location_employee.organization'])->group(function(){
+    Route::get('technician',[MaintainanceController::class,'technicianGet']);
+    Route::get('asset',[MaintainanceController::class,'assetGet']);
 });
