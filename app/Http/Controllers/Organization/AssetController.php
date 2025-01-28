@@ -1,106 +1,127 @@
 <?php
-
 namespace App\Http\Controllers\Organization;
 
+use App\Http\Controllers\Controller;
+use App\Imports\AssetImport;
 use App\Models\Asset;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AssetController extends Controller
 {
+    //import
+    public function importAssets(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:xlsx,csv',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
+        }
+
+        try {
+            Excel::import(new AssetImport, $request->file('file'));
+
+            return response()->json(['status' => true, 'message' => 'Assets imported successfully.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => 'Failed to import assets. ' . $e->getMessage()], 500);
+        }
+    }
+
     //create asset
     public function createAsset(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'asset_name' => 'required|string|max:255',
-            'brand_name' => 'nullable|string',
-            'QR_code' => 'nullable|string',
-            'Unit_Price' => 'nullable|string',
-            'Current_Spend' => 'nullable|string',
-            'Max_Spend' => 'nullable|string',
-            'range' => 'nullable|string',
-            'location' => 'nullable|string',
-            'manufacture_sno' => 'nullable|string',
-            'manufacture_date' => 'nullable|date',
-            'installation_date' => 'nullable|date',
-            'warranty_date' => 'nullable|date',
-            'service_contract' => 'nullable|string',
+            'product_id'             => 'required|string|max:255',
+            'brand'                  => 'required|string',
+            'range'                  => 'nullable|string',
+            'product'                => 'nullable|string',
+            'qr_code'                => 'nullable|string',
+            'serial_number'          => 'nullable|string',
+            'external_serial_number' => 'nullable|string',
+            'manufacturing_date'     => 'nullable|string',
+            'installation_date'      => 'nullable|string',
+            'warranty_end_date'      => 'nullable|string',
+            'unit_price'             => 'nullable|string',
+            'max_spend'              => 'nullable|string',
+            'fitness_product'        => 'nullable|string',
+            'has_odometer'           => 'nullable|string',
+            'location'               => 'nullable|string',
+            'residual_price'         => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => false,
-                'message' => $validator->errors()
+                'status'  => false,
+                'message' => $validator->errors(),
             ], 422);
         }
 
         $asset = Asset::create([
-            'asset_name' => $request->asset_name,
-            'brand_name' => $request->brand_name,
-            'QR_code' => $request->QR_code,
-            'Unit_Price' => $request->Unit_Price,
-            'Current_Spend' => $request->Current_Spend,
-            'Max_Spend' => $request->Max_Spend,
-            'range' => $request->range,
-            'location' => $request->location,
-            'manufacture_sno' => $request->manufacture_sno,
-            'manufacture_date' => $request->manufacture_date,
-            'installation_date' => $request->installation_date,
-            'warranty_date' => $request->warranty_date,
-            'service_contract' => $request->service_contract,
+            'organization_id'        => Auth::user()->id,
+            'product_id'             => $request->product_id,
+            'brand'                  => $request->brand,
+            'range'                  => $request->range,
+            'product'                => $request->product,
+            'qr_code'                => $request->qr_code,
+            'serial_number'          => $request->serial_number,
+            'external_serial_number' => $request->external_serial_number,
+            'manufacturing_date'     => $request->manufacturing_date,
+            'installation_date'      => $request->installation_date,
+            'warranty_end_date'      => $request->warranty_end_date,
+            'unit_price'             => $request->unit_price,
+            'max_spend'              => $request->max_spend,
+            'fitness_product'        => $request->fitness_product,
+            'has_odometer'           => $request->has_odometer,
+            'location'               => $request->location,
+            'residual_price'         => $request->residual_price,
         ]);
 
         return response()->json([
-            'status' => true,
-            'message' => $asset
+            'status'  => true,
+            'message' => $asset,
         ], 200);
     }
 
     //asset update
     public function updateAsset(Request $request, $id)
     {
-        try {
-            $asset = Asset::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Asset Not Found',
-            ], 401);
+        $asset = Asset::findOrFail($id);
+
+        if (! $asset) {
+            return response()->json(['status' => false, 'message' => 'Asset Not Found'], 404);
         }
 
         $validator = Validator::make($request->all(), [
-            'asset_name' => 'nullable|string',
-            'brand_name' => 'nullable|string',
-            'QR_code' => 'nullable|string',
-            'Unit_Price' => 'nullable|string',
-            'Current_Spend' => 'nullable|string',
-            'Max_Spend' => 'nullable|string',
-            'range' => 'nullable|string',
-            'location' => 'nullable|string',
-            'manufacture_sno' => 'nullable|string',
-            'manufacture_date' => 'nullable|date',
-            'installation_date' => 'nullable|date',
-            'warranty_date' => 'nullable|date',
-            'service_contract' => 'nullable|string',
+            'product_id'             => 'nullable|string|max:255',
+            'brand'                  => 'nullable|string',
+            'range'                  => 'nullable|string',
+            'product'                => 'nullable|string',
+            'qr_code'                => 'nullable|string',
+            'serial_number'          => 'nullable|string',
+            'external_serial_number' => 'nullable|string',
+            'manufacturing_date'     => 'nullable|string',
+            'installation_date'      => 'nullable|string',
+            'warranty_end_date'      => 'nullable|string',
+            'unit_price'             => 'nullable|string',
+            'max_spend'              => 'nullable|string',
+            'fitness_product'        => 'nullable|string',
+            'has_odometer'           => 'nullable|string',
+            'location'               => 'nullable|string',
+            'residual_price'         => 'nullable|string',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => $validator->errors(),
-            ], 422);
-        }
 
         $validatedData = $validator->validated();
 
         $asset->update($validatedData);
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Asset updated successfully.',
-            'data' => $asset,
+            'data'    => $asset,
         ], 200);
     }
 
@@ -111,39 +132,135 @@ class AssetController extends Controller
         $search  = $request->input('search');
         $sortBy  = $request->input('sort_by');
 
-        $assets = Asset::paginate($perPage);
+        $assetlist = Asset::query();
+
+        // Apply search
+        if (! empty($search)) {
+            $assetlist->where('product_id', 'like', "%$search%")
+                ->orWhere('product', 'like', "%$search%")
+                ->orWhere('qr_code', 'like', "%$search%")
+                ->orWhere('warranty_end_date', 'like', "%$search%")
+                ->orWhere('unit_price', 'like', "%$search%")
+                ->orWhere('max_spend', 'like', "%$search%");
+        }
+
+        // Apply sorting
+        if (! empty($sortBy)) {
+            if ($sortBy == 'product_id') {
+                $assetlist->orderBy('product_id', 'asc');
+            }elseif ($sortBy == 'product') {
+                $assetlist->orderBy('product', 'asc');
+            }elseif ($sortBy == 'brand') {
+                $assetlist->orderBy('brand', 'asc');
+            }
+        }
+
+        $assets = $assetlist->paginate($perPage);
 
         return response()->json([
             'status' => true,
-            'data' => $assets,
+            'data'   => $assets,
         ]);
     }
+
     //asset details
     public function assetDetails(Request $request, $id)
     {
         $asset = Asset::find($id);
 
-        if (!$asset) {
-            return response()->json(['status'=> false , 'message'=>'Asset Not Found'],401);
+        if (! $asset) {
+            return response()->json(['status' => false, 'message' => 'Asset Not Found'], 401);
         }
-        return response()->json(['status'=>true, 'message'=>$asset]);
+        $data = [
+            'id'                        => $asset->id,
+            'product_id'                => $asset->product_id,
+            'brand'           => $asset->brand,
+            'range'                     => $asset->range,
+            'product'                  => $asset->product,
+            'serial_number' => $asset->serial_number,
+            'manufacture_date'          => $asset->manufacture_date,
+            'installation_date'         => $asset->installation_date,
+            'warranty_end_date'         => $asset->warranty_end_date,
+        ];
+        return response()->json(['status' => true, 'message' => $data]);
     }
+    //asset list
+    public function assetListAdmin(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $search  = $request->input('search');
+        $sortBy  = $request->input('sort_by');
+
+        $assetlist = Asset::query()->with('organization:id,name');
+
+        // Apply search filter
+        if (! empty($search)) {
+            $assetlist->where(function ($query) use ($search) {
+                $query->where('brand', 'like', "%$search%")
+                    ->orWhere('qr_code', 'like', "%$search%")
+                    ->orWhere('warranty_date', 'like', "%$search%")
+                    ->orWhere('unit_price', 'like', "%$search%")
+                    ->orWhere('current_spend', 'like', "%$search%")
+                    ->orWhere('max_spend', 'like', "%$search%");
+            });
+        }
+
+        // Apply sorting
+        if (! empty($sortBy)) {
+            if ($sortBy == 'brand') {
+                $assetlist->orderBy('brand', 'asc');
+            } elseif ($sortBy == 'qr_code') {
+                $assetlist->orderBy('qr_code', 'asc');
+            } elseif ($sortBy == 'warranty_date') {
+                $assetlist->orderBy('warranty_date', 'asc');
+            } elseif ($sortBy == 'unit_price') {
+                $assetlist->orderBy('unit_price', 'asc');
+            } elseif ($sortBy == 'current_spend') {
+                $assetlist->orderBy('current_spend', 'asc');
+            } elseif ($sortBy == 'organization') {
+                $assetlist->orderBy('max_spend', 'asc');
+            }
+        }
+
+        $assets = $assetlist->paginate($perPage);
+
+        // Map customized response with organization name
+        $data = $assets->getCollection()->map(function ($asset) {
+            return [
+                'id'            => $asset->id,
+                'name'          => $asset->brand,
+                'qr_code'       => $asset->qr_code,
+                'warranty_date' => $asset->warranty_date,
+                'unit_price'    => $asset->unit_price,
+                'current_spend' => $asset->current_spend,
+                'max_spend'     => $asset->max_spend,
+                'organization'  => $asset->organization->name ?? 'N/A', // Organization or third party name
+            ];
+        });
+
+        // Replace the original collection with the mapped data
+        $assets->setCollection(collect($data));
+
+        return response()->json([
+            'status' => true,
+            'data'   => $assets,
+        ]);
+    }
+
     //asset delete
     public function deleteAsset($id)
     {
         $asset = Asset::find($id);
 
-        if (!$asset) {
+        if (! $asset) {
             return response()->json(['status' => 'error', 'message' => 'Asset not found.'], 404);
         }
-
 
         $asset->delete();
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Asset deleted successfully.',
         ], 200);
     }
 }
-

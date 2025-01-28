@@ -13,20 +13,25 @@ return new class extends Migration
     {
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
-            $table->string('asset_name');
-            $table->string('brand_name');
-            $table->string('QR_code')->nullable();
-            $table->string('Unit_Price')->nullable();
-            $table->string('Current_Spend')->nullable();
-            $table->string('Max_Spend')->nullable();
+            $table->foreignId('organization_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->string('product_id')->nullable();
+            $table->string('brand');
             $table->string('range')->nullable();
+            $table->string('product');
+            $table->string('qr_code')->nullable();
+            $table->string('serial_number')->nullable();
+            $table->string('external_serial_number')->nullable();
+            $table->date('manufacturing_date')->nullable();
+            $table->date('installation_date')->nullable();
+            $table->date('warranty_end_date')->nullable();
+            $table->float('unit_price')->nullable();
+            $table->float('max_spend')->nullable();
+            $table->boolean('fitness_product')->nullable();
+            $table->boolean('has_odometer')->nullable();
             $table->string('location')->nullable();
-            $table->string('manufacture_sno')->nullable();
-            $table->string('manufacture_date')->nullable();
-            $table->string('installation_date')->nullable();
-            $table->string('warranty_date')->nullable();
-            $table->string('service_contract')->nullable();
+            $table->float('residual_price')->nullable();
             $table->timestamps();
+            
         });
     }
 
