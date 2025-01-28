@@ -55,6 +55,20 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::delete('delete_user/{id}', [AdminController::class, 'deleteUser']);
     Route::get('soft_delete_user', [AdminController::class, 'SoftDeletedUsers']);
 
+    //assetlist
+    Route::get('get_asset_list', [AssetController::class, 'assetListAdmin']);
+
+     //setting
+     Route::post('create_setting', [SettingController::class, 'createSetting']);
+     Route::get('settings', [SettingController::class, 'listSetting']);
+
+     //faq
+     Route::post('create_faq', [FAQController::class, 'createFaq']);
+     Route::post('update_faq/{id}', [FAQController::class, 'updateFaq']);
+     Route::get('faq_list', [FAQController::class, 'listFaq']);
+     Route::delete('delete_faq/{id}', [FAQController::class, 'deleteFaq']);
+
+
 });
 Route::middleware(['auth:api', 'organization'])->group(function () {
 
@@ -86,7 +100,7 @@ Route::middleware(['auth:api', 'common'])->group(function () {
 
     //update ticket
     Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
-    Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
+    Route::get('ticket_details/{id}', [TicketController::class, 'ticketDetails']);
     Route::get('ticket-list', [TicketController::class, 'ticketList']);
 
 
@@ -122,21 +136,11 @@ Route::middleware(['auth:api', 'creator'])->group(function () {
     Route::get('get_user_details/{id}', [OrganizationController::class, 'getuserDetails']);
 
     //asset
-    Route::post('create-asset', [AssetController::class, 'createAsset']);
-    Route::post('update-asset/{id}', [AssetController::class, 'updateAsset']);
-    Route::get('asset-list', [AssetController::class, 'assetList']);
-    Route::get('asset-details/{id}', [AssetController::class, 'assetDetails']);
+    Route::post('create_asset', [AssetController::class, 'createAsset']);
+    Route::post('update_asset/{id}', [AssetController::class, 'updateAsset']);
+    Route::get('asset_list', [AssetController::class, 'assetList']);
+    Route::get('asset_details/{id}', [AssetController::class, 'assetDetails']);
+    Route::delete('delete_asset/{id}', [AssetController::class, 'deleteAsset']);
 
-    Route::delete('delete-asset/{id}', [AssetController::class, 'deleteAsset']);
-
-    //setting
-    Route::post('create-setting', [SettingController::class, 'createSetting']);
-    Route::get('settings', [SettingController::class, 'listSetting']);
-
-    //faq
-    Route::post('create-faq', [FAQController::class, 'createFaq']);
-    Route::post('update-faq/{id}', [FAQController::class, 'updateFaq']);
-    Route::get('faq-list', [FAQController::class, 'listFaq']);
-    Route::delete('delete-faq/{id}', [FAQController::class, 'deleteFaq']);
-
+    Route::post('import_asset', [AssetController::class, 'importAssets']);
 });
