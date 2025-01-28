@@ -63,7 +63,7 @@ class TicketController extends Controller
 
     public function updateTicket(Request $request, $id)
     {
-        $ticket = Ticket::findOrFail($id);
+        $ticket = Ticket::with('user:id,name,address', 'asset:id,asset_name,brand_name,manufacture_sno')->findOrFail($id);
 
         // Validate input data
         $validator = Validator::make($request->all(), [
@@ -76,43 +76,20 @@ class TicketController extends Controller
             'order_number'  => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
-        }
-
         $validatedData = $validator->validated();
 
-          // Check ticket status and update ticket name accordingly
-    if (isset($validatedData['ticket_status'])) {
-        // If ticket status is 'Completed', set ticket_name to 'Past Tickets'
-        // Otherwise, set it to 'Open Tickets'
-        $validatedData['ticket_name'] = ($validatedData['ticket_status'] === 'Completed') ? 'Past Tickets' : 'Open Tickets';
-    } elseif ($ticket->ticket_status === 'Completed') {
-        // If no status is provided and ticket was 'Completed', keep the ticket_name as 'Past Tickets'
-        $validatedData['ticket_name'] = 'Past Tickets';
-    } else {
-        // If the ticket is not completed, set it to 'Open Tickets'
-        $validatedData['ticket_name'] = 'Open Tickets';
-    }
+        if (isset($validatedData['ticket_status'])) {
+
+            $validatedData['ticket_name'] = ($validatedData['ticket_status'] === 'Completed') ? 'Past Tickets' : 'Open Tickets';
+        } elseif ($ticket->ticket_status === 'Completed') {
+            $validatedData['ticket_name'] = 'Past Tickets';
+        } else {
+            $validatedData['ticket_name'] = 'Open Tickets';
+        }
 
         // Update ticket fields
         $ticket->update($validatedData);
-        $ticket->load('user:id,name', 'asset:id,asset_name,brand_name,manufacture_sno');
-
-        // $asset        = $ticket->asset;
-        // $responseData = [
-        //     'id'            => $ticket->id,
-        //     'asset_id'      => $asset->id ?? null,
-        //     'device_name'   => $asset->asset_name ?? null,
-        //     'organization'  => $asset->brand_name ?? null,
-        //     'serial_no'     => $asset->manufacture_sno ?? null,
-        //     'problem'       => $ticket->problem ?? null,
-        //     'ticket_name'   => $ticket->ticket_name ?? null,
-        //     'user_comment'  => $ticket->user_comment ?? null,
-        //     'ticket_status' => $ticket->ticket_status,
-        //     'cost'          => $ticket->cost ?? null,
-        //     'order_number'  => $ticket->order_number ?? null,
-        // ];
+        // $ticket->load('user:id,name', 'asset:id,asset_name,brand_name,manufacture_sno');
 
         return response()->json([
             'status'  => true,
@@ -125,45 +102,22 @@ class TicketController extends Controller
     public function ticketList(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-
-        // Filters
-        $ticketName = $request->input('ticket_name');
-        $status     = $request->input('status');
-
-        $tickets = Ticket::with(['asset', 'user', 'technician']);
-
-        // Apply filters
-        if ($ticketName) {
-            $tickets->where('ticket_name', $ticketName);
+        $search  = $request->input('search');
+        // $sortBy = $request->input('sort_by');
+        $tickeLtist = Ticket::with('user:id,name,address', 'asset:id,asset_name,brand_name,manufacture_sno');
+        //search
+        if ($search) {
+            $tickeLtist = $tickeLtist->where('ticket_name', $search);
         }
-
-        if ($status) {
-            $tickets->where('ticket_status', $status);
+        // Apply role filter
+        if (! empty($filter)) {
+            $tickeLtist->where('ticket_status', $filter);
         }
-
-        $data = $tickets->paginate($perPage);
-
-        // Transform the paginated collection
-        $data->getCollection()->transform(function ($ticket) {
-            return [
-                'ticket_number' => $ticket->id,
-                'device_name'   => $ticket->asset->asset_name ?? null,
-                'organization'  => $ticket->asset->brand_name ?? null,
-                'serial_number' => $ticket->asset->manufacture_sno ?? null,
-                'date'          => $ticket->created_at->format('d/m/Y'),
-                'time'          => $ticket->created_at->format('h:i A'),
-                'location'      => $ticket->user->address ?? 'N/A',
-                'ticket_status' => $ticket->ticket_status ?? 'New',
-                'ticket_name'   => $ticket->ticket_name ?? 'New Tickets',
-                'problem'       => $ticket->problem ?? 'N/A',
-                'cost'          => $ticket->cost ?? 'N/A',
-
-            ];
-        });
-
+        // $tickets = $tickeLtist;
+        $tickeLtist = $tickeLtist->paginate($perPage);
         return response()->json([
             'status' => true,
-            'data'   => $data,
+            'data'   => $tickeLtist,
 
         ]);
     }

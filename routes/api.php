@@ -99,7 +99,7 @@ Route::middleware(['auth:api', 'common'])->group(function () {
 
     //update ticket
     Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
-    Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
+    Route::get('ticket_details/{id}', [TicketController::class, 'ticketDetails']);
     Route::get('ticket-list', [TicketController::class, 'ticketList']);
 
 });
