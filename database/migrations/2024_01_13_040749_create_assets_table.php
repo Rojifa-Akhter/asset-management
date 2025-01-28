@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('organization_id')->nullable()->constrained('users')->cascadeOnDelete();
-            $table->unsignedBigInteger('product_id')->nullable();
+            $table->string('product_id')->nullable();
             $table->string('brand');
             $table->string('range')->nullable();
             $table->string('product');
@@ -24,12 +24,12 @@ return new class extends Migration
             $table->date('manufacturing_date')->nullable();
             $table->date('installation_date')->nullable();
             $table->date('warranty_end_date')->nullable();
-            $table->string('unit_price')->nullable();
-            $table->string('max_spend')->nullable();
+            $table->float('unit_price')->nullable();
+            $table->float('max_spend')->nullable();
             $table->boolean('fitness_product')->nullable();
             $table->boolean('has_odometer')->nullable();
             $table->string('location')->nullable();
-            $table->string('residual_price')->nullable();
+            $table->float('residual_price')->nullable();
             $table->timestamps();
         });
     }

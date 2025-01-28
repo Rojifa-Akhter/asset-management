@@ -174,14 +174,13 @@ class AssetController extends Controller
         $data = [
             'id'                        => $asset->id,
             'product_id'                => $asset->product_id,
-            'product_id name'           => $asset->brand_name,
+            'brand'           => $asset->brand,
             'range'                     => $asset->range,
-            'location'                  => $asset->address,
-            'manufacture serial number' => $asset->manufacture_sno,
-            'manufacture date'          => $asset->manufacture_date,
-            'installation date'         => $asset->installation_date,
-            'warranty end date'         => $asset->warranty_date,
-            'service contract'          => $asset->service_contract,
+            'product'                  => $asset->product,
+            'serial_number' => $asset->serial_number,
+            'manufacture_date'          => $asset->manufacture_date,
+            'installation_date'         => $asset->installation_date,
+            'warranty_end_date'         => $asset->warranty_end_date,
         ];
         return response()->json(['status' => true, 'message' => $data]);
     }
