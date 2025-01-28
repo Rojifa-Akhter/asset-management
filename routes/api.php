@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\MaintainanceController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\FAQController;
@@ -139,4 +140,9 @@ Route::middleware(['auth:api', 'creator'])->group(function () {
     Route::get('faq-list', [FAQController::class, 'listFaq']);
     Route::delete('delete-faq/{id}', [FAQController::class, 'deleteFaq']);
 
+});
+
+Route::middleware(['auth:api','super_admin.location_employee.organization'])->group(function(){
+    Route::get('technician',[MaintainanceController::class,'technicianGet']);
+    Route::get('asset',[MaintainanceController::class,'assetGet']);
 });
