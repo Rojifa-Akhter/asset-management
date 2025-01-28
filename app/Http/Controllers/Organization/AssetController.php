@@ -46,6 +46,7 @@ class AssetController extends Controller
             'installation_date'      => 'nullable|string',
             'warranty_end_date'      => 'nullable|string',
             'unit_price'             => 'nullable|string',
+            'current_spend'          => 'nullable|string',
             'max_spend'              => 'nullable|string',
             'fitness_product'        => 'nullable|string',
             'has_odometer'           => 'nullable|string',
@@ -73,6 +74,7 @@ class AssetController extends Controller
             'installation_date'      => $request->installation_date,
             'warranty_end_date'      => $request->warranty_end_date,
             'unit_price'             => $request->unit_price,
+            'current_spend'          => $request->current_spend,
             'max_spend'              => $request->max_spend,
             'fitness_product'        => $request->fitness_product,
             'has_odometer'           => $request->has_odometer,
@@ -107,6 +109,7 @@ class AssetController extends Controller
             'installation_date'      => 'nullable|string',
             'warranty_end_date'      => 'nullable|string',
             'unit_price'             => 'nullable|string',
+            'current_spend'          => 'nullable|string',
             'max_spend'              => 'nullable|string',
             'fitness_product'        => 'nullable|string',
             'has_odometer'           => 'nullable|string',
@@ -125,44 +128,6 @@ class AssetController extends Controller
         ], 200);
     }
 
-    //asset list
-    public function assetList(Request $request)
-    {
-        $perPage = $request->input('per_page', 10);
-        $search  = $request->input('search');
-        $sortBy  = $request->input('sort_by');
-
-        $assetlist = Asset::query();
-
-        // Apply search
-        if (! empty($search)) {
-            $assetlist->where('product_id', 'like', "%$search%")
-                ->orWhere('product', 'like', "%$search%")
-                ->orWhere('qr_code', 'like', "%$search%")
-                ->orWhere('warranty_end_date', 'like', "%$search%")
-                ->orWhere('unit_price', 'like', "%$search%")
-                ->orWhere('max_spend', 'like', "%$search%");
-        }
-
-        // Apply sorting
-        if (! empty($sortBy)) {
-            if ($sortBy == 'product_id') {
-                $assetlist->orderBy('product_id', 'asc');
-            }elseif ($sortBy == 'product') {
-                $assetlist->orderBy('product', 'asc');
-            }elseif ($sortBy == 'brand') {
-                $assetlist->orderBy('brand', 'asc');
-            }
-        }
-
-        $assets = $assetlist->paginate($perPage);
-
-        return response()->json([
-            'status' => true,
-            'data'   => $assets,
-        ]);
-    }
-
     //asset details
     public function assetDetails(Request $request, $id)
     {
@@ -172,26 +137,26 @@ class AssetController extends Controller
             return response()->json(['status' => false, 'message' => 'Asset Not Found'], 401);
         }
         $data = [
-            'id'                        => $asset->id,
-            'product_id'                => $asset->product_id,
-            'brand'           => $asset->brand,
-            'range'                     => $asset->range,
-            'product'                  => $asset->product,
-            'serial_number' => $asset->serial_number,
-            'manufacture_date'          => $asset->manufacture_date,
-            'installation_date'         => $asset->installation_date,
-            'warranty_end_date'         => $asset->warranty_end_date,
+            'id'                => $asset->id,
+            'product_id'        => $asset->product_id,
+            'brand'             => $asset->brand,
+            'range'             => $asset->range,
+            'product'           => $asset->product,
+            'serial_number'     => $asset->serial_number,
+            'manufacture_date'  => $asset->manufacture_date,
+            'installation_date' => $asset->installation_date,
+            'warranty_end_date' => $asset->warranty_end_date,
         ];
         return response()->json(['status' => true, 'message' => $data]);
     }
     //asset list
-    public function assetListAdmin(Request $request)
+    public function assetList(Request $request)
     {
         $perPage = $request->input('per_page', 10);
         $search  = $request->input('search');
         $sortBy  = $request->input('sort_by');
 
-        $assetlist = Asset::query()->with('organization:id,name');
+        $assetlist = Asset::with('organization:id,name');
 
         // Apply search filter
         if (! empty($search)) {
@@ -245,6 +210,34 @@ class AssetController extends Controller
             'status' => true,
             'data'   => $assets,
         ]);
+    }
+    public function assetMaturity($id)
+    {
+        $asset = Asset::find($id);
+
+        if (! $asset) {
+            return response()->json(['status' => false, 'message' => 'Asset Not Found'], 404);
+        }
+
+        $currentSpend = (float) $asset->current_spend;
+        $maxSpend     = (float) $asset->max_spend;
+
+        // Calculate the percentage spent
+        $percentageSpent = ($maxSpend > 0) ? round(($currentSpend / $maxSpend) * 100, 2) : 0;
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Asset Maturity Fetched Successfully',
+            'data'    => [
+                'id'            => $asset->id,
+                'product'       => $asset->product,
+                'brand'         => $asset->brand,
+                'serial_number' => $asset->serial_number,
+                'current_spend' => $currentSpend,
+                'max_spend'     => $maxSpend,
+                'percentage'    => $percentageSpent,
+            ],
+        ], 200);
     }
 
     //asset delete

@@ -102,7 +102,7 @@ Route::middleware(['auth:api', 'common'])->group(function () {
     //update ticket
     Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
     Route::get('ticket_details/{id}', [TicketController::class, 'ticketDetails']);
-    Route::get('ticket-list', [TicketController::class, 'ticketList']);
+    Route::get('ticket_list', [TicketController::class, 'ticketList']);
 
 
 
@@ -136,10 +136,11 @@ Route::middleware(['auth:api', 'creator'])->group(function () {
     Route::get('user_details/{id}', [AdminController::class, 'userDetails']);
     Route::get('get_user_details/{id}', [OrganizationController::class, 'getuserDetails']);
 
-    //asset
+    //asset route
     Route::post('create_asset', [AssetController::class, 'createAsset']);
     Route::post('update_asset/{id}', [AssetController::class, 'updateAsset']);
     Route::get('asset_list', [AssetController::class, 'assetList']);
+    Route::get('asset_maturity/{id}', [AssetController::class, 'assetMaturity']);
     Route::get('asset_details/{id}', [AssetController::class, 'assetDetails']);
     Route::delete('delete_asset/{id}', [AssetController::class, 'deleteAsset']);
 

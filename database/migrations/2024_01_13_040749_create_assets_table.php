@@ -25,6 +25,7 @@ return new class extends Migration
             $table->date('installation_date')->nullable();
             $table->date('warranty_end_date')->nullable();
             $table->float('unit_price')->nullable();
+            $table->float('current_spend')->nullable();
             $table->float('max_spend')->nullable();
             $table->boolean('fitness_product')->nullable();
             $table->boolean('has_odometer')->nullable();
