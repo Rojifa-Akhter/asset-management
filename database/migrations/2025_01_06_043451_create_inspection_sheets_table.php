@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('inspection_sheets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ticket_id')->constrained('tickets')->onDelete('cascade');
+            $table->foreignId('ticket_id')->nullable()->constrained('tickets')->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade')->comment('support agent id');
             $table->foreignId('technician_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->json('inspection_sheet_name')->nullable();
-            $table->json('checklist')->nullable();
             $table->longText('support_agent_comment')->nullable();
             $table->longText('technician_comment')->nullable();
             $table->string('location_employee_signature')->nullable();

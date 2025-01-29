@@ -77,13 +77,6 @@ Route::middleware(['auth:api', 'organization'])->group(function () {
 });
 
 Route::middleware(['auth:api', 'support_agent'])->group(function () {
-    //inspection sheet
-    Route::post('create-inspection', action: [InspectionSheetController::class, 'createInspectionSheet']);
-    Route::post('update-inspection/{id}', [InspectionSheetController::class, 'updateInspectionSheet']);
-    Route::delete('delete-inspection/{id}', [InspectionSheetController::class, 'deleteInspectionSheet']);
-
-    Route::get('inspection-list', [InspectionSheetController::class, 'InspectionSheetList']);
-    Route::get('inspection-details/{id}', action: [InspectionSheetController::class, 'InspectionSheetDetails']);
 
 });
 
@@ -149,4 +142,14 @@ Route::middleware(['auth:api', 'creator'])->group(function () {
 Route::middleware(['auth:api','super_admin.location_employee.organization'])->group(function(){
     Route::get('technician',[MaintainanceController::class,'technicianGet']);
     Route::get('asset',[MaintainanceController::class,'assetGet']);
+});
+
+Route::middleware(['auth:api','support_agent.location_employee.technician'])->group(function(){
+    //inspection sheet
+    Route::post('create_inspection_sheet',[InspectionSheetController::class, 'createInspectionSheet']);
+    Route::post('update_inspection/{id}', [InspectionSheetController::class, 'updateInspectionSheet']);
+    Route::delete('delete_inspection/{id}', [InspectionSheetController::class, 'deleteInspectionSheet']);
+
+    Route::get('inspection_list', [InspectionSheetController::class, 'InspectionSheetList']);
+    Route::get('inspection_details/{id}',[InspectionSheetController::class, 'InspectionSheetDetails']);
 });

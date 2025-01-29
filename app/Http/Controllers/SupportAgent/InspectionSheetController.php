@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 
 class InspectionSheetController extends Controller
 {
+    // create inspection sheet
     public function createInspectionSheet(Request $request)
     {
         $validator =Validator::make($request->all(),[

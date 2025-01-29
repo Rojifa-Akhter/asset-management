@@ -131,23 +131,12 @@ class AssetController extends Controller
     //asset details
     public function assetDetails(Request $request, $id)
     {
-        $asset = Asset::find($id);
+        $asset = Asset::with('organization:id,name')-> find($id);
 
         if (! $asset) {
             return response()->json(['status' => false, 'message' => 'Asset Not Found'], 401);
         }
-        $data = [
-            'id'                => $asset->id,
-            'product_id'        => $asset->product_id,
-            'brand'             => $asset->brand,
-            'range'             => $asset->range,
-            'product'           => $asset->product,
-            'serial_number'     => $asset->serial_number,
-            'manufacture_date'  => $asset->manufacture_date,
-            'installation_date' => $asset->installation_date,
-            'warranty_end_date' => $asset->warranty_end_date,
-        ];
-        return response()->json(['status' => true, 'message' => $data]);
+        return response()->json(['status' => true, 'message' => $asset]);
     }
     //asset list
     public function assetList(Request $request)
