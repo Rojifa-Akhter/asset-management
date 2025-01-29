@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class TicketController extends Controller
 {
+    //create ticket
     public function createTicket(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -25,7 +26,6 @@ class TicketController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()], 400);
         }
 
-        // Create the ticket
         $ticket = Ticket::create([
             'user_id'       => auth()->id(),
             'asset_id'      => $request->asset_id,
@@ -47,9 +47,14 @@ class TicketController extends Controller
         ], 201);
     }
 
+    //update ticket
     public function updateTicket(Request $request, $id)
     {
         $ticket = Ticket::with('user:id,name,address,phone', 'asset:id,product,brand,serial_number')->findOrFail($id);
+
+        if (!$ticket) {
+            return response()->json(['status'=>false, 'message'=>'Ticket not Found'],422);
+        }
 
         $validator = Validator::make($request->all(), [
             'asset_id'      => 'nullable|string|exists:assets,id',
@@ -87,7 +92,7 @@ class TicketController extends Controller
     {
         $perPage    = $request->input('per_page', 10);
         $search     = $request->input('search');
-        $filter  = $request->input('filter');
+        $filter     = $request->input('filter');
         $ticketList = Ticket::with('user:id,name,address,phone', 'asset:id,product,brand,serial_number');
         //search
         if ($search) {
@@ -116,7 +121,7 @@ class TicketController extends Controller
 
         return response()->json([
             'status' => true,
-            'data'   => $ticket
+            'data'   => $ticket,
         ]);
     }
 
@@ -132,7 +137,28 @@ class TicketController extends Controller
         $ticket->delete();
 
         return response()->json([
-            'status'  => true,'message' => 'Ticket deleted successfully',], 200);
+            'status' => true, 'message' => 'Ticket deleted successfully'], 200);
+    }
+    //get ticket details for inspection sheet
+    public function getTicketDetails(Request $request, $id)
+    {
+        $ticket = Ticket::with('user:id,name,address', 'asset:id,product,brand,serial_number')->find($id);
+
+        if (! $ticket) {
+            return response()->json(['status' => false, 'message' => 'Ticket Not Found'], 404);
+        }
+        $data = [
+            'id'            => $ticket->id,
+            'asset'         => $ticket->asset,
+            'user'          => $ticket->user,
+            'problem'       => $ticket->problem,
+            'ticket_status' => $ticket->status,
+        ];
+
+        return response()->json([
+            'status' => true,
+            'data'   => $data,
+        ]);
     }
 
 }
