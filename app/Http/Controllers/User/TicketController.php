@@ -56,7 +56,7 @@ class TicketController extends Controller
             'ticket_type'   => 'nullable|string',
             'problem'       => 'nullable|string',
             'user_comment'  => 'nullable|string',
-            'ticket_status' => 'nullable|string|in:New,Assigned,Inspection,Awaiting PO,Job Card Created,Completed',
+            'ticket_status' => 'nullable|string|in:New,Assigned,Inspection sheet,Awaiting purchase order,Job card created,Completed',
             'cost'          => 'nullable|string',
             'order_number'  => 'nullable|string',
         ]);
@@ -64,7 +64,6 @@ class TicketController extends Controller
         $validatedData = $validator->validated();
 
         if (isset($validatedData['ticket_status'])) {
-
             $validatedData['ticket_type'] = ($validatedData['ticket_status'] === 'Completed') ? 'Past Tickets' : 'Open Tickets';
         } elseif ($ticket->ticket_status === 'Completed') {
             $validatedData['ticket_type'] = 'Past Tickets';
@@ -88,19 +87,20 @@ class TicketController extends Controller
     {
         $perPage    = $request->input('per_page', 10);
         $search     = $request->input('search');
-        $tickeLtist = Ticket::with('user:id,name,address', 'asset:id,product,brand,serial_number');
+        $filter  = $request->input('filter');
+        $ticketList = Ticket::with('user:id,name,address,phone', 'asset:id,product,brand,serial_number');
         //search
         if ($search) {
-            $tickeLtist = $tickeLtist->where('ticket_type', $search);
+            $ticketList = $ticketList->where('ticket_type', $search);
         }
         // Apply role filter
         if (! empty($filter)) {
-            $tickeLtist->where('ticket_status', $filter);
+            $ticketList->where('ticket_status', $filter);
         }
-        $tickeLtist = $tickeLtist->paginate($perPage);
+        $ticketList = $ticketList->paginate($perPage);
         return response()->json([
             'status' => true,
-            'data'   => $tickeLtist,
+            'data'   => $ticketList,
 
         ]);
     }
@@ -116,17 +116,7 @@ class TicketController extends Controller
 
         return response()->json([
             'status' => true,
-            'data'   => [
-                'ticket_number' => $ticket->id,
-                'product'       => $ticket->asset->product ?? null,
-                'organization'  => $ticket->asset->brand ?? null,
-                'serial_number' => $ticket->asset->serial_number ?? null,
-                'location'      => $ticket->user->address ?? 'N/A',
-                'problem'       => $ticket->problem ?? null,
-                'cost'          => $ticket->cost ?? null,
-                'order_number'  => $ticket->order_number ?? null,
-
-            ],
+            'data'   => $ticket
         ]);
     }
 
@@ -142,9 +132,7 @@ class TicketController extends Controller
         $ticket->delete();
 
         return response()->json([
-            'status'  => true,
-            'message' => 'Ticket deleted successfully',
-        ], 200);
+            'status'  => true,'message' => 'Ticket deleted successfully',], 200);
     }
 
 }

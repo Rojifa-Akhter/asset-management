@@ -91,7 +91,6 @@ Route::middleware(['auth:api', 'user'])->group(function () {
 
     //ticket
     Route::post('create-ticket', [TicketController::class, 'createTicket']);
-    Route::delete('delete-ticket/{id}', [TicketController::class, 'deleteTicket']);
     Route::get('ticket-list', [TicketController::class, 'ticketList']);
     Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
 
