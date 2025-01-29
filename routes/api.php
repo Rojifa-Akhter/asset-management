@@ -149,4 +149,12 @@ Route::middleware(['auth:api', 'creator'])->group(function () {
 Route::middleware(['auth:api','super_admin.location_employee.organization'])->group(function(){
     Route::get('technician',[MaintainanceController::class,'technicianGet']);
     Route::get('asset',[MaintainanceController::class,'assetGet']);
+    Route::get('maintainance',[MaintainanceController::class,'maintainanceGet']);
 });
+
+Route::middleware(['auth:api','location_employee'])->group(function(){
+    Route::post('set-reminder',[MaintainanceController::class,'setReminder']);
+    Route::get('get-reminder',[MaintainanceController::class,'getReminder']);
+    Route::post('update-maintainance/{id}',[MaintainanceController::class,'updateStatus']);
+});
+
