@@ -144,12 +144,18 @@ Route::middleware(['auth:api','super_admin.location_employee.organization'])->gr
     Route::get('asset',[MaintainanceController::class,'assetGet']);
 });
 
-Route::middleware(['auth:api','support_agent.location_employee.technician'])->group(function(){
+Route::middleware(['auth:api','support_agent'])->group(function(){
 
     //get ticket details
     Route::get('get_ticket_details/{id}',[TicketController::class, 'getTicketDetails']);
     //inspection sheet
     Route::post('create_inspection_sheet',[InspectionSheetController::class, 'createInspectionSheet']);
+});
+Route::middleware(['auth:api','support_agent.location_employee.technician'])->group(function(){
+
+    //get ticket details
+    Route::get('get_ticket_details/{id}',[TicketController::class, 'getTicketDetails']);
+    //inspection sheet
     Route::post('update_inspection/{id}', [InspectionSheetController::class, 'updateInspectionSheet']);
     Route::delete('delete_inspection/{id}', [InspectionSheetController::class, 'deleteInspectionSheet']);
 

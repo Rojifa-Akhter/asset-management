@@ -40,8 +40,8 @@ class InspectionSheet extends Model
     {
         $videos = json_decode($video, true);
         if (is_array($videos) && count($videos) > 0) {
-            return array_map(function ($video) {
-                return asset('uploads/sheet_videos/' . $video);
+            return array_map(function ($vdo) {
+                return asset('uploads/sheet_videos/' . $vdo);
             }, $videos);
         }
         return [];

@@ -80,7 +80,7 @@ class InspectionSheetController extends Controller
             'location_employee_signature' => 'nullable|string',
             'image'                       => 'nullable|string',
             'video'                       => 'nullable',
-            'status'                      => 'nullable',
+            'status'                      => 'nullable|string|in:New,Arrived in Location,Contract with user,View the problem,Solve the problem,Completed',
         ]);
         $validatedData = $validator->validated();
 
@@ -91,6 +91,29 @@ class InspectionSheetController extends Controller
         } else {
             $validatedData['inspection_sheet_type'] = 'Open Sheets';
         }
+        //image add or update
+        if ($request->hasFile('images')) {
+            $existingImages = $inspection_sheet->image;
+
+            // Delete old images
+            foreach ($existingImages as $image) {
+                $relativePath = parse_url($image, PHP_URL_PATH);
+                $relativePath = ltrim($relativePath, '/');
+                unlink(public_path($relativePath));
+            }
+
+            // Upload new documents
+            $newImages = [];
+            foreach ($request->file('images') as $image) {
+                $ImageName = time() . uniqid() . $image->getClientOriginalName();
+                $image->move(public_path('uploads/sheet_images'), $ImageName);
+
+                $newImages[] = $ImageName;
+            }
+
+            $inspection_sheet->image = json_encode($newImages);
+        }
+        // videos update or add
 
         $inspection_sheet->update($validatedData);
 
