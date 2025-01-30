@@ -28,6 +28,7 @@ class InspectionSheet extends Model
     public function getImageAttribute($image)
     {
         $images = json_decode($image, true);
+
         if (is_array($images) && count($images) > 0) {
             return array_map(function ($img) {
                 return asset('uploads/sheet_images/' . $img);

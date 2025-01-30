@@ -83,16 +83,17 @@ Route::middleware(['auth:api', 'support_agent'])->group(function () {
 Route::middleware(['auth:api', 'user'])->group(function () {
 
     //ticket
-    Route::post('create-ticket', [TicketController::class, 'createTicket']);
-    Route::get('ticket-list', [TicketController::class, 'ticketList']);
-    Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
+    Route::post('create_ticket', [TicketController::class, 'createTicket']);
+    Route::get('ticket_list', [TicketController::class, 'ticketList']);
+    Route::get('ticket_details/{id}', [TicketController::class, 'ticketDetails']);
+    Route::get('ticket_delete/{id}', [TicketController::class, 'deleteTicket']);
 
 });
 
 Route::middleware(['auth:api', 'common'])->group(function () {
 
     //update ticket
-    Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
+    Route::post('update_ticket/{id}', [TicketController::class, 'updateTicket']);
     Route::get('ticket_details/{id}', [TicketController::class, 'ticketDetails']);
     Route::get('ticket_list', [TicketController::class, 'ticketList']);
 
@@ -151,7 +152,7 @@ Route::middleware(['auth:api','support_agent'])->group(function(){
     //inspection sheet
     Route::post('create_inspection_sheet',[InspectionSheetController::class, 'createInspectionSheet']);
 });
-Route::middleware(['auth:api','support_agent.location_employee.technician'])->group(function(){
+Route::middleware(['auth:api','support_agent.location_employee.technician.third_party'])->group(function(){
 
     //get ticket details
     Route::get('get_ticket_details/{id}',[TicketController::class, 'getTicketDetails']);

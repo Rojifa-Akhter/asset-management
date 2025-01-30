@@ -18,7 +18,7 @@ class SupportAgentLocationEmployeeTechnicianMiddleware
     {
         $user = Auth::user();
 
-        if (! in_array($user->role, ['location_employee','support_agent','technician'])) {
+        if (! in_array($user->role, ['location_employee','support_agent','technician','super_admin','organization','third_party'])) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         return $next($request);

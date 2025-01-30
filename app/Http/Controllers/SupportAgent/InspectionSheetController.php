@@ -99,10 +99,13 @@ class InspectionSheetController extends Controller
             foreach ($existingImages as $image) {
                 $relativePath = parse_url($image, PHP_URL_PATH);
                 $relativePath = ltrim($relativePath, '/');
-                unlink(public_path($relativePath));
+                // return $relativePath;
+                if (! file_exists(public_path('uploads/sheet_images'))) {
+                    unlink(public_path($relativePath));
+                }
             }
 
-            // Upload new documents
+            // Upload new images
             $newImages = [];
             foreach ($request->file('images') as $image) {
                 $ImageName = time() . uniqid() . $image->getClientOriginalName();
@@ -114,7 +117,30 @@ class InspectionSheetController extends Controller
             $inspection_sheet->image = json_encode($newImages);
         }
         // videos update or add
+        if ($request->hasFile('videos')) {
+            $existingVideos = $inspection_sheet->video;
 
+            // Delete old videos
+            foreach ($existingVideos as $video) {
+                $relativePath = parse_url($video, PHP_URL_PATH);
+                $relativePath = ltrim($relativePath, '/');
+                if (! file_exists(public_path('uploads/sheet_videos'))) {
+                    unlink(public_path($relativePath));
+                }
+
+            }
+
+            // Upload new videos
+            $newVideos = [];
+            foreach ($request->file('videos') as $video) {
+                $VideoName = time() . uniqid() . $video->getClientOriginalName();
+                $video->move(public_path('uploads/sheet_videos'), $VideoName);
+
+                $newVideos[] = $VideoName;
+            }
+
+            $inspection_sheet->video = json_encode($newVideos);
+        }
         $inspection_sheet->update($validatedData);
 
         return response()->json(['status' => true,
@@ -123,5 +149,51 @@ class InspectionSheetController extends Controller
         ]);
 
     }
+    //delete inspection sheet
+    public function deleteInspectionSheet($id)
+    {
+        $inspection_sheet = InspectionSheet::find($id);
 
+        if (! $inspection_sheet) {
+            return response()->json(['status' => 'error', 'message' => 'Inspection sheet not found.'], 422);
+        }
+
+        $inspection_sheet->delete();
+
+        return response()->json([
+            'status' => true, 'message' => 'Inspection Sheet deleted successfully'], 200);
+    }
+    //inspection sheet list
+    public function InspectionSheetList(Request $request)
+    {
+        $perPage = $request->input('per_page',10);
+        $search = $request->input('search');
+        $filter = $request->input('filter');
+
+        $inspectionList= InspectionSheet::with('user:id,name,address','ticket:id,asset_id','ticket.asset:id,product,brand,serial_number','technician:id,name');
+
+        if ($search) {
+            $inspectionList = $inspectionList->where('inspection_sheet_type',$search);
+        }
+        if (!empty($filter)) {
+            $inspectionList = $inspectionList->where('status',$filter);
+        }
+        $inspectionList = $inspectionList->paginate($perPage);
+
+        return response()->json(['status'=>true,'data'=>$inspectionList],200);
+
+    }
+    public function InspectionSheetDetails(Request $request, $id)
+    {
+        $sheetDetails = InspectionSheet::with('user:id,name,address','ticket:id,asset_id','ticket.asset:id,product,brand,serial_number','technician:id,name')->findOrFail($id);
+
+        if (! $sheetDetails) {
+            return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data'   => $sheetDetails,
+        ]);
+    }
 }

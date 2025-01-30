@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('organization_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('product_id')->nullable();
-            $table->string('brand');
+            $table->string('brand')->nullable();
             $table->string('range')->nullable();
-            $table->string('product');
+            $table->string('product')->nullable();
             $table->string('qr_code')->nullable();
             $table->string('serial_number')->nullable();
             $table->string('external_serial_number')->nullable();
@@ -32,7 +32,7 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->float('residual_price')->nullable();
             $table->timestamps();
-            
+
         });
     }
 

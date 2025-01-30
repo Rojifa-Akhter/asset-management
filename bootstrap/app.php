@@ -35,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'common'                                     => CommonMiddleware::class,
             'creator'                                    => CreatorMiddleware::class,
             'super_admin.location_employee.organization' => SuperAdminOrganizationLocationEmployeeMiddleware::class,
-            'support_agent.location_employee.technician' => SupportAgentLocationEmployeeTechnicianMiddleware::class,
+            'support_agent.location_employee.technician.third_party' => SupportAgentLocationEmployeeTechnicianMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

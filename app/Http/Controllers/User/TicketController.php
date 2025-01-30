@@ -130,8 +130,9 @@ class TicketController extends Controller
     {
         $ticket = Ticket::find($id);
 
+        // return $ticket;
         if (! $ticket) {
-            return response()->json(['status' => 'error', 'message' => 'Ticket not found.'], 404);
+            return response()->json(['status' => 'error', 'message' => 'Ticket not found.'], 422);
         }
 
         $ticket->delete();
