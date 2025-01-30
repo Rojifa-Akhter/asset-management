@@ -7,6 +7,7 @@ use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
+use App\Http\Controllers\SupportAgent\JobCardController;
 use App\Http\Controllers\User\AdminController;
 use App\Http\Controllers\User\OrganizationController;
 use App\Http\Controllers\User\TicketController;
@@ -71,14 +72,6 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 
 
 });
-Route::middleware(['auth:api', 'organization'])->group(function () {
-
-
-});
-
-Route::middleware(['auth:api', 'support_agent'])->group(function () {
-
-});
 
 Route::middleware(['auth:api', 'user'])->group(function () {
 
@@ -109,7 +102,7 @@ Route::middleware(['auth:api', 'common'])->group(function () {
     Route::get('search-new-user',[MessageController::class,'searchNewUser']);
     Route::get('chat-list',[MessageController::class,'chatList']);
 });
-Route::middleware(['auth:api', 'creator'])->group(function () {
+Route::middleware(['auth:api', 'super_admin.third_party.organization'])->group(function () {
 
     //add and update location employee
     Route::post('location_employee_add', [OrganizationController::class, 'addLocationEmployee']);
@@ -151,6 +144,8 @@ Route::middleware(['auth:api','support_agent'])->group(function(){
     Route::get('get_ticket_details/{id}',[TicketController::class, 'getTicketDetails']);
     //inspection sheet
     Route::post('create_inspection_sheet',[InspectionSheetController::class, 'createInspectionSheet']);
+    //job card
+    Route::post('create_job_card',[JobCardController::class, 'createJobCard']);
 });
 Route::middleware(['auth:api','support_agent.location_employee.technician.third_party'])->group(function(){
 

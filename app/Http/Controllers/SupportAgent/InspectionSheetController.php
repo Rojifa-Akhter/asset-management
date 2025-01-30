@@ -47,10 +47,10 @@ class InspectionSheetController extends Controller
         }
 
         $inspectionSheet = InspectionSheet::create([
-            'assigned'                    => auth()->id(),
+            'support_agent_id'                    => auth()->id(),
             'ticket_id'                   => $request->ticket_id,
             'technician_id'               => $request->technician_id,
-            'inspection_sheet_type'       => $request->inspection_sheet_type ?? 'New Tickets',
+            'inspection_sheet_type'       => $request->inspection_sheet_type ?? 'New Sheets',
             'support_agent_comment'       => $request->support_agent_comment,
             'technician_comment'          => $request->technician_comment,
             'location_employee_signature' => $request->location_employee_signature ?? null,
@@ -60,13 +60,13 @@ class InspectionSheetController extends Controller
         ]);
 
         // Eager load the related user and asset
-        $inspectionSheet->load('user:id,name,address', 'ticket:id,problem,asset_id', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name');
+        $inspectionSheet->load( 'assigned:id,name','ticket:id,problem,asset_id,user_id','ticket.user:id,name,address', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name');
 
         return response()->json(['status' => true, 'message' => 'Inspection Sheet Created Successfully', 'data' => $inspectionSheet]);
     }
     public function updateInspectionSheet(Request $request, $id)
     {
-        $inspection_sheet = InspectionSheet::with('user:id,name,address', 'ticket:id,problem,asset_id', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name')->findOrFail($id);
+        $inspection_sheet = InspectionSheet::with('assigned:id,name','ticket:id,problem,asset_id,user_id','ticket.user:id,name,address,phone', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name')->findOrFail($id);
 
         if (! $inspection_sheet) {
             return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 422);

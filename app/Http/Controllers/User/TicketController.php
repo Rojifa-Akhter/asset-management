@@ -52,8 +52,8 @@ class TicketController extends Controller
     {
         $ticket = Ticket::with('user:id,name,address,phone', 'asset:id,product,brand,serial_number')->findOrFail($id);
 
-        if (!$ticket) {
-            return response()->json(['status'=>false, 'message'=>'Ticket not Found'],422);
+        if (! $ticket) {
+            return response()->json(['status' => false, 'message' => 'Ticket not Found'], 422);
         }
 
         $validator = Validator::make($request->all(), [

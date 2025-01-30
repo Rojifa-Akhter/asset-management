@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('inspection_sheets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('ticket_id')->nullable()->constrained('tickets')->onDelete('cascade');
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade')->comment('support agent id');
+            $table->foreignId('support_agent_id')->nullable()->constrained('users')->onDelete('cascade')->comment('support agent id');
             $table->foreignId('technician_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('inspection_sheet_type')->default('New Sheets');
             $table->longText('support_agent_comment')->nullable();
