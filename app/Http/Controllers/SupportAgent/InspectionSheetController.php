@@ -72,8 +72,6 @@ class InspectionSheetController extends Controller
             return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 422);
         }
         $validator = Validator::make($request->all(), [
-            'ticket_id'                   => 'nullable|string|exists:tickets,id',
-            'technician_id'               => 'nullable|string|exists:users,id',
             'inspection_sheet_type'       => 'nullable|string',
             'support_agent_comment'       => 'nullable|string',
             'technician_comment'          => 'nullable|string',

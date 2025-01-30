@@ -157,4 +157,11 @@ Route::middleware(['auth:api','support_agent.location_employee.technician.third_
 
     Route::get('inspection_list', [InspectionSheetController::class, 'InspectionSheetList']);
     Route::get('inspection_details/{id}',[InspectionSheetController::class, 'InspectionSheetDetails']);
+
+     //job card update list details
+     Route::post('update_card/{id}', [JobCardController::class, 'updateJobCard']);
+     Route::delete('delete_card/{id}', [JobCardController::class, 'deleteJobCard']);
+
+     Route::get('card_list', [JobCardController::class, 'JobCardList']);
+     Route::get('card_details/{id}',[JobCardController::class, 'detailsJobCard']);
 });

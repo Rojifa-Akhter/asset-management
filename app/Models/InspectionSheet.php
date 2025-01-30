@@ -12,10 +12,9 @@ class InspectionSheet extends Model
     }
 
     public function assigned()
-{
-    return $this->belongsTo(User::class, 'support_agent_id');
-}
-
+    {
+        return $this->belongsTo(User::class, 'support_agent_id');
+    }
 
     public function asset()
     {
