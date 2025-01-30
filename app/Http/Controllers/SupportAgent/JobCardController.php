@@ -45,10 +45,11 @@ class JobCardController extends Controller
 
         $job_card->save();
 
-        return response()->json(['status'=>true, 'message'=>'Job Card Create Successfully', 'data'=>$job_card],201);
+        return response()->json(['status' => true, 'message' => 'Job Card Create Successfully', 'data' => $job_card], 201);
 
     }
-    public function updateJobCard(Request $request,$id){
+    public function updateJobCard(Request $request, $id)
+    {
         $job_card = JobCard::with('supportAgent:id,name',
             'inspectionSheet:id,ticket_id,technician_id',
             'inspectionSheet.technician:id,name',
@@ -56,18 +57,33 @@ class JobCardController extends Controller
             'inspectionSheet.ticket.asset:id,product,brand,serial_number',
             'inspectionSheet.ticket.user:id,name,address,phone')->findOrFail($id);
 
-            if (! $job_card) {
-                return response()->json(['status' => false, 'message' => 'Job Card Not Found'], 422);
-            }
-            $validator = Validator::make($request->all(), [
-                'job_card_type'               => 'nullable|string',
-                'support_agent_comment'       => 'nullable|string',
-                'technician_comment'          => 'nullable|string',
-                'location_employee_signature' => 'nullable|string',
-                'job_status'                  => 'nullable|string|in:New,Assigned,In Progress,View the problem,Solve the problem,Completed',
-            ]);
-            $validatedData = $validator->validated();
-    }
+        if (! $job_card) {
+            return response()->json(['status' => false, 'message' => 'Job Card Not Found'], 422);
+        }
+        $validator = Validator::make($request->all(), [
+            'job_card_type'               => 'nullable|string',
+            'support_agent_comment'       => 'nullable|string',
+            'technician_comment'          => 'nullable|string',
+            'location_employee_signature' => 'nullable|string',
+            'job_status'                  => 'nullable|string|in:New,Assigned,In Progress,On hold,Cancel,To be allocated,Awaiting courier
+                                                                ,Collected by courier,Parts required,Picking,To be invoiced,Invoiced,Completed',
+        ]);
+        $validatedData = $validator->validated();
 
+        if (isset($validatedData['job_status'])) {
+            $validatedData['job_card_type'] = ($validatedData['job_status'] === 'Completed') ? 'Past Cards' : 'Open Cards';
+        } elseif ($job_card->job_status === 'Completed') {
+            $validatedData['job_card_type'] = 'Past Cards';
+        } else {
+            $validatedData['job_card_type'] = 'Open Cards';
+        }
+        $job_card->update($validatedData);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Inspection Sheet Update Successfully',
+            'data'    => $job_card,
+        ]);
+    }
 
 }

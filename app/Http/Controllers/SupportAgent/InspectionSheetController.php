@@ -47,7 +47,7 @@ class InspectionSheetController extends Controller
         }
 
         $inspectionSheet = InspectionSheet::create([
-            'support_agent_id'                    => auth()->id(),
+            'support_agent_id'            => auth()->id(),
             'ticket_id'                   => $request->ticket_id,
             'technician_id'               => $request->technician_id,
             'inspection_sheet_type'       => $request->inspection_sheet_type ?? 'New Sheets',
@@ -60,13 +60,13 @@ class InspectionSheetController extends Controller
         ]);
 
         // Eager load the related user and asset
-        $inspectionSheet->load( 'assigned:id,name','ticket:id,problem,asset_id,user_id','ticket.user:id,name,address', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name');
+        $inspectionSheet->load('assigned:id,name', 'ticket:id,problem,asset_id,user_id', 'ticket.user:id,name,address', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name');
 
         return response()->json(['status' => true, 'message' => 'Inspection Sheet Created Successfully', 'data' => $inspectionSheet]);
     }
     public function updateInspectionSheet(Request $request, $id)
     {
-        $inspection_sheet = InspectionSheet::with('assigned:id,name','ticket:id,problem,asset_id,user_id','ticket.user:id,name,address,phone', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name')->findOrFail($id);
+        $inspection_sheet = InspectionSheet::with('assigned:id,name', 'ticket:id,problem,asset_id,user_id', 'ticket.user:id,name,address,phone', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name')->findOrFail($id);
 
         if (! $inspection_sheet) {
             return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 422);
@@ -141,9 +141,10 @@ class InspectionSheetController extends Controller
         }
         $inspection_sheet->update($validatedData);
 
-        return response()->json(['status' => true,
-            'message'                         => 'Inspection Sheet Update Successfully',
-            'data'                            => $inspection_sheet,
+        return response()->json([
+            'status'  => true,
+            'message' => 'Inspection Sheet Update Successfully',
+            'data'    => $inspection_sheet,
         ]);
 
     }
@@ -164,26 +165,26 @@ class InspectionSheetController extends Controller
     //inspection sheet list
     public function InspectionSheetList(Request $request)
     {
-        $perPage = $request->input('per_page',10);
-        $search = $request->input('search');
-        $filter = $request->input('filter');
+        $perPage = $request->input('per_page', 10);
+        $search  = $request->input('search');
+        $filter  = $request->input('filter');
 
-        $inspectionList= InspectionSheet::with('user:id,name,address','ticket:id,asset_id','ticket.asset:id,product,brand,serial_number','technician:id,name');
+        $inspectionList = InspectionSheet::with('user:id,name,address', 'ticket:id,asset_id', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name');
 
         if ($search) {
-            $inspectionList = $inspectionList->where('inspection_sheet_type',$search);
+            $inspectionList = $inspectionList->where('inspection_sheet_type', $search);
         }
-        if (!empty($filter)) {
-            $inspectionList = $inspectionList->where('status',$filter);
+        if (! empty($filter)) {
+            $inspectionList = $inspectionList->where('status', $filter);
         }
         $inspectionList = $inspectionList->paginate($perPage);
 
-        return response()->json(['status'=>true,'data'=>$inspectionList],200);
+        return response()->json(['status' => true, 'data' => $inspectionList], 200);
 
     }
     public function InspectionSheetDetails(Request $request, $id)
     {
-        $sheetDetails = InspectionSheet::with('user:id,name,address','ticket:id,asset_id','ticket.asset:id,product,brand,serial_number','technician:id,name')->findOrFail($id);
+        $sheetDetails = InspectionSheet::with('user:id,name,address', 'ticket:id,asset_id', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name')->findOrFail($id);
 
         if (! $sheetDetails) {
             return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 404);
