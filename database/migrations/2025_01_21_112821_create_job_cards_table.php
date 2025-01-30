@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('job_cards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('support_agent_id')->nullable()->constrained('users')->cascadeOnDelete()->comment('support agent id');
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete()->comment('support agent id');
             $table->foreignId('ticket_id')->nullable()->constrained('tickets')->cascadeOnDelete();
             $table->foreignId('inspection_sheet_id')->nullable()->constrained('inspection_sheets')->cascadeOnDelete();
             $table->string('job_card_type')->default('New Sheets');

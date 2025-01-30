@@ -84,6 +84,44 @@ class JobCardController extends Controller
             'message' => 'Inspection Sheet Update Successfully',
             'data'    => $job_card,
         ]);
+
+    }
+    public function deleteJobCard($id)
+    {
+        $job_card = JobCard::find($id);
+
+        if (! $job_card) {
+            return response()->json(['status' => 'error', 'message' => 'Job Card not found.'], 422);
+        }
+
+        $job_card->delete();
+
+        return response()->json([
+            'status' => true, 'message' => 'Job Card deleted successfully'], 200);
+    }
+    public function JobCardList(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $search  = $request->input('search');
+        $filter  = $request->input('filter');
+
+        $cardList = JobCard::with('supportAgent:id,name',
+            'inspectionSheet:id,ticket_id,support_agent_id,technician_id',
+            'inspectionSheet.assigned:id,name',
+            'inspectionSheet.technician:id,name',
+            'inspectionSheet.ticket:id,asset_id,problem,order_number,cost,user_id',
+            'inspectionSheet.ticket.asset:id,product,brand,serial_number',
+            'inspectionSheet.ticket.user:id,name,address,phone');
+
+        if ($search) {
+            $cardList = $cardList->where('inspection_sheet_type', $search);
+        }
+        if (! empty($filter)) {
+            $cardList = $cardList->where('status', $filter);
+        }
+        $cardList = $cardList->paginate($perPage);
+
+        return response()->json(['status' => true, 'data' => $cardList], 200);
     }
 
 }

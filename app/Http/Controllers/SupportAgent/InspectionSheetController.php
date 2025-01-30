@@ -169,7 +169,7 @@ class InspectionSheetController extends Controller
         $search  = $request->input('search');
         $filter  = $request->input('filter');
 
-        $inspectionList = InspectionSheet::with('user:id,name,address', 'ticket:id,asset_id', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name');
+        $inspectionList = InspectionSheet::with('assigned:id,name', 'ticket:id,asset_id,user_id', 'ticket.asset:id,product,brand,serial_number', 'ticket.user:id,name,address,phone', 'technician:id,name');
 
         if ($search) {
             $inspectionList = $inspectionList->where('inspection_sheet_type', $search);
