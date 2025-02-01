@@ -20,7 +20,12 @@ class AuthController extends Controller
     public function profile()
     {
         $user = Auth::user();
-        return $user;
+
+        if (!$user) {
+            return response()->json(['status'=>false,'message'=>'User Not Found'],422);
+        }
+
+        return response()->json(['status'=>true, 'data'=>$user]);
     }
     //signup or registration
     public function signup(Request $request)
@@ -251,6 +256,7 @@ class AuthController extends Controller
     //change password
     public function changePassword(Request $request)
     {
+
         $request->validate([
             'current_password' => 'required',
             'new_password'     => 'required|string|min:6|confirmed',

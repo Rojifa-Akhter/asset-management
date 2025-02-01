@@ -14,7 +14,7 @@ class AssetImport implements ToModel, WithChunkReading, WithHeadingRow
     {
         return new Asset([
             'organization_id'        => Auth::id(),
-            'product_id'             => $row['product_id'] ?? null,  // Access by header name
+            'product_id'             => $row['id'] ?? null, // Access by header name
             'brand'                  => $row['brand'] ?? null,
             'range'                  => $row['range'] ?? null,
             'product'                => $row['product'] ?? null,
@@ -25,7 +25,7 @@ class AssetImport implements ToModel, WithChunkReading, WithHeadingRow
             'installation_date'      => isset($row['installation_date']) ? $this->parseDate($row['installation_date']) : null,
             'warranty_end_date'      => isset($row['warranty_end_date']) ? $this->parseDate($row['warranty_end_date']) : null,
             'unit_price'             => $this->parseNumeric($row['unit_price'] ?? null),
-            'current_spend'              => $this->parseNumeric($row['current_spend'] ?? null),
+            'current_spend'          => $this->parseNumeric($row['current_spend'] ?? null),
             'max_spend'              => $this->parseNumeric($row['max_spend'] ?? null),
             'fitness_product'        => isset($row['fitness_product']) && ($row['fitness_product'] == 'true' || $row['fitness_product'] == 1),
             'has_odometer'           => isset($row['has_odometer']) && ($row['has_odometer'] == 'true' || $row['has_odometer'] == 1),
@@ -75,4 +75,3 @@ class AssetImport implements ToModel, WithChunkReading, WithHeadingRow
         return 1000;
     }
 }
-
