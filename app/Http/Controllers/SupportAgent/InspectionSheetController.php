@@ -169,7 +169,8 @@ class InspectionSheetController extends Controller
         $search  = $request->input('search');
         $filter  = $request->input('filter');
 
-        $inspectionList = InspectionSheet::with('assigned:id,name', 'ticket:id,asset_id,user_id', 'ticket.asset:id,product,brand,serial_number', 'ticket.user:id,name,address,phone', 'technician:id,name');
+        $inspectionList = InspectionSheet::with('assigned:id,name', 'ticket:id,asset_id,user_id',
+            'ticket.asset:id,product,brand,serial_number', 'ticket.user:id,name,address,phone', 'technician:id,name,image');
 
         if ($search) {
             $inspectionList = $inspectionList->where('inspection_sheet_type', $search);
@@ -184,15 +185,31 @@ class InspectionSheetController extends Controller
     }
     public function InspectionSheetDetails(Request $request, $id)
     {
-        $sheetDetails = InspectionSheet::with('user:id,name,address', 'ticket:id,asset_id', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name')->findOrFail($id);
+        $sheet_details = InspectionSheet::with('assigned:id,name', 'ticket:id,asset_id,user_id,problem',
+            'ticket.asset:id,product,brand,serial_number', 'ticket.user:id,name,address,phone', 'technician:id,name,image')->findOrFail($id);
 
-        if (! $sheetDetails) {
-            return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 404);
+        if (! $sheet_details) {
+            return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 422);
         }
 
         return response()->json([
             'status' => true,
-            'data'   => $sheetDetails,
+            'data'   =>$sheet_details
+            // ['sheet_details' =>
+            //     [
+            //         'id'                          => $sheet_details->id ?? null,
+            //         'ticket_id'                   => $sheet_details->ticket->id ?? null,
+            //         'asset_id'                    => $sheet_details->ticket->asset->id ?? null,
+            //         'product'                     => $sheet_details->ticket->asset->product ?? null,
+            //         'brand'                       => $sheet_details->ticket->asset->brand ?? null,
+            //         'serial_number'               => $sheet_details->ticket->asset->serial_number ?? null,
+            //         'problem'                     => $sheet_details->ticket->problem ?? null,
+            //         'location'                    => $sheet_details->ticket->user->address ?? null,
+            //         'technician_name'             => $sheet_details->technician->name ?? null,
+            //         'support_agent_comment'       => $sheet_details->support_agent_comment ?? null,
+            //         'technician_comment'          => $sheet_details->technician_comment ?? null,
+            //         'location_employee_signature' => $sheet_details->location_employee_signature ?? null,
+            //     ]],
         ]);
     }
 }
