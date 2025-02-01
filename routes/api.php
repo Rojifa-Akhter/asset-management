@@ -6,6 +6,8 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\SettingController;
+use App\Http\Controllers\Statistic\LocationEmployee;
+use App\Http\Controllers\Statistic\Organization;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use App\Http\Controllers\SupportAgent\JobCardController;
 use App\Http\Controllers\User\AdminController;
@@ -144,6 +146,7 @@ Route::middleware(['auth:api','location_employee'])->group(function(){
     Route::post('set-reminder',[MaintainanceController::class,'setReminder']);
     Route::get('get-reminder',[MaintainanceController::class,'getReminder']);
     Route::post('update-maintainance/{id}',[MaintainanceController::class,'updateStatus']);
+    Route::get('location-employee-dashboard',[LocationEmployee::class,'dashboard']);
 });
 
 
@@ -174,4 +177,9 @@ Route::middleware(['auth:api','support_agent.location_employee.technician.third_
      Route::get('card_list', [JobCardController::class, 'JobCardList']);
      Route::get('card_details/{id}',[JobCardController::class, 'detailsJobCard']);
 });
+Route::middleware(['auth:api','organization'])->group(function(){
+    Route::get('organization-dashboard',[Organization::class,'dashboard']);
+});
+
+
 
