@@ -8,28 +8,29 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class AssetImport implements ToModel, WithChunkReading,WithHeadingRow
+class AssetImport implements ToModel, WithChunkReading, WithHeadingRow
 {
     public function model(array $row)
     {
         return new Asset([
             'organization_id'        => Auth::id(),
-            'product_id'             => $row[0],
-            'brand'                  => $row[1] ?? null,
-            'range'                  => $row[2] ?? null,
-            'product'                => $row[3] ?? null,
-            'qr_code'                => $row[4] ?? null,
-            'serial_number'          => $row[5] ?? null,
-            'external_serial_number' => $row[6] ?? null,
-            'manufacturing_date'     => isset($row[7]) ? $this->parseDate($row[7]) : null,
-            'installation_date'      => isset($row[8]) ? $this->parseDate($row[8]) : null,
-            'warranty_end_date'      => isset($row[9]) ? $this->parseDate($row[9]) : null,
-            'unit_price'             => $this->parseNumeric($row[10]),
-            'max_spend'              => $this->parseNumeric($row[11]),
-            'fitness_product'        => $row[12] == 'true' || $row[12] == 1,
-            'has_odometer'           => $row[13] == 'true' || $row[13] == 1,
-            'location'               => $row[14] ?? null,
-            'residual_price'         => $this->parseNumeric($row[15]),
+            'product_id'             => $row['product_id'] ?? null,  // Access by header name
+            'brand'                  => $row['brand'] ?? null,
+            'range'                  => $row['range'] ?? null,
+            'product'                => $row['product'] ?? null,
+            'qr_code'                => $row['qr_code'] ?? null,
+            'serial_number'          => $row['serial_number'] ?? null,
+            'external_serial_number' => $row['external_serial_number'] ?? null,
+            'manufacturing_date'     => isset($row['manufacturing_date']) ? $this->parseDate($row['manufacturing_date']) : null,
+            'installation_date'      => isset($row['installation_date']) ? $this->parseDate($row['installation_date']) : null,
+            'warranty_end_date'      => isset($row['warranty_end_date']) ? $this->parseDate($row['warranty_end_date']) : null,
+            'unit_price'             => $this->parseNumeric($row['unit_price'] ?? null),
+            'current_spend'              => $this->parseNumeric($row['current_spend'] ?? null),
+            'max_spend'              => $this->parseNumeric($row['max_spend'] ?? null),
+            'fitness_product'        => isset($row['fitness_product']) && ($row['fitness_product'] == 'true' || $row['fitness_product'] == 1),
+            'has_odometer'           => isset($row['has_odometer']) && ($row['has_odometer'] == 'true' || $row['has_odometer'] == 1),
+            'location'               => $row['location'] ?? null,
+            'residual_price'         => $this->parseNumeric($row['residual_price'] ?? null),
         ]);
     }
 
@@ -74,3 +75,4 @@ class AssetImport implements ToModel, WithChunkReading,WithHeadingRow
         return 1000;
     }
 }
+

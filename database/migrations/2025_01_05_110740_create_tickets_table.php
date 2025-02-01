@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('asset_id')->constrained('assets')->onDelete('cascade');
-            $table->string('ticket_name')->default('New Tickets');
+            $table->string('ticket_type')->default('New Tickets');
             $table->longText('problem');
             $table->longText('user_comment')->nullable();
             $table->string('ticket_status')->default('New');

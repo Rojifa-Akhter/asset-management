@@ -411,13 +411,18 @@ class AdminController extends Controller
         if ($request->hasFile('documents')) {
             $existingDocuments = $support_agent->document;
 
+
             if (is_array($existingDocuments)) {
                 foreach ($existingDocuments as $document) {
                     $relativePath = parse_url($document, PHP_URL_PATH);
                     $relativePath = ltrim($relativePath, '/');
-                    unlink(public_path($relativePath));
+                    if (!file_exists(public_path('uploads/documents'))) {
+                        # code...
+                        unlink(public_path($relativePath));
+                    }
                 }
             }
+            // return $existingDocuments;
 
             // Upload new documents
             $newDocuments = [];
