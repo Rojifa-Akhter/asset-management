@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class creatorMiddleware
+class SupportAgentLocationEmployeeTechnicianMiddleware
 {
     /**
      * Handle an incoming request.
@@ -18,7 +18,7 @@ class creatorMiddleware
     {
         $user = Auth::user();
 
-        if (! in_array($user->role, ['super_admin','organization','third_party'])) {
+        if (! in_array($user->role, ['location_employee','support_agent','technician','super_admin','organization','third_party'])) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         return $next($request);

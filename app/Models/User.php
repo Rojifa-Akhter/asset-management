@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -72,6 +73,10 @@ class User extends Authenticatable implements JWTSubject
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
+    }
+    public function inspectionSheets()
+    {
+        return $this->hasMany(InspectionSheetController::class);
     }
 
 

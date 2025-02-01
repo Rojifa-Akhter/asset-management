@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('job_cards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('ticket_id')->constrained('tickets')->onDelete('cascade');
-            $table->foreignId('inspection_sheet_id')->constrained('inspection_sheets')->onDelete('cascade');
-            $table->string('comment')->nullable();
-            $table->enum('job_status',['check_in','in_progress','check_out'])->default('in_progress');
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete()->comment('support agent id');
+            $table->foreignId('ticket_id')->nullable()->constrained('tickets')->cascadeOnDelete();
+            $table->foreignId('inspection_sheet_id')->nullable()->constrained('inspection_sheets')->cascadeOnDelete();
+            $table->string('job_card_type')->default('New Sheets');
+            $table->longText('support_agent_comment')->nullable();
+            $table->longText('technician_comment')->nullable();
+            $table->string('location_employee_signature')->nullable();
+            $table->string('job_status')->default('New');
             $table->timestamps();
         });
     }

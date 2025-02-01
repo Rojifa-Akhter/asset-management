@@ -10,5 +10,9 @@ class Asset extends Model
     {
         return $this->belongsTo(User::class, 'organization_id');
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
 }

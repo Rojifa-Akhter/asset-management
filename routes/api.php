@@ -7,6 +7,7 @@ use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
+use App\Http\Controllers\SupportAgent\JobCardController;
 use App\Http\Controllers\User\AdminController;
 use App\Http\Controllers\User\OrganizationController;
 use App\Http\Controllers\User\TicketController;
@@ -71,38 +72,23 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 
 
 });
-Route::middleware(['auth:api', 'organization'])->group(function () {
-
-
-});
-
-Route::middleware(['auth:api', 'support_agent'])->group(function () {
-    //inspection sheet
-    Route::post('create-inspection', action: [InspectionSheetController::class, 'createInspectionSheet']);
-    Route::post('update-inspection/{id}', [InspectionSheetController::class, 'updateInspectionSheet']);
-    Route::delete('delete-inspection/{id}', [InspectionSheetController::class, 'deleteInspectionSheet']);
-
-    Route::get('inspection-list', [InspectionSheetController::class, 'InspectionSheetList']);
-    Route::get('inspection-details/{id}', action: [InspectionSheetController::class, 'InspectionSheetDetails']);
-
-});
 
 Route::middleware(['auth:api', 'user'])->group(function () {
 
     //ticket
-    Route::post('create-ticket', [TicketController::class, 'createTicket']);
-    Route::delete('delete-ticket/{id}', [TicketController::class, 'deleteTicket']);
-    Route::get('ticket-list', [TicketController::class, 'ticketList']);
-    Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
+    Route::post('create_ticket', [TicketController::class, 'createTicket']);
+    Route::get('ticket_list', [TicketController::class, 'ticketList']);
+    Route::get('ticket_details/{id}', [TicketController::class, 'ticketDetails']);
+    Route::get('ticket_delete/{id}', [TicketController::class, 'deleteTicket']);
 
 });
 
 Route::middleware(['auth:api', 'common'])->group(function () {
 
     //update ticket
-    Route::post('update-ticket/{id}', [TicketController::class, 'updateTicket']);
+    Route::post('update_ticket/{id}', [TicketController::class, 'updateTicket']);
     Route::get('ticket_details/{id}', [TicketController::class, 'ticketDetails']);
-    Route::get('ticket-list', [TicketController::class, 'ticketList']);
+    Route::get('ticket_list', [TicketController::class, 'ticketList']);
 
 
 
@@ -116,7 +102,7 @@ Route::middleware(['auth:api', 'common'])->group(function () {
     Route::get('search-new-user',[MessageController::class,'searchNewUser']);
     Route::get('chat-list',[MessageController::class,'chatList']);
 });
-Route::middleware(['auth:api', 'creator'])->group(function () {
+Route::middleware(['auth:api', 'super_admin.third_party.organization'])->group(function () {
 
     //add and update location employee
     Route::post('location_employee_add', [OrganizationController::class, 'addLocationEmployee']);
@@ -136,10 +122,11 @@ Route::middleware(['auth:api', 'creator'])->group(function () {
     Route::get('user_details/{id}', [AdminController::class, 'userDetails']);
     Route::get('get_user_details/{id}', [OrganizationController::class, 'getuserDetails']);
 
-    //asset
+    //asset route
     Route::post('create_asset', [AssetController::class, 'createAsset']);
     Route::post('update_asset/{id}', [AssetController::class, 'updateAsset']);
     Route::get('asset_list', [AssetController::class, 'assetList']);
+    Route::get('asset_maturity/{id}', [AssetController::class, 'assetMaturity']);
     Route::get('asset_details/{id}', [AssetController::class, 'assetDetails']);
     Route::delete('delete_asset/{id}', [AssetController::class, 'deleteAsset']);
 
@@ -152,9 +139,39 @@ Route::middleware(['auth:api','super_admin.location_employee.organization'])->gr
     Route::get('maintainance',[MaintainanceController::class,'maintainanceGet']);
 });
 
+
 Route::middleware(['auth:api','location_employee'])->group(function(){
     Route::post('set-reminder',[MaintainanceController::class,'setReminder']);
     Route::get('get-reminder',[MaintainanceController::class,'getReminder']);
     Route::post('update-maintainance/{id}',[MaintainanceController::class,'updateStatus']);
+});
+
+
+Route::middleware(['auth:api','support_agent'])->group(function(){
+
+    //get ticket details
+    Route::get('get_ticket_details/{id}',[TicketController::class, 'getTicketDetails']);
+    //inspection sheet
+    Route::post('create_inspection_sheet',[InspectionSheetController::class, 'createInspectionSheet']);
+    //job card
+    Route::post('create_job_card',[JobCardController::class, 'createJobCard']);
+});
+Route::middleware(['auth:api','support_agent.location_employee.technician.third_party'])->group(function(){
+
+    //get ticket details
+    Route::get('get_ticket_details/{id}',[TicketController::class, 'getTicketDetails']);
+    //inspection sheet
+    Route::post('update_inspection/{id}', [InspectionSheetController::class, 'updateInspectionSheet']);
+    Route::delete('delete_inspection/{id}', [InspectionSheetController::class, 'deleteInspectionSheet']);
+
+    Route::get('inspection_list', [InspectionSheetController::class, 'InspectionSheetList']);
+    Route::get('inspection_details/{id}',[InspectionSheetController::class, 'InspectionSheetDetails']);
+
+     //job card update list details
+     Route::post('update_card/{id}', [JobCardController::class, 'updateJobCard']);
+     Route::delete('delete_card/{id}', [JobCardController::class, 'deleteJobCard']);
+
+     Route::get('card_list', [JobCardController::class, 'JobCardList']);
+     Route::get('card_details/{id}',[JobCardController::class, 'detailsJobCard']);
 });
 

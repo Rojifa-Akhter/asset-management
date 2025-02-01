@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('organization_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('product_id')->nullable();
-            $table->string('brand');
+            $table->string('brand')->nullable();
             $table->string('range')->nullable();
-            $table->string('product');
+            $table->string('product')->nullable();
             $table->string('qr_code')->nullable();
             $table->string('serial_number')->nullable();
             $table->string('external_serial_number')->nullable();
@@ -25,19 +25,17 @@ return new class extends Migration
             $table->date('installation_date')->nullable();
             $table->date('warranty_end_date')->nullable();
             $table->float('unit_price')->nullable();
+            $table->float('current_spend')->nullable();
             $table->float('max_spend')->nullable();
             $table->boolean('fitness_product')->nullable();
             $table->boolean('has_odometer')->nullable();
             $table->string('location')->nullable();
             $table->float('residual_price')->nullable();
             $table->timestamps();
-            
+
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('assets');
