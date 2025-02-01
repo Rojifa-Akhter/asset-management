@@ -136,7 +136,16 @@ Route::middleware(['auth:api', 'super_admin.third_party.organization'])->group(f
 Route::middleware(['auth:api','super_admin.location_employee.organization'])->group(function(){
     Route::get('technician',[MaintainanceController::class,'technicianGet']);
     Route::get('asset',[MaintainanceController::class,'assetGet']);
+    Route::get('maintainance',[MaintainanceController::class,'maintainanceGet']);
 });
+
+
+Route::middleware(['auth:api','location_employee'])->group(function(){
+    Route::post('set-reminder',[MaintainanceController::class,'setReminder']);
+    Route::get('get-reminder',[MaintainanceController::class,'getReminder']);
+    Route::post('update-maintainance/{id}',[MaintainanceController::class,'updateStatus']);
+});
+
 
 Route::middleware(['auth:api','support_agent'])->group(function(){
 
@@ -165,3 +174,4 @@ Route::middleware(['auth:api','support_agent.location_employee.technician.third_
      Route::get('card_list', [JobCardController::class, 'JobCardList']);
      Route::get('card_details/{id}',[JobCardController::class, 'detailsJobCard']);
 });
+

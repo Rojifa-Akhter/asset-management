@@ -19,4 +19,9 @@ class Maintainance extends Model
     public function user(){
         return $this->belongsTo(User::class,'user_id');
     }
+    public function getCheckedAttribute($checked)
+    {
+        return $checked ? json_decode($checked, true) : [];
+    }
+
 }
