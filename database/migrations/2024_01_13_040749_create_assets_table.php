@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained('users')->cascadeOnDelete()->comment('super_admin , organizaton , third_party');
             $table->string('product_id')->nullable();
             $table->string('brand')->nullable();
             $table->string('range')->nullable();

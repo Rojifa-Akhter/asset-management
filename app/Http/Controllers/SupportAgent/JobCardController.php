@@ -52,7 +52,7 @@ class JobCardController extends Controller
     {
         $job_card = JobCard::with('supportAgent:id,name',
             'inspectionSheet:id,ticket_id,technician_id',
-            'inspectionSheet.technician:id,name',
+            'inspectionSheet.technician:id,name,image',
             'inspectionSheet.ticket:id,asset_id,problem,order_number,cost,user_id',
             'inspectionSheet.ticket.asset:id,product,brand,serial_number',
             'inspectionSheet.ticket.user:id,name,address,phone')->findOrFail($id);
@@ -108,7 +108,7 @@ class JobCardController extends Controller
         $cardList = JobCard::with('supportAgent:id,name',
             'inspectionSheet:id,ticket_id,support_agent_id,technician_id',
             'inspectionSheet.assigned:id,name',
-            'inspectionSheet.technician:id,name',
+            'inspectionSheet.technician:id,name,image',
             'inspectionSheet.ticket:id,asset_id,problem,order_number,cost,user_id',
             'inspectionSheet.ticket.asset:id,product,brand,serial_number',
             'inspectionSheet.ticket.user:id,name,address,phone');
@@ -122,6 +122,41 @@ class JobCardController extends Controller
         $cardList = $cardList->paginate($perPage);
 
         return response()->json(['status' => true, 'data' => $cardList], 200);
+    }
+    public function detailsJobCard(Request $request, $id)
+    {
+        $card_details = JobCard::with('supportAgent:id,name',
+            'inspectionSheet:id,ticket_id,support_agent_id,technician_id',
+            'inspectionSheet.assigned:id,name',
+            'inspectionSheet.technician:id,name,image',
+            'inspectionSheet.ticket:id,asset_id,problem,order_number,cost,user_id',
+            'inspectionSheet.ticket.asset:id,product,brand,serial_number',
+            'inspectionSheet.ticket.user:id,name,address,phone')->findOrFail($id);
+        if (! $card_details) {
+            return response()->json(['status' => false, 'message' => 'Job Card Not Found'], 422);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data'   =>$card_details
+            // [
+            //     'job_card_details' => [
+            //         'id'              => $card_details->id ?? null,
+            //         'ticket_id'       => $card_details->inspectionSheet->ticket->id ?? null,
+            //         'asset_id'         => $card_details->inspectionSheet->ticket->asset->id ?? null,
+            //         'product'         => $card_details->inspectionSheet->ticket->asset->product ?? null,
+            //         'brand'           => $card_details->inspectionSheet->ticket->asset->brand ?? null,
+            //         'serial_number'   => $card_details->inspectionSheet->ticket->asset->serial_number ?? null,
+            //         'problem'         => $card_details->inspectionSheet->ticket->problem ?? null,
+            //         'location'        => $card_details->inspectionSheet->ticket->user->address ?? null,
+            //         'phone'           => $card_details->inspectionSheet->ticket->user->phone ?? null,
+            //         'technician_name' => $card_details->inspectionSheet->technician->name ?? null,
+            //         'order_number'    => $card_details->inspectionSheet->ticket->order_number ?? null,
+            //         'job card status' => $card_details->job_status ?? null,
+            //     ],
+            // ],
+        ]);
+
     }
 
 }
