@@ -8,6 +8,7 @@ use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\Statistic\LocationEmployee;
 use App\Http\Controllers\Statistic\Organization;
+use App\Http\Controllers\Statistic\SupportAgent;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use App\Http\Controllers\SupportAgent\JobCardController;
 use App\Http\Controllers\User\AdminController;
@@ -179,6 +180,9 @@ Route::middleware(['auth:api','support_agent.location_employee.technician.third_
 });
 Route::middleware(['auth:api','organization'])->group(function(){
     Route::get('organization-dashboard',[Organization::class,'dashboard']);
+});
+Route::middleware(['auth:api','support_agent'])->group(function(){
+    Route::get('support-agent-dashboard',[SupportAgent::class,'chartSupportAgent']);
 });
 
 
