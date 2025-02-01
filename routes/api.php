@@ -8,6 +8,7 @@ use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\Statistic\LocationEmployee;
 use App\Http\Controllers\Statistic\Organization;
+use App\Http\Controllers\Statistic\SuperAdmin;
 use App\Http\Controllers\Statistic\SupportAgent;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use App\Http\Controllers\SupportAgent\JobCardController;
@@ -37,6 +38,10 @@ Route::group(['prefix' => 'auth'], function ($router) {
 
 });
 Route::middleware(['auth:api', 'super_admin'])->group(function () {
+
+    //statistics
+    Route::get('support-agent-dashboard',[SuperAdmin::class,'dashboard']);
+
 
     //add and update organization
     Route::post('organization_add', [AdminController::class, 'addOrganization']);
@@ -183,7 +188,9 @@ Route::middleware(['auth:api','organization'])->group(function(){
 });
 Route::middleware(['auth:api','support_agent'])->group(function(){
     Route::get('support-agent-dashboard',[SupportAgent::class,'chartSupportAgent']);
+    Route::get('ticket-activity',[SupportAgent::class,'chartTicket']);
 });
+
 
 
 

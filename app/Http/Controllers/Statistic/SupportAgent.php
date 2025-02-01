@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 class SupportAgent extends Controller
 {
+    // chart statistics for support agent
     public function chartSupportAgent(Request $request)
     {
         $filter    = $request->query('filter', 'weekly');
@@ -17,7 +18,7 @@ class SupportAgent extends Controller
         $endDate   = Carbon::now()->endOfDay();
 
         $ticketStats = $this->getStatusStats(
-            Ticket::class,'ticket_status',
+            Ticket::class, 'ticket_status',
             ['New'],
             ['Assigned', 'Inspection Sheet', 'Awaiting Purchase Order', 'Job Card Created'],
             ['Completed'],
@@ -60,9 +61,9 @@ class SupportAgent extends Controller
     {
         return match ($filter) {
             'monthly' => Carbon::now()->subMonth()->startOfMonth(), // Start of last month
-            'yearly'  => Carbon::now()->subYear()->startOfYear(),  // Start of last year
-            'weekly'  => Carbon::now()->subWeek()->startOfWeek(),  // Start of last week
-            default   => Carbon::now()->startOfWeek(),             // Default is current week
+            'yearly' => Carbon::now()->subYear()->startOfYear(),    // Start of last year
+            'weekly' => Carbon::now()->subWeek()->startOfWeek(),    // Start of last week
+            default => Carbon::now()->startOfWeek(),                // Default is current week
         };
     }
 
@@ -84,6 +85,10 @@ class SupportAgent extends Controller
             'In-Progress' => ['count' => $inProgressCount, 'percentage' => $calcPercentage($inProgressCount)],
             'Completed'   => ['count' => $completedCount, 'percentage' => $calcPercentage($completedCount)],
         ];
+    }
+    public function chartTicket(Request $request)
+    {
+        
     }
 }
 
