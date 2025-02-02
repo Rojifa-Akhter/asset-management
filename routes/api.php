@@ -40,7 +40,18 @@ Route::group(['prefix' => 'auth'], function ($router) {
 Route::middleware(['auth:api', 'super_admin'])->group(function () {
 
     //statistics
-    Route::get('support-agent-dashboard', [SuperAdmin::class, 'dashboard']);
+    Route::get('super-admin-overview', [SuperAdmin::class, 'overview']);
+    Route::get('super-admin-chart', [SuperAdmin::class, 'chartsuperAdmin']);
+
+    Route::get('ticket-activity-super', [SuperAdmin::class, 'activityTicket']);
+    //inspection sheet
+    Route::get('inspection-statistics', [SuperAdmin::class, 'statisticsInspectionSheet']);
+    Route::get('total-inspections-super', [SuperAdmin::class, 'totalInspections']);
+    Route::get('inspection-status', [SuperAdmin::class, 'statusInspectionSheet']);
+    //job card
+    Route::get('card-statistics', [SuperAdmin::class, 'statisticsJobCard']);
+    Route::get('total-card', [SuperAdmin::class, 'totalJobCard']);
+    Route::get('card-status', [SuperAdmin::class, 'statusJobCard']);
 
     //add and update organization
     Route::post('organization_add', [AdminController::class, 'addOrganization']);
