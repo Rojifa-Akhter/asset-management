@@ -128,7 +128,7 @@ class SupportAgent extends Controller
             'tickets'    => $formattedData,
         ]);
     }
-    public function chartInspectionSheet(Request $request)
+    public function analyticInspectionSheet(Request $request)
     {
 
         // Get start and end dates
@@ -141,10 +141,10 @@ class SupportAgent extends Controller
 
         // Group tickets by date and inspection_sheet_type
         $sheets = InspectionSheet::whereBetween('created_at', [$startDate, $endDate])
-        ->selectRaw("DATE(created_at) as date, inspection_sheet_type, COUNT(*) as count")
-        ->groupBy('date', 'inspection_sheet_type')
-        ->orderBy('date', 'ASC')
-        ->get();
+            ->selectRaw("DATE(created_at) as date, inspection_sheet_type, COUNT(*) as count")
+            ->groupBy('date', 'inspection_sheet_type')
+            ->orderBy('date', 'ASC')
+            ->get();
 
         // Format the response
         $formattedData = $sheets->groupBy('date')->map(function ($dateGroup) {
@@ -167,7 +167,35 @@ class SupportAgent extends Controller
         return response()->json([
             'start_date' => $startDate->toDateString(),
             'end_date'   => $endDate->toDateString(),
-            'sheets'    => $formattedData,
+            'sheets'     => $formattedData,
+        ]);
+    }
+    public function chartInspectionSheet(Request $request)
+    {
+        // Fetch Inspection Sheets grouped by status
+        $sheets = InspectionSheet::selectRaw("status, COUNT(*) as count")
+            ->groupBy('status')
+            ->orderBy('count', 'DESC') // Order by count in descending order
+            ->get();
+
+        $defaultStatuses = [
+            'Arrived in Location' => 0,
+            'Contract with user'  => 0,
+            'View the problem'    => 0,
+            'Solve the problem'   => 0,
+        ];
+
+        // Format the response
+        $formattedData = $defaultStatuses;
+
+        foreach ($sheets as $sheet) {
+            if (isset($formattedData[$sheet->status])) {
+                $formattedData[$sheet->status] = $sheet->count;
+            }
+        }
+
+        return response()->json([
+            'inspection status' => $formattedData,
         ]);
     }
 
