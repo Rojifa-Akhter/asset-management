@@ -189,6 +189,7 @@ Route::middleware(['auth:api','organization'])->group(function(){
 Route::middleware(['auth:api','support_agent'])->group(function(){
     Route::get('support-agent-dashboard',[SupportAgent::class,'chartSupportAgent']);
     Route::get('ticket-activity',[SupportAgent::class,'chartTicket']);
+    Route::get('inspection-sheet-analytics',[SupportAgent::class,'chartInspectionSheet']);
 });
 
 

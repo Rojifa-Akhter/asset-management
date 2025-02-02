@@ -88,7 +88,87 @@ class SupportAgent extends Controller
     }
     public function chartTicket(Request $request)
     {
-        
-    }
-}
+        // Get start and end dates
+        $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $endDate   = $request->query('end_date', Carbon::now()->endOfDay()->toDateString());
 
+        // Ensure start and end dates
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate   = Carbon::parse($endDate)->endOfDay();
+
+        // Group tickets by date and status
+        $tickets = Ticket::whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw("DATE(created_at) as date, ticket_status, COUNT(*) as count")
+            ->groupBy('date', 'ticket_status')
+            ->orderBy('date', 'ASC')
+            ->get();
+
+        // Format the response
+        $formattedData = $tickets->groupBy('date')->map(function ($dateGroup) {
+            $data = [
+                'New'         => 0,
+                'In progress' => 0,
+                'Completed'   => 0,
+            ];
+            foreach ($dateGroup as $ticket) {
+                if ($ticket->ticket_status === 'New') {
+                    $data['New'] = $ticket->count;
+                } elseif (in_array($ticket->ticket_status, ['Assigned', 'Inspection Sheet', 'Awaiting Purchase Order', 'Job Card Created'])) {
+                    $data['In progress'] = $ticket->count;
+                } elseif ($ticket->ticket_status === 'Completed') {
+                    $data['Completed'] = $ticket->count;
+                }
+            }
+            return $data;
+        });
+
+        return response()->json([
+            'start_date' => $startDate->toDateString(),
+            'end_date'   => $endDate->toDateString(),
+            'tickets'    => $formattedData,
+        ]);
+    }
+    public function chartInspectionSheet(Request $request)
+    {
+
+        // Get start and end dates
+        $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $endDate   = $request->query('end_date', Carbon::now()->endOfDay()->toDateString());
+
+        // Ensure start and end dates
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate   = Carbon::parse($endDate)->endOfDay();
+
+        // Group tickets by date and inspection_sheet_type
+        $sheets = InspectionSheet::whereBetween('created_at', [$startDate, $endDate])
+        ->selectRaw("DATE(created_at) as date, inspection_sheet_type, COUNT(*) as count")
+        ->groupBy('date', 'inspection_sheet_type')
+        ->orderBy('date', 'ASC')
+        ->get();
+
+        // Format the response
+        $formattedData = $sheets->groupBy('date')->map(function ($dateGroup) {
+            $data = [
+                'New Sheets'  => 0,
+                'Past Sheets' => 0,
+
+            ];
+            // return $data;
+            foreach ($dateGroup as $sheet) {
+                if ($sheet->inspection_sheet_type === 'New Sheets') {
+                    $data['New Sheets'] = $sheet->count;
+                } elseif ($sheet->inspection_sheet_type === 'Past Sheets') {
+                    $data['Past Sheets'] = $sheet->count;
+                }
+            }
+            return $data;
+        });
+
+        return response()->json([
+            'start_date' => $startDate->toDateString(),
+            'end_date'   => $endDate->toDateString(),
+            'sheets'    => $formattedData,
+        ]);
+    }
+
+}
