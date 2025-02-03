@@ -200,3 +200,7 @@ Route::middleware(['auth:api', 'support_agent'])->group(function () {
     Route::get('total-job-card', [SupportAgent::class, 'totalJobCard']);
     Route::get('job-card-status', [SupportAgent::class, 'statusJobCard']);
 });
+Route::middleware(['auth:api', 'location_employee'])->group(function () {
+    Route::get('location-employee-dashboard', [LocationEmployee::class, 'dashboardLocationEmployee']);
+
+});
