@@ -195,21 +195,6 @@ class InspectionSheetController extends Controller
         return response()->json([
             'status' => true,
             'data'   =>$sheet_details
-            // ['sheet_details' =>
-            //     [
-            //         'id'                          => $sheet_details->id ?? null,
-            //         'ticket_id'                   => $sheet_details->ticket->id ?? null,
-            //         'asset_id'                    => $sheet_details->ticket->asset->id ?? null,
-            //         'product'                     => $sheet_details->ticket->asset->product ?? null,
-            //         'brand'                       => $sheet_details->ticket->asset->brand ?? null,
-            //         'serial_number'               => $sheet_details->ticket->asset->serial_number ?? null,
-            //         'problem'                     => $sheet_details->ticket->problem ?? null,
-            //         'location'                    => $sheet_details->ticket->user->address ?? null,
-            //         'technician_name'             => $sheet_details->technician->name ?? null,
-            //         'support_agent_comment'       => $sheet_details->support_agent_comment ?? null,
-            //         'technician_comment'          => $sheet_details->technician_comment ?? null,
-            //         'location_employee_signature' => $sheet_details->location_employee_signature ?? null,
-            //     ]],
         ]);
     }
 }

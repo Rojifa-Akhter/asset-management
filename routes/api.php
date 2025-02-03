@@ -8,6 +8,8 @@ use App\Http\Controllers\Organization\FAQController;
 use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\Statistic\LocationEmployee;
 use App\Http\Controllers\Statistic\Organization;
+use App\Http\Controllers\Statistic\SuperAdmin;
+use App\Http\Controllers\Statistic\SupportAgent;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use App\Http\Controllers\SupportAgent\JobCardController;
 use App\Http\Controllers\User\AdminController;
@@ -37,6 +39,16 @@ Route::group(['prefix' => 'auth'], function ($router) {
 });
 Route::middleware(['auth:api', 'super_admin'])->group(function () {
 
+    //statistics
+    Route::get('super-admin-overview', [SuperAdmin::class, 'overview']);
+    Route::get('super-admin-chart', [SuperAdmin::class, 'chartsuperAdmin']);
+
+    Route::get('ticket-activity-super', [SuperAdmin::class, 'activityTicket']);
+    //inspection sheet
+    Route::get('inspection-statistics', [SuperAdmin::class, 'statisticsInspectionSheet']);
+    //job card
+    Route::get('card-statistics', [SuperAdmin::class, 'statisticsJobCard']);
+    
     //add and update organization
     Route::post('organization_add', [AdminController::class, 'addOrganization']);
     Route::post('organization_update/{id}', [AdminController::class, 'updateOrganization']);
@@ -62,16 +74,15 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //assetlist
     Route::get('get_asset_list', [AssetController::class, 'assetListAdmin']);
 
-     //setting
-     Route::post('create_setting', [SettingController::class, 'createSetting']);
-     Route::get('settings', [SettingController::class, 'listSetting']);
+    //setting
+    Route::post('create_setting', [SettingController::class, 'createSetting']);
+    Route::get('settings', [SettingController::class, 'listSetting']);
 
-     //faq
-     Route::post('create_faq', [FAQController::class, 'createFaq']);
-     Route::post('update_faq/{id}', [FAQController::class, 'updateFaq']);
-     Route::get('faq_list', [FAQController::class, 'listFaq']);
-     Route::delete('delete_faq/{id}', [FAQController::class, 'deleteFaq']);
-
+    //faq
+    Route::post('create_faq', [FAQController::class, 'createFaq']);
+    Route::post('update_faq/{id}', [FAQController::class, 'updateFaq']);
+    Route::get('faq_list', [FAQController::class, 'listFaq']);
+    Route::delete('delete_faq/{id}', [FAQController::class, 'deleteFaq']);
 
 });
 
@@ -92,17 +103,12 @@ Route::middleware(['auth:api', 'common'])->group(function () {
     Route::get('ticket_details/{id}', [TicketController::class, 'ticketDetails']);
     Route::get('ticket_list', [TicketController::class, 'ticketList']);
 
-
-
-
-
-
     //message routes
-    Route::post('send-message',[MessageController::class,'sendMessage']);
-    Route::get('get-message',[MessageController::class,'getMessage']);
-    Route::get('mark-read',[MessageController::class,'markRead']);
-    Route::get('search-new-user',[MessageController::class,'searchNewUser']);
-    Route::get('chat-list',[MessageController::class,'chatList']);
+    Route::post('send-message', [MessageController::class, 'sendMessage']);
+    Route::get('get-message', [MessageController::class, 'getMessage']);
+    Route::get('mark-read', [MessageController::class, 'markRead']);
+    Route::get('search-new-user', [MessageController::class, 'searchNewUser']);
+    Route::get('chat-list', [MessageController::class, 'chatList']);
 });
 Route::middleware(['auth:api', 'super_admin.third_party.organization'])->group(function () {
 
@@ -135,54 +141,63 @@ Route::middleware(['auth:api', 'super_admin.third_party.organization'])->group(f
     Route::post('import_asset', [AssetController::class, 'importAssets']);
 });
 
-Route::middleware(['auth:api','super_admin.location_employee.organization'])->group(function(){
-    Route::get('technician',[MaintainanceController::class,'technicianGet']);
-    Route::get('asset',[MaintainanceController::class,'assetGet']);
-    Route::get('maintainance',[MaintainanceController::class,'maintainanceGet']);
+Route::middleware(['auth:api', 'super_admin.location_employee.organization'])->group(function () {
+    Route::get('technician', [MaintainanceController::class, 'technicianGet']);
+    Route::get('asset', [MaintainanceController::class, 'assetGet']);
+    Route::get('maintainance', [MaintainanceController::class, 'maintainanceGet']);
 });
 
-
-Route::middleware(['auth:api','location_employee'])->group(function(){
-    Route::post('set-reminder',[MaintainanceController::class,'setReminder']);
-    Route::get('get-reminder',[MaintainanceController::class,'getReminder']);
-    Route::post('update-maintainance/{id}',[MaintainanceController::class,'updateStatus']);
-    Route::get('location-employee-dashboard',[LocationEmployee::class,'dashboard']);
+Route::middleware(['auth:api', 'location_employee'])->group(function () {
+    Route::post('set-reminder', [MaintainanceController::class, 'setReminder']);
+    Route::get('get-reminder', [MaintainanceController::class, 'getReminder']);
+    Route::post('update-maintainance/{id}', [MaintainanceController::class, 'updateStatus']);
+    Route::get('location-employee-dashboard', [LocationEmployee::class, 'dashboard']);
 });
 
-
-Route::middleware(['auth:api','support_agent'])->group(function(){
+Route::middleware(['auth:api', 'support_agent'])->group(function () {
 
     //get ticket details
-    Route::get('get_ticket_details/{id}',[TicketController::class, 'getTicketDetails']);
+    Route::get('get_ticket_details/{id}', [TicketController::class, 'getTicketDetails']);
     //inspection sheet
-    Route::post('create_inspection_sheet',[InspectionSheetController::class, 'createInspectionSheet']);
+    Route::post('create_inspection_sheet', [InspectionSheetController::class, 'createInspectionSheet']);
     //job card
-    Route::post('create_job_card',[JobCardController::class, 'createJobCard']);
+    Route::post('create_job_card', [JobCardController::class, 'createJobCard']);
 });
-Route::middleware(['auth:api','support_agent.location_employee.technician.third_party'])->group(function(){
+Route::middleware(['auth:api', 'support_agent.location_employee.technician.third_party'])->group(function () {
 
     //get ticket details
-    Route::get('get_ticket_details/{id}',[TicketController::class, 'getTicketDetails']);
+    Route::get('get_ticket_details/{id}', [TicketController::class, 'getTicketDetails']);
     //inspection sheet
     Route::post('update_inspection/{id}', [InspectionSheetController::class, 'updateInspectionSheet']);
     Route::delete('delete_inspection/{id}', [InspectionSheetController::class, 'deleteInspectionSheet']);
 
     Route::get('inspection_list', [InspectionSheetController::class, 'InspectionSheetList']);
-    Route::get('inspection_details/{id}',[InspectionSheetController::class, 'InspectionSheetDetails']);
+    Route::get('inspection_details/{id}', [InspectionSheetController::class, 'InspectionSheetDetails']);
 
-     //job card update list details
-     Route::post('update_card/{id}', [JobCardController::class, 'updateJobCard']);
-     Route::delete('delete_card/{id}', [JobCardController::class, 'deleteJobCard']);
+    //job card update list details
+    Route::post('update_card/{id}', [JobCardController::class, 'updateJobCard']);
+    Route::delete('delete_card/{id}', [JobCardController::class, 'deleteJobCard']);
 
-     Route::get('card_list', [JobCardController::class, 'JobCardList']);
-     Route::get('card_details/{id}',[JobCardController::class, 'detailsJobCard']);
+    Route::get('card_list', [JobCardController::class, 'JobCardList']);
+    Route::get('card_details/{id}', [JobCardController::class, 'detailsJobCard']);
 });
+
 Route::middleware(['auth:api','organization'])->group(function(){
     Route::get('organization-dashboard',[Organization::class,'dashboard']);
     Route::get('ticket-activity',[Organization::class,'ticketActivity']);
     Route::get('inspaction-sheet-overview',[Organization::class,'inspactionSheetOverview']);
     Route::get('job-card-overview',[Organization::class,'jobCardOverview']);
+
 });
+Route::middleware(['auth:api', 'support_agent'])->group(function () {
+    Route::get('support-agent-dashboard', [SupportAgent::class, 'chartSupportAgent']);
+    Route::get('ticket-activity', [SupportAgent::class, 'activityTicket']);
+    //inspection sheet
+    Route::get('inspection-sheet-statistics', [SupportAgent::class, 'statisticsInspectionSheet']);
+    //job card
+    Route::get('job-card-statistics', [SupportAgent::class, 'statisticsJobCard']);
+});
+Route::middleware(['auth:api', 'location_employee'])->group(function () {
+    Route::get('location-employee-dashboard', [LocationEmployee::class, 'dashboardLocationEmployee']);
 
-
-
+});

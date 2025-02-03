@@ -16,10 +16,10 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete()->comment('support agent id');
             $table->foreignId('ticket_id')->nullable()->constrained('tickets')->cascadeOnDelete();
             $table->foreignId('inspection_sheet_id')->nullable()->constrained('inspection_sheets')->cascadeOnDelete();
-            $table->string('job_card_type')->default('New Sheets');
+            $table->string('job_card_type')->default('New Cards');
             $table->longText('support_agent_comment')->nullable();
             $table->longText('technician_comment')->nullable();
-            $table->string('location_employee_signature')->nullable();
+            $table->longText('location_employee_signature')->nullable();
             $table->string('job_status')->default('New');
             $table->timestamps();
         });
