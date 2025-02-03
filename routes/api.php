@@ -46,12 +46,8 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::get('ticket-activity-super', [SuperAdmin::class, 'activityTicket']);
     //inspection sheet
     Route::get('inspection-statistics', [SuperAdmin::class, 'statisticsInspectionSheet']);
-    Route::get('total-inspections-super', [SuperAdmin::class, 'totalInspections']);
-    Route::get('inspection-status', [SuperAdmin::class, 'statusInspectionSheet']);
     //job card
     Route::get('card-statistics', [SuperAdmin::class, 'statisticsJobCard']);
-    Route::get('total-card', [SuperAdmin::class, 'totalJobCard']);
-    Route::get('card-status', [SuperAdmin::class, 'statusJobCard']);
 
     //add and update organization
     Route::post('organization_add', [AdminController::class, 'addOrganization']);
@@ -193,12 +189,8 @@ Route::middleware(['auth:api', 'support_agent'])->group(function () {
     Route::get('ticket-activity', [SupportAgent::class, 'activityTicket']);
     //inspection sheet
     Route::get('inspection-sheet-statistics', [SupportAgent::class, 'statisticsInspectionSheet']);
-    Route::get('total-inspections', [SupportAgent::class, 'totalInspections']);
-    Route::get('inspection-sheet-status', [SupportAgent::class, 'statusInspectionSheet']);
     //job card
     Route::get('job-card-statistics', [SupportAgent::class, 'statisticsJobCard']);
-    Route::get('total-job-card', [SupportAgent::class, 'totalJobCard']);
-    Route::get('job-card-status', [SupportAgent::class, 'statusJobCard']);
 });
 Route::middleware(['auth:api', 'location_employee'])->group(function () {
     Route::get('location-employee-dashboard', [LocationEmployee::class, 'dashboardLocationEmployee']);
