@@ -37,7 +37,7 @@ class LocationController extends Controller
         $user = User::find($id);
 
         if (!$user) {
-            return response()->json(['status' => false, 'message' => 'User Not Found'], 422);
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
         }
 
         return response()->json([
