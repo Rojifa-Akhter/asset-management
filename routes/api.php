@@ -181,8 +181,13 @@ Route::middleware(['auth:api', 'support_agent.location_employee.technician.third
     Route::get('card_list', [JobCardController::class, 'JobCardList']);
     Route::get('card_details/{id}', [JobCardController::class, 'detailsJobCard']);
 });
-Route::middleware(['auth:api', 'organization'])->group(function () {
-    Route::get('organization-dashboard', [Organization::class, 'dashboard']);
+
+Route::middleware(['auth:api','organization'])->group(function(){
+    Route::get('organization-dashboard',[Organization::class,'dashboard']);
+    Route::get('ticket-activity',[Organization::class,'ticketActivity']);
+    Route::get('inspaction-sheet-overview',[Organization::class,'inspactionSheetOverview']);
+    Route::get('job-card-overview',[Organization::class,'jobCardOverview']);
+
 });
 Route::middleware(['auth:api', 'support_agent'])->group(function () {
     Route::get('support-agent-dashboard', [SupportAgent::class, 'chartSupportAgent']);
