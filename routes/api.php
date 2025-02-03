@@ -13,6 +13,7 @@ use App\Http\Controllers\Statistic\SupportAgent;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use App\Http\Controllers\SupportAgent\JobCardController;
 use App\Http\Controllers\User\AdminController;
+use App\Http\Controllers\User\LocationController;
 use App\Http\Controllers\User\OrganizationController;
 use App\Http\Controllers\User\TicketController;
 use Illuminate\Http\Request;
@@ -33,6 +34,8 @@ Route::group(['prefix' => 'auth'], function ($router) {
         Route::get('profile', [AuthController::class, 'profile']);
         Route::post('profile-update', [AuthController::class, 'updateProfile']);
         Route::post('change-password', [AuthController::class, 'changePassword']);
+        Route::post('location', [LocationController::class, 'Address']);
+        Route::get('get-address/{id}', [LocationController::class, 'getAddress']);
     });
     Route::post('logout', [AuthController::class, 'logout']);
 
@@ -48,7 +51,7 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::get('inspection-statistics', [SuperAdmin::class, 'statisticsInspectionSheet']);
     //job card
     Route::get('card-statistics', [SuperAdmin::class, 'statisticsJobCard']);
-    
+
     //add and update organization
     Route::post('organization_add', [AdminController::class, 'addOrganization']);
     Route::post('organization_update/{id}', [AdminController::class, 'updateOrganization']);
@@ -181,8 +184,11 @@ Route::middleware(['auth:api', 'support_agent.location_employee.technician.third
     Route::get('card_list', [JobCardController::class, 'JobCardList']);
     Route::get('card_details/{id}', [JobCardController::class, 'detailsJobCard']);
 });
-Route::middleware(['auth:api', 'organization'])->group(function () {
-    Route::get('organization-dashboard', [Organization::class, 'dashboard']);
+Route::middleware(['auth:api','organization'])->group(function(){
+    Route::get('organization-dashboard',[Organization::class,'dashboard']);
+    Route::get('ticket-activity',[Organization::class,'ticketActivity']);
+    Route::get('inspaction-sheet-overview',[Organization::class,'inspactionSheetOverview']);
+    Route::get('job-card-overview',[Organization::class,'jobCardOverview']);
 });
 Route::middleware(['auth:api', 'support_agent'])->group(function () {
     Route::get('support-agent-dashboard', [SupportAgent::class, 'chartSupportAgent']);
@@ -196,3 +202,4 @@ Route::middleware(['auth:api', 'location_employee'])->group(function () {
     Route::get('location-employee-dashboard', [LocationEmployee::class, 'dashboardLocationEmployee']);
 
 });
+
