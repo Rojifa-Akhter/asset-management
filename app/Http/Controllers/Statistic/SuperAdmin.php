@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Statistic;
 
 use App\Http\Controllers\Controller;
@@ -180,125 +179,68 @@ class SuperAdmin extends Controller
             'tickets'    => $formattedData,
         ]);
     }
-     //inspection sheet overview
-     public function statisticsInspectionSheet(Request $request)
-     {
-         $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
-         $endDate   = $request->query('end_date', Carbon::now()->endOfDay()->toDateString());
+    //inspection sheet overview
+    public function statisticsInspectionSheet(Request $request)
+    {
+        $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $endDate   = $request->query('end_date', Carbon::now()->endOfDay()->toDateString());
 
-         // Convert to Carbon instances
-         $startDate = Carbon::parse($startDate)->startOfDay();
-         $endDate   = Carbon::parse($endDate)->endOfDay();
+        // Convert to Carbon instances
+        $startDate = Carbon::parse($startDate)->startOfDay();
+        $endDate   = Carbon::parse($endDate)->endOfDay();
 
-         // Count sheets based on type and date range
-         $totalNewSheet = InspectionSheet::where('inspection_sheet_type', 'New Sheets')
-             ->whereBetween('created_at', [$startDate, $endDate])
-             ->count();
+        // Count sheets based on type and date range
+        $totalNewSheet = InspectionSheet::where('inspection_sheet_type', 'New Sheets')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
 
-         $totalOpenSheet = InspectionSheet::where('inspection_sheet_type', 'Open Sheets')
-             ->whereBetween('created_at', [$startDate, $endDate])
-             ->count();
+        $totalOpenSheet = InspectionSheet::where('inspection_sheet_type', 'Open Sheets')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
 
-         $totalPastSheet = InspectionSheet::where('inspection_sheet_type', 'Past Sheets')
-             ->whereBetween('created_at', [$startDate, $endDate])
-             ->count();
+        $totalPastSheet = InspectionSheet::where('inspection_sheet_type', 'Past Sheets')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+        //inspection sheet total inspection
+        $sheets = InspectionSheet::whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw("DATE(created_at) as date, inspection_sheet_type, COUNT(*) as count")
+            ->groupBy('date', 'inspection_sheet_type')
+            ->orderBy('date', 'ASC')
+            ->get();
 
-         return response()->json([
-             'start_date'            => $startDate->toDateString(),
-             'end_date'              => $endDate->toDateString(),
-             'total_created_sheet'   => $totalNewSheet,
-             'total_running_sheet'   => $totalOpenSheet,
-             'total_Completed_sheet' => $totalPastSheet,
-         ]);
-     }
-     //inspection sheet total inspection
-     public function totalInspections(Request $request)
-     {
+        // Format the response
+        $formattedData = $sheets->groupBy('date')->map(function ($dateGroup) {
+            $data = [
+                'New Sheets'  => 0,
+                'Past Sheets' => 0,
 
-         // Get start and end dates
-         $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
-         $endDate   = $request->query('end_date', Carbon::now()->endOfDay()->toDateString());
+            ];
+            // return $data;
+            foreach ($dateGroup as $sheet) {
+                if ($sheet->inspection_sheet_type === 'New Sheets') {
+                    $data['New Sheets'] = $sheet->count;
+                } elseif ($sheet->inspection_sheet_type === 'Past Sheets') {
+                    $data['Past Sheets'] = $sheet->count;
+                }
+            }
+            return $data;
+        });
+        //inspection sheet status
+        $inspections = InspectionSheet::whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw("status, COUNT(*) as count")
+            ->groupBy('status')
+            ->orderBy('status', 'ASC')
+            ->get();
+        return response()->json([
+            'total_created_sheet'       => $totalNewSheet,
+            'total_running_sheet'       => $totalOpenSheet,
+            'total_Completed_sheet'     => $totalPastSheet,
+            'total_inspection_per_date' => $formattedData,
+            'inspections_status'        => $inspections,
+        ]);
+    }
 
-         // Ensure start and end dates
-         $startDate = Carbon::parse($startDate)->startOfDay();
-         $endDate   = Carbon::parse($endDate)->endOfDay();
-
-         // Group tickets by date and inspection_sheet_type
-         $sheets = InspectionSheet::whereBetween('created_at', [$startDate, $endDate])
-             ->selectRaw("DATE(created_at) as date, inspection_sheet_type, COUNT(*) as count")
-             ->groupBy('date', 'inspection_sheet_type')
-             ->orderBy('date', 'ASC')
-             ->get();
-
-         // Format the response
-         $formattedData = $sheets->groupBy('date')->map(function ($dateGroup) {
-             $data = [
-                 'New Sheets'  => 0,
-                 'Past Sheets' => 0,
-
-             ];
-             // return $data;
-             foreach ($dateGroup as $sheet) {
-                 if ($sheet->inspection_sheet_type === 'New Sheets') {
-                     $data['New Sheets'] = $sheet->count;
-                 } elseif ($sheet->inspection_sheet_type === 'Past Sheets') {
-                     $data['Past Sheets'] = $sheet->count;
-                 }
-             }
-             return $data;
-         });
-
-         return response()->json([
-             'start_date' => $startDate->toDateString(),
-             'end_date'   => $endDate->toDateString(),
-             'sheets'     => $formattedData,
-         ]);
-     }
-     //inspection sheet status
-     public function statusInspectionSheet(Request $request)
-     {
-         // Get start and end dates from the request (default to current month)
-         $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
-         $endDate   = $request->query('end_date', Carbon::now()->endOfDay()->toDateString());
-
-         // Convert them to Carbon instances
-         $startDate = Carbon::parse($startDate)->startOfDay();
-         $endDate   = Carbon::parse($endDate)->endOfDay();
-
-         // Fetch inspection sheets within the date range, grouping by date and status
-         $inspections = InspectionSheet::whereBetween('created_at', [$startDate, $endDate])
-             ->selectRaw("DATE(created_at) as date, status, COUNT(*) as count")
-             ->groupBy('date', 'status')
-             ->orderBy('date', 'ASC')
-             ->get();
-
-         // Ensure all statuses appear even if they have 0 records
-         $defaultStatuses = [
-             'Arrived in Location' => 0,
-             'Contract with user'  => 0,
-             'View the problem'    => 0,
-             'Solve the problem'   => 0,
-         ];
-
-         // Format the response
-         $formattedData = [];
-         foreach ($inspections->groupBy('date') as $date => $dateGroup) {
-             $data = $defaultStatuses; // Start with default values
-             foreach ($dateGroup as $inspection) {
-                 if (isset($data[$inspection->status])) {
-                     $data[$inspection->status] = $inspection->count;
-                 }
-             }
-             $formattedData[$date] = $data;
-         }
-
-         return response()->json([
-             'start_date'         => $startDate->toDateString(),
-             'end_date'           => $endDate->toDateString(),
-             'inspections_status' => $formattedData,
-         ]);
-     }
-         //job card overview
+    //job card overview
     public function statisticsJobCard(Request $request)
     {
         $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
@@ -319,29 +261,7 @@ class SuperAdmin extends Controller
         $totalPastCard = JobCard::where('job_card_type', 'Past Cards')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
-        // return $totalPastCard;
-
-        return response()->json([
-            'start_date'           => $startDate->toDateString(),
-            'end_date'             => $endDate->toDateString(),
-            'total_created_card'   => $totalNewCard,
-            'total_running_card'   => $totalOpenCard,
-            'total_Completed_card' => $totalPastCard,
-        ]);
-    }
-//total job card per date
-    public function totalJobCard(Request $request)
-    {
-
-        // Get start and end dates
-        $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
-        $endDate   = $request->query('end_date', Carbon::now()->endOfDay()->toDateString());
-
-        // Ensure start and end dates
-        $startDate = Carbon::parse($startDate)->startOfDay();
-        $endDate   = Carbon::parse($endDate)->endOfDay();
-
-        // Group tickets by date and job_card_type
+        //total job card per date
         $cards = JobCard::whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw("DATE(created_at) as date, job_card_type, COUNT(*) as count")
             ->groupBy('date', 'job_card_type')
@@ -365,62 +285,19 @@ class SuperAdmin extends Controller
             }
             return $data;
         });
-
-        return response()->json([
-            'start_date'    => $startDate->toDateString(),
-            'end_date'      => $endDate->toDateString(),
-            'job_card_type' => $formattedData,
-        ]);
-    }
-    //job status
-    public function statusJobCard(Request $request)
-    {
-        // Get start and end dates from the request (default to current month)
-        $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
-        $endDate   = $request->query('end_date', Carbon::now()->endOfDay()->toDateString());
-
-        // Convert them to Carbon instances
-        $startDate = Carbon::parse($startDate)->startOfDay();
-        $endDate   = Carbon::parse($endDate)->endOfDay();
-
-        // Fetch inspection sheets within the date range, grouping by date and status
+        //job card status
         $cards = JobCard::whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw("DATE(created_at) as date, job_status, COUNT(*) as count")
-            ->groupBy('date', 'job_status')
-            ->orderBy('date', 'ASC')
+            ->selectRaw("job_status, COUNT(*) as count")
+            ->groupBy('job_status')
+            ->orderBy('job_status', 'ASC')
             ->get();
-
-        $defaultStatuses = [
-            'New'                  => 0,
-            'Assigned'             => 0,
-            'In Progress'          => 0,
-            'On hold'              => 0,
-            'Cancel'               => 0,
-            'To be allocated'      => 0,
-            'Awaiting courier'     => 0,
-            'Collected by courier' => 0,
-            'Parts required'       => 0,
-            'Picking'              => 0,
-            'To be invoiced'       => 0,
-            'Invoiced'             => 0,
-        ];
-
-        // Format the response
-        $formattedData = [];
-        foreach ($cards->groupBy('date') as $date => $dateGroup) {
-            $data = $defaultStatuses; // Start with default values
-            foreach ($dateGroup as $card) {
-                if (isset($data[$card->job_status])) {
-                    $data[$card->job_status] = $card->count;
-                }
-            }
-            $formattedData[$date] = $data;
-        }
-
         return response()->json([
-            'start_date' => $startDate->toDateString(),
-            'end_date'   => $endDate->toDateString(),
-            'job_status' => $formattedData,
+            'total_created_card'      => $totalNewCard,
+            'total_running_card'      => $totalOpenCard,
+            'total_Completed_card'    => $totalPastCard,
+            'total_job_card_per_date' => $formattedData,
+            'job_status'              => $cards,
         ]);
     }
+
 }
