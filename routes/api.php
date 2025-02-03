@@ -48,7 +48,7 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::get('inspection-statistics', [SuperAdmin::class, 'statisticsInspectionSheet']);
     //job card
     Route::get('card-statistics', [SuperAdmin::class, 'statisticsJobCard']);
-
+    
     //add and update organization
     Route::post('organization_add', [AdminController::class, 'addOrganization']);
     Route::post('organization_update/{id}', [AdminController::class, 'updateOrganization']);
