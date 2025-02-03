@@ -188,7 +188,7 @@ Route::middleware(['auth:api', 'support_agent.location_employee.technician.third
 
 Route::middleware(['auth:api','organization'])->group(function(){
     Route::get('organization-dashboard',[Organization::class,'dashboard']);
-    Route::get('ticket-activity',[Organization::class,'ticketActivity']);
+    Route::get('organization-ticket-activity',[Organization::class,'ticketActivity']);
     Route::get('inspaction-sheet-overview',[Organization::class,'inspactionSheetOverview']);
     Route::get('job-card-overview',[Organization::class,'jobCardOverview']);
 
