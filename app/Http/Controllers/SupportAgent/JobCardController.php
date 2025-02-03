@@ -1,9 +1,10 @@
 <?php
 namespace App\Http\Controllers\SupportAgent;
 
-use App\Http\Controllers\Controller;
 use App\Models\JobCard;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class JobCardController extends Controller
@@ -24,7 +25,7 @@ class JobCardController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
         $job_card = JobCard::create([
-            'support_agent_id'            => auth()->id(),
+            'support_agent_id'            => Auth::user()->id,
             'ticket_id'                   => $request->ticket_id,
             'inspection_sheet_id'         => $request->inspection_sheet_id,
             'job_card_type'               => $request->job_card_type ?? 'New Cards',
