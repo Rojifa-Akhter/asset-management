@@ -48,7 +48,7 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::get('inspection-statistics', [SuperAdmin::class, 'statisticsInspectionSheet']);
     //job card
     Route::get('card-statistics', [SuperAdmin::class, 'statisticsJobCard']);
-    
+
     //add and update organization
     Route::post('organization_add', [AdminController::class, 'addOrganization']);
     Route::post('organization_update/{id}', [AdminController::class, 'updateOrganization']);
@@ -184,7 +184,7 @@ Route::middleware(['auth:api', 'support_agent.location_employee.technician.third
 
 Route::middleware(['auth:api','organization'])->group(function(){
     Route::get('organization-dashboard',[Organization::class,'dashboard']);
-    Route::get('ticket-activity',[Organization::class,'ticketActivity']);
+    Route::get('organization-ticket-activity',[Organization::class,'ticketActivity']);
     Route::get('inspaction-sheet-overview',[Organization::class,'inspactionSheetOverview']);
     Route::get('job-card-overview',[Organization::class,'jobCardOverview']);
 
