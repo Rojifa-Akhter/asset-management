@@ -65,11 +65,11 @@ class InspectionSheetController extends Controller
 
         // Eager load the related user and asset
         $inspectionSheet->load('assigned:id,name', 'ticket:id,problem,asset_id,user_id', 'ticket.user:id,name,address', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name');
-        //notification sent
-        $usersToNotify = User::whereIn('role', ['super_admin', 'organization', 'third_party','location_employee'])->get();
-        foreach ($usersToNotify as $user) {
-            $user->notify(new InspectionSheetNotification($inspectionSheet));
-        }
+         // Notify relevant users
+         $usersToNotify = User::whereIn('role', ['super_admin', 'organization', 'third_party', 'location_employee', 'technician'])->get();
+         foreach ($usersToNotify as $user) {
+             $user->notify(new InspectionSheetNotification($inspectionSheet));
+         }
         return response()->json(['status' => true, 'message' => 'Inspection Sheet Created Successfully', 'data' => $inspectionSheet]);
     }
     public function updateInspectionSheet(Request $request, $id)
@@ -206,32 +206,23 @@ class InspectionSheetController extends Controller
         ]);
     }
     //get all notification
-    public function getNotifications(Request $request)
+    public function getAllNotifications(Request $request)
     {
         $perPage = $request->query('per_page', 10);
         $user = Auth::user();
 
         if (!$user) {
-            return response()->json([
-                'status' => false,'message'=>'Authorization User Not Found'], 401);
+            return response()->json(['status' => false, 'message' => 'Authorization User Not Found'], 401);
         }
 
         $notifications = $user->notifications()->paginate($perPage);
-        $unread = DB::table('notifications')->where('notifiable_id', 1)->whereNull('read_at')->count();
-
-        if ($notifications->isEmpty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No notifications available.',
-            ], 422);
-        }
+        $unreadCount = $user->unreadNotifications()->count();
 
         return response()->json([
             'status' => 'success',
-            'unread_notification' => $unread,
+            'unread_notifications' => $unreadCount,
             'notifications' => $notifications,
         ], 200);
-
     }
     //read one notification
     public function markNotification($notificationId)
@@ -268,7 +259,7 @@ class InspectionSheetController extends Controller
         $notifications = $user->unreadNotifications;
 
         if ($notifications->isEmpty()) {
-            return response()->json(['message' => 'No unread notifications found.'], 401);
+            return response()->json(['message' => 'No unread notifications found.'], 422);
         }
 
         $notifications->markAsRead();

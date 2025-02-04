@@ -192,7 +192,7 @@ Route::middleware(['auth:api', 'support_agent.location_employee.technician.third
     Route::get('read_all_notifications', [TicketController::class, 'markAllNotification']);
 
     //notification
-    Route::get('notifications', [InspectionSheetController::class, 'getNotifications']);
+    Route::get('notifications', [InspectionSheetController::class, 'getAllNotifications']);
     Route::get('notification_read/{notificationId}', [InspectionSheetController::class, 'markNotification']);
     Route::get('all_notifications_read', [InspectionSheetController::class, 'markAllNotification']);
 });

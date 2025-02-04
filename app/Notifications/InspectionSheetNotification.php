@@ -11,10 +11,10 @@ class InspectionSheetNotification extends Notification
 {
     use Queueable;
 
-    protected $inspection_sheets;
-    public function __construct($inspection_sheet)
+    protected $inspection_sheet;
+    public function __construct($inspectionSheet)
     {
-        $this->inspection_sheets = $inspection_sheet;
+        $this->inspection_sheet = $inspectionSheet;
     }
 
     /**
@@ -24,7 +24,7 @@ class InspectionSheetNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -47,9 +47,9 @@ class InspectionSheetNotification extends Notification
     {
         return [
             'message'    => 'A new inspection sheet has been created',
-            'inspection_id'  => $this->inspection_sheets->id,
-            'product'  => $this->inspection_sheets->ticket->asset->product,
-            'serial_number'  => $this->inspection_sheets->ticket->asset->serial_number,
+            'inspection_id'  => $this->inspection_sheet->id,
+            'product'  => $this->inspection_sheet->ticket->asset->product,
+            'serial_number'  => $this->inspection_sheet->ticket->asset->serial_number,
             'created_at' => now(),
         ];
     }
