@@ -2,8 +2,10 @@
 namespace App\Http\Controllers\SupportAgent;
 
 use App\Models\JobCard;
+use App\Notifications\JobCardNotification;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -43,6 +45,12 @@ class JobCardController extends Controller
             'inspectionSheet.ticket.user:id,name,address,phone'
 
         );
+
+        // Notify relevant users
+        $usersToNotify = User::whereIn('role', ['super_admin', 'organization', 'third_party', 'location_employee', 'technician'])->get();
+        foreach ($usersToNotify as $user) {
+            $user->notify(new JobCardNotification($job_card));
+        }
 
         $job_card->save();
 
@@ -159,5 +167,71 @@ class JobCardController extends Controller
         ]);
 
     }
+
+    //notification part
+     //get all notification
+     public function notifications(Request $request)
+     {
+         $perPage = $request->query('per_page', 10);
+         $user = Auth::user();
+
+         if (!$user) {
+             return response()->json(['status' => false, 'message' => 'Authorization User Not Found'], 401);
+         }
+
+         $notifications = $user->notifications()->paginate($perPage);
+         $unreadCount = $user->unreadNotifications()->count();
+
+         return response()->json([
+             'status' => 'success',
+             'unread_notifications' => $unreadCount,
+             'notifications' => $notifications,
+         ], 200);
+     }
+     //read one notification
+     public function notificationMark($notificationId)
+     {
+         $user = Auth::user();
+
+         if (!$user) {
+             return response()->json(['status' => false,'message'=>'Authorization User Not Found'], 401);
+         }
+
+         $notification = $user->notifications()->find($notificationId);
+
+         if (!$notification) {
+             return response()->json(['message' => 'Notification not found.'], 401);
+         }
+
+         if (!$notification->read_at) {
+             $notification->markAsRead();
+         }
+
+         return response()->json([
+             'status' => 'success',
+             'message' => 'Notification marked as read.'], 200);
+     }
+     //read all notification
+     public function allNotificationMark(Request $request)
+     {
+         $user = Auth::user();
+
+         if (!$user) {
+             return response()->json(['status' => false,'message'=>'Authorization User Not Found'], 401);
+         }
+
+         $notifications = $user->unreadNotifications;
+
+         if ($notifications->isEmpty()) {
+             return response()->json(['message' => 'No unread notifications found.'], 422);
+         }
+
+         $notifications->markAsRead();
+
+         return response()->json([
+             'status' => 'success',
+             'message' => 'All notifications marked as read.',
+         ], 200);
+     }
 
 }

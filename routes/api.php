@@ -27,6 +27,7 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('signup', [AuthController::class, 'signup']);
     Route::post('verify', [AuthController::class, 'verify']);
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('social-login', [AuthController::class, 'login']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('resend-otp', [AuthController::class, 'resendOtp']);
@@ -195,16 +196,18 @@ Route::middleware(['auth:api', 'support_agent.location_employee.technician.third
     Route::get('notifications', [InspectionSheetController::class, 'getAllNotifications']);
     Route::get('notification_read/{notificationId}', [InspectionSheetController::class, 'markNotification']);
     Route::get('all_notifications_read', [InspectionSheetController::class, 'markAllNotification']);
+
+    //notification
+    Route::get('notification_get', [JobCardController::class, 'notifications']);
+    Route::get('notification_read_one/{notificationId}', [JobCardController::class, 'notificationMark']);
+    Route::get('notifications_read_all', [JobCardController::class, 'allNotificationMark']);
 });
 
-
-Route::middleware(['auth:api','organization'])->group(function(){
-    Route::get('organization-dashboard',[Organization::class,'dashboard']);
-    Route::get('organization-ticket-activity',[Organization::class,'ticketActivity']);
-    Route::get('inspaction-sheet-overview',[Organization::class,'inspactionSheetOverview']);
-    Route::get('job-card-overview',[Organization::class,'jobCardOverview']);
-
-
+Route::middleware(['auth:api', 'organization'])->group(function () {
+    Route::get('organization-dashboard', [Organization::class, 'dashboard']);
+    Route::get('organization-ticket-activity', [Organization::class, 'ticketActivity']);
+    Route::get('inspaction-sheet-overview', [Organization::class, 'inspactionSheetOverview']);
+    Route::get('job-card-overview', [Organization::class, 'jobCardOverview']);
 
 });
 Route::middleware(['auth:api', 'support_agent'])->group(function () {
