@@ -13,6 +13,7 @@ use App\Http\Controllers\Statistic\SupportAgent;
 use App\Http\Controllers\SupportAgent\InspectionSheetController;
 use App\Http\Controllers\SupportAgent\JobCardController;
 use App\Http\Controllers\User\AdminController;
+use App\Http\Controllers\User\LocationController;
 use App\Http\Controllers\User\OrganizationController;
 use App\Http\Controllers\User\TicketController;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('signup', [AuthController::class, 'signup']);
     Route::post('verify', [AuthController::class, 'verify']);
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('social-login', [AuthController::class, 'login']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('resend-otp', [AuthController::class, 'resendOtp']);
@@ -33,6 +35,8 @@ Route::group(['prefix' => 'auth'], function ($router) {
         Route::get('profile', [AuthController::class, 'profile']);
         Route::post('profile-update', [AuthController::class, 'updateProfile']);
         Route::post('change-password', [AuthController::class, 'changePassword']);
+        Route::post('location', [LocationController::class, 'Address']);
+        Route::get('get-address/{id}', [LocationController::class, 'getAddress']);
     });
     Route::post('logout', [AuthController::class, 'logout']);
 
@@ -145,6 +149,8 @@ Route::middleware(['auth:api', 'super_admin.location_employee.organization'])->g
     Route::get('technician', [MaintainanceController::class, 'technicianGet']);
     Route::get('asset', [MaintainanceController::class, 'assetGet']);
     Route::get('maintainance', [MaintainanceController::class, 'maintainanceGet']);
+
+
 });
 
 Route::middleware(['auth:api', 'location_employee'])->group(function () {
@@ -180,13 +186,28 @@ Route::middleware(['auth:api', 'support_agent.location_employee.technician.third
 
     Route::get('card_list', [JobCardController::class, 'JobCardList']);
     Route::get('card_details/{id}', [JobCardController::class, 'detailsJobCard']);
+
+    //get notification when new ticket has been created
+    Route::get('get_notifications', [TicketController::class, 'getNotifications']);
+    Route::get('read_notifications/{notificationId}', [TicketController::class, 'markNotification']);
+    Route::get('read_all_notifications', [TicketController::class, 'markAllNotification']);
+
+    //notification
+    Route::get('notifications', [InspectionSheetController::class, 'getAllNotifications']);
+    Route::get('notification_read/{notificationId}', [InspectionSheetController::class, 'markNotification']);
+    Route::get('all_notifications_read', [InspectionSheetController::class, 'markAllNotification']);
+
+    //notification
+    Route::get('notification_get', [JobCardController::class, 'notifications']);
+    Route::get('notification_read_one/{notificationId}', [JobCardController::class, 'notificationMark']);
+    Route::get('notifications_read_all', [JobCardController::class, 'allNotificationMark']);
 });
 
-Route::middleware(['auth:api','organization'])->group(function(){
-    Route::get('organization-dashboard',[Organization::class,'dashboard']);
-    Route::get('organization-ticket-activity',[Organization::class,'ticketActivity']);
-    Route::get('inspaction-sheet-overview',[Organization::class,'inspactionSheetOverview']);
-    Route::get('job-card-overview',[Organization::class,'jobCardOverview']);
+Route::middleware(['auth:api', 'organization'])->group(function () {
+    Route::get('organization-dashboard', [Organization::class, 'dashboard']);
+    Route::get('organization-ticket-activity', [Organization::class, 'ticketActivity']);
+    Route::get('inspaction-sheet-overview', [Organization::class, 'inspactionSheetOverview']);
+    Route::get('job-card-overview', [Organization::class, 'jobCardOverview']);
 
 });
 Route::middleware(['auth:api', 'support_agent'])->group(function () {
@@ -201,3 +222,4 @@ Route::middleware(['auth:api', 'location_employee'])->group(function () {
     Route::get('location-employee-dashboard', [LocationEmployee::class, 'dashboardLocationEmployee']);
 
 });
+

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -53,7 +54,7 @@ class AuthController extends Controller
             $new_name  = time() . '.' . $extension;
             $path      = $image->move(public_path('uploads/profile_images'), $new_name);
         }
-// return $new_name;
+        // return $new_name;
         $otp            = rand(100000, 999999);
         $otp_expires_at = now()->addMinutes(10);
 
@@ -151,6 +152,58 @@ class AuthController extends Controller
             ],
         ], 200);
 
+    }
+    //social login
+    public function socialLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $existingUser = User::where('email', $request->email)->first();
+
+        if ($existingUser) {
+            $socialMatch = ($request->has('google_id') && $existingUser->google_id === $request->google_id);
+
+            if ($socialMatch) {
+                $token = JWTAuth::fromUser($existingUser);
+                return response()->json(['access_token' => $token, 'token_type' => 'bearer']);
+            } elseif (is_null($existingUser->google_id) && is_null($existingUser->facebook_id)) {
+                return response()->json(['message' => 'User already exists. Sign in manually.'], 422);
+            } else {
+                $existingUser->update([
+                    'google_id' => $request->google_id ?? $existingUser->google_id,
+                ]);
+                $token = JWTAuth::fromUser($existingUser);
+                return response()->json(['access_token' => $token, 'token_type' => 'bearer']);
+            }
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make(Str::random(16)),
+            'role' => 'user',
+            'google_id' => $request->google_id ?? null,
+            'address' => $request->address ?? null,
+            'verify_email' => true,
+            'status' => 'active',
+        ]);
+
+        $token = JWTAuth::fromUser($user);
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+        ]);
     }
 
     public function guard()
