@@ -27,7 +27,7 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('signup', [AuthController::class, 'signup']);
     Route::post('verify', [AuthController::class, 'verify']);
     Route::post('login', [AuthController::class, 'login']);
-    Route::post('social-login', [AuthController::class, 'login']);
+    Route::post('social-login', [AuthController::class, 'socialLogin']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('resend-otp', [AuthController::class, 'resendOtp']);
