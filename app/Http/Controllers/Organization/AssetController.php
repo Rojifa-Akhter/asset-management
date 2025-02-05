@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Imports\AssetImport;
 use App\Models\Asset;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -128,16 +129,7 @@ class AssetController extends Controller
         ], 200);
     }
 
-    //asset details
-    public function assetDetails(Request $request, $id)
-    {
-        $asset = Asset::with('organization:id,name')-> find($id);
 
-        if (! $asset) {
-            return response()->json(['status' => false, 'message' => 'Asset Not Found'], 401);
-        }
-        return response()->json(['status' => true, 'message' => $asset]);
-    }
     //asset list
     public function assetList(Request $request)
     {
@@ -200,13 +192,15 @@ class AssetController extends Controller
             'data'   => $assets,
         ]);
     }
-    public function assetMaturity($id)
-    {
-        $asset = Asset::find($id);
+      //asset details
+      public function assetDetails(Request $request, $id)
+      {
+        // return 'a';
+          $asset = Asset::with('organization:id,name')-> find($id);
 
-        if (! $asset) {
-            return response()->json(['status' => false, 'message' => 'Asset Not Found'], 404);
-        }
+          if (! $asset) {
+              return response()->json(['status' => false, 'message' => 'Asset Not Found'], 401);
+          }
 
         $currentSpend = (float) $asset->current_spend;
         $maxSpend     = (float) $asset->max_spend;
@@ -216,8 +210,11 @@ class AssetController extends Controller
 
         return response()->json([
             'status'  => true,
-            'message' => 'Asset Maturity Fetched Successfully',
-            'data'    => [
+            'service_cost_history'=> [
+
+            ],
+            'asset_details'=> $asset,
+            'asset_Maturity'    => [
                 'id'            => $asset->id,
                 'product'       => $asset->product,
                 'brand'         => $asset->brand,
