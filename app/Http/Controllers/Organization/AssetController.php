@@ -224,7 +224,7 @@ class AssetController extends Controller
 
           return response()->json([
               'status'  => true,
-              'service_cost_history' => $serviceCostHistory,  // ✅ Now correctly formatted
+              'service_cost_history' => $serviceCostHistory ?? null,  // ✅ Now correctly formatted
               'asset_details' => $asset,
               'asset_Maturity' => [
                   'id'            => $asset->id,
