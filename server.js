@@ -84,6 +84,6 @@ io.on("connection", (socket) => {
     });
 });
 
-server.listen(3000, "127.0.0.1", () => {
-    console.log("Server running at http://127.0.0.1:3000");
+server.listen(3001, "182.252.68.227", () => {
+    console.log("Server running at http://182.252.68.227:3001");
 });
