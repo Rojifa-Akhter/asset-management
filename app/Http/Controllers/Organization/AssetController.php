@@ -195,36 +195,50 @@ class AssetController extends Controller
       //asset details
       public function assetDetails(Request $request, $id)
       {
-        // return 'a';
-          $asset = Asset::with('organization:id,name')-> find($id);
+          $asset = Asset::with([
+              'organization:id,name',
+              'tickets:id,asset_id,problem,cost'
+          ])->find($id);
 
-          if (! $asset) {
-              return response()->json(['status' => false, 'message' => 'Asset Not Found'], 401);
+          if (!$asset) {
+              return response()->json(['status' => false, 'message' => 'Asset Not Found'], 404);
           }
 
-        $currentSpend = (float) $asset->current_spend;
-        $maxSpend     = (float) $asset->max_spend;
+          $currentSpend = (float) $asset->current_spend;
+          $maxSpend     = (float) $asset->max_spend;
 
-        // Calculate the percentage spent
-        $percentageSpent = ($maxSpend > 0) ? round(($currentSpend / $maxSpend) * 100, 2) : 0;
+          // Calculate percentage spent
+          $percentageSpent = ($maxSpend > 0) ? round(($currentSpend / $maxSpend) * 100, 2) : 0;
 
-        return response()->json([
-            'status'  => true,
-            'service_cost_history'=> [
+          // Ensure tickets exist before looping
+          $serviceCostHistory = [];
+          if ($asset->tickets->isNotEmpty()) {
+              foreach ($asset->tickets as $ticket) {
+                  $serviceCostHistory[] = [
+                      'ticket_id' => $ticket->id,
+                      'problem'   => $ticket->problem,
+                      'cost'      => $ticket->cost,
+                  ];
+              }
+          }
 
-            ],
-            'asset_details'=> $asset,
-            'asset_Maturity'    => [
-                'id'            => $asset->id,
-                'product'       => $asset->product,
-                'brand'         => $asset->brand,
-                'serial_number' => $asset->serial_number,
-                'current_spend' => $currentSpend,
-                'max_spend'     => $maxSpend,
-                'percentage'    => $percentageSpent,
-            ],
-        ], 200);
-    }
+          return response()->json([
+              'status'  => true,
+              'service_cost_history' => $serviceCostHistory,  // ✅ Now correctly formatted
+              'asset_details' => $asset,
+              'asset_Maturity' => [
+                  'id'            => $asset->id,
+                  'product'       => $asset->product,
+                  'brand'         => $asset->brand,
+                  'serial_number' => $asset->serial_number,
+                  'current_spend' => $currentSpend,
+                  'max_spend'     => $maxSpend,
+                  'percentage'    => $percentageSpent,
+              ],
+          ], 200);
+      }
+
+
 
     //asset delete
     public function deleteAsset($id)
