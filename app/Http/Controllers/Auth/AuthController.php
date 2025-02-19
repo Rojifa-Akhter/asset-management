@@ -132,7 +132,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (! $user) {
-            return response()->json(['status' => 'error', 'message' => 'Email not found.'], 404);
+            return response()->json(['status' => 'error', 'message' => 'Email not found.'], 422);
         }
 
         if (! $token = Auth::guard('api')->attempt($credentials)) {
