@@ -80,7 +80,6 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
 
     //setting
     Route::post('create_setting', [SettingController::class, 'createSetting']);
-    Route::get('settings', [SettingController::class, 'listSetting']);
 
     //faq
     Route::post('create_faq', [FAQController::class, 'createFaq']);
@@ -113,6 +112,9 @@ Route::middleware(['auth:api', 'common'])->group(function () {
     Route::get('mark-read', [MessageController::class, 'markRead']);
     Route::get('search-new-user', [MessageController::class, 'searchNewUser']);
     Route::get('chat-list', [MessageController::class, 'chatList']);
+
+    Route::get('settings', [SettingController::class, 'listSetting']);
+
 });
 Route::middleware(['auth:api', 'super_admin.third_party.organization'])->group(function () {
 
