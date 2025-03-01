@@ -148,22 +148,6 @@ class JobCardController extends Controller
         return response()->json([
             'status' => true,
             'data'   =>$card_details
-            // [
-            //     'job_card_details' => [
-            //         'id'              => $card_details->id ?? null,
-            //         'ticket_id'       => $card_details->inspectionSheet->ticket->id ?? null,
-            //         'asset_id'         => $card_details->inspectionSheet->ticket->asset->id ?? null,
-            //         'product'         => $card_details->inspectionSheet->ticket->asset->product ?? null,
-            //         'brand'           => $card_details->inspectionSheet->ticket->asset->brand ?? null,
-            //         'serial_number'   => $card_details->inspectionSheet->ticket->asset->serial_number ?? null,
-            //         'problem'         => $card_details->inspectionSheet->ticket->problem ?? null,
-            //         'location'        => $card_details->inspectionSheet->ticket->user->address ?? null,
-            //         'phone'           => $card_details->inspectionSheet->ticket->user->phone ?? null,
-            //         'technician_name' => $card_details->inspectionSheet->technician->name ?? null,
-            //         'order_number'    => $card_details->inspectionSheet->ticket->order_number ?? null,
-            //         'job card status' => $card_details->job_status ?? null,
-            //     ],
-            // ],
         ]);
 
     }
@@ -223,7 +207,7 @@ class JobCardController extends Controller
          $notifications = $user->unreadNotifications;
 
          if ($notifications->isEmpty()) {
-             return response()->json(['message' => 'No unread notifications found.'], 422);
+             return response()->json(['status'=>'true','message' => 'No unread notifications found.'], 200);
          }
 
          $notifications->markAsRead();

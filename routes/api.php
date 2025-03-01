@@ -72,7 +72,7 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::post('add-technician', [AdminController::class, 'technicianAdd']);
     Route::post('update-technician/{id}', [AdminController::class, 'technicianUpdate']);
 
-    Route::delete('delete-user/{id}', [AdminController::class, 'deleteUser']);
+    Route::get('delete-user/{id}', [AdminController::class, 'deleteUser']);
     Route::get('soft-delete-user', [AdminController::class, 'SoftDeletedUsers']);
 
     //assetlist
@@ -84,7 +84,6 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     //faq
     Route::post('create-faq', [FAQController::class, 'createFaq']);
     Route::post('update-faq/{id}', [FAQController::class, 'updateFaq']);
-    Route::get('faq-list', [FAQController::class, 'listFaq']);
     Route::delete('delete-faq/{id}', [FAQController::class, 'deleteFaq']);
 
 });
@@ -114,12 +113,15 @@ Route::middleware(['auth:api', 'common'])->group(function () {
     Route::get('chat-list', [MessageController::class, 'chatList']);
 
     Route::get('settings', [SettingController::class, 'listSetting']);
+    //faq list
+    Route::get('faq-list', [FAQController::class, 'listFaq']);
+
 
 });
 Route::middleware(['auth:api', 'super_admin.third_party.organization'])->group(function () {
 
     //add and update location employee
-    Route::post('location-employee_add', [OrganizationController::class, 'addLocationEmployee']);
+    Route::post('location-employee-add', [OrganizationController::class, 'addLocationEmployee']);
     Route::post('location-employee-update/{id}', [OrganizationController::class, 'updateLocationEmployee']);
 
     //add and update support agent
@@ -201,7 +203,7 @@ Route::middleware(['auth:api', 'support_agent.location_employee.technician.third
 
     //notification
     Route::get('notification-get', [JobCardController::class, 'notifications']);
-    Route::get('notification-read_one/{notificationId}', [JobCardController::class, 'notificationMark']);
+    Route::get('notification-read-one/{notificationId}', [JobCardController::class, 'notificationMark']);
     Route::get('notifications-read-all', [JobCardController::class, 'allNotificationMark']);
 });
 

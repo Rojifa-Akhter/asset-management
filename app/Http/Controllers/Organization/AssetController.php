@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Imports\AssetImport;
 use App\Models\Asset;
-use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -129,7 +128,6 @@ class AssetController extends Controller
         ], 200);
     }
 
-
     //asset list
     public function assetList(Request $request)
     {
@@ -144,7 +142,7 @@ class AssetController extends Controller
             $assetlist->where(function ($query) use ($search) {
                 $query->where('brand', 'like', "%$search%")
                     ->orWhere('qr_code', 'like', "%$search%")
-                    ->orWhere('warranty_date', 'like', "%$search%")
+                    ->orWhere('warranty_end_date', 'like', "%$search%")
                     ->orWhere('unit_price', 'like', "%$search%")
                     ->orWhere('current_spend', 'like', "%$search%")
                     ->orWhere('max_spend', 'like', "%$search%");
@@ -157,8 +155,8 @@ class AssetController extends Controller
                 $assetlist->orderBy('brand', 'asc');
             } elseif ($sortBy == 'qr_code') {
                 $assetlist->orderBy('qr_code', 'asc');
-            } elseif ($sortBy == 'warranty_date') {
-                $assetlist->orderBy('warranty_date', 'asc');
+            } elseif ($sortBy == 'warranty_end_date') {
+                $assetlist->orderBy('warranty_end_date', 'asc');
             } elseif ($sortBy == 'unit_price') {
                 $assetlist->orderBy('unit_price', 'asc');
             } elseif ($sortBy == 'current_spend') {
@@ -173,14 +171,14 @@ class AssetController extends Controller
         // Map customized response with organization name
         $data = $assets->getCollection()->map(function ($asset) {
             return [
-                'id'            => $asset->id,
-                'name'          => $asset->brand,
-                'qr_code'       => $asset->qr_code,
-                'warranty_date' => $asset->warranty_date,
-                'unit_price'    => $asset->unit_price,
-                'current_spend' => $asset->current_spend,
-                'max_spend'     => $asset->max_spend,
-                'organization'  => $asset->organization->name ?? 'N/A', // Organization or third party name
+                'id'                => $asset->id,
+                'name'              => $asset->brand,
+                'qr_code'           => $asset->qr_code,
+                'warranty_end_date' => $asset->warranty_end_date,
+                'unit_price'        => $asset->unit_price,
+                'current_spend'     => $asset->current_spend,
+                'max_spend'         => $asset->max_spend,
+                'organization'      => $asset->organization->name ?? 'N/A', // Organization or third party name
             ];
         });
 
@@ -192,53 +190,51 @@ class AssetController extends Controller
             'data'   => $assets,
         ]);
     }
-      //asset details
-      public function assetDetails(Request $request, $id)
-      {
-          $asset = Asset::with([
-              'organization:id,name',
-              'tickets:id,asset_id,problem,cost'
-          ])->find($id);
+    //asset details
+    public function assetDetails(Request $request, $id)
+    {
+        $asset = Asset::with([
+            'organization:id,name',
+            'tickets:id,asset_id,problem,cost',
+        ])->find($id);
 
-          if (!$asset) {
-              return response()->json(['status' => false, 'message' => 'Asset Not Found'], 422);
-          }
+        if (! $asset) {
+            return response()->json(['status' => false, 'message' => 'Asset Not Found'], 422);
+        }
 
-          $currentSpend = (float) $asset->current_spend;
-          $maxSpend     = (float) $asset->max_spend;
+        $currentSpend = (float) $asset->current_spend;
+        $maxSpend     = (float) $asset->max_spend;
 
-          // Calculate percentage spent
-          $percentageSpent = ($maxSpend > 0) ? round(($currentSpend / $maxSpend) * 100, 2) : 0;
+        // Calculate percentage spent
+        $percentageSpent = ($maxSpend > 0) ? round(($currentSpend / $maxSpend) * 100, 2) : 0;
 
-          // Ensure tickets exist before looping
-          $serviceCostHistory = [];
-          if ($asset->tickets->isNotEmpty()) {
-              foreach ($asset->tickets as $ticket) {
-                  $serviceCostHistory[] = [
-                      'ticket_id' => $ticket->id,
-                      'problem'   => $ticket->problem,
-                      'cost'      => $ticket->cost,
-                  ];
-              }
-          }
+        // Ensure tickets exist before looping
+        $serviceCostHistory = [];
+        if ($asset->tickets->isNotEmpty()) {
+            foreach ($asset->tickets as $ticket) {
+                $serviceCostHistory[] = [
+                    'ticket_id' => $ticket->id,
+                    'problem'   => $ticket->problem,
+                    'cost'      => $ticket->cost,
+                ];
+            }
+        }
 
-          return response()->json([
-              'status'  => true,
-              'service_cost_history' => $serviceCostHistory ?? null,  // ✅ Now correctly formatted
-              'asset_details' => $asset,
-              'asset_Maturity' => [
-                  'id'            => $asset->id,
-                  'product'       => $asset->product,
-                  'brand'         => $asset->brand,
-                  'serial_number' => $asset->serial_number,
-                  'current_spend' => $currentSpend,
-                  'max_spend'     => $maxSpend,
-                  'percentage'    => $percentageSpent,
-              ],
-          ], 200);
-      }
-
-
+        return response()->json([
+            'status'               => true,
+            'service_cost_history' => $serviceCostHistory ?? null, // ✅ Now correctly formatted
+            'asset_details'        => $asset,
+            'asset_Maturity'       => [
+                'id'            => $asset->id,
+                'product'       => $asset->product,
+                'brand'         => $asset->brand,
+                'serial_number' => $asset->serial_number,
+                'current_spend' => $currentSpend,
+                'max_spend'     => $maxSpend,
+                'percentage'    => $percentageSpent,
+            ],
+        ], 200);
+    }
 
     //asset delete
     public function deleteAsset($id)

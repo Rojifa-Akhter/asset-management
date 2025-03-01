@@ -21,7 +21,7 @@ class AdminController extends Controller
             'documents.*' => 'nullable|file',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
         // Upload new documents
         $newDocuments = [];
@@ -127,7 +127,7 @@ class AdminController extends Controller
             'documents.*' => 'nullable|file',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
         // Upload new documents
         $newDocuments = [];
@@ -233,7 +233,7 @@ class AdminController extends Controller
             'documents.*' => 'nullable|file',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
         // Upload new documents
         $newDocuments = [];
@@ -339,7 +339,7 @@ class AdminController extends Controller
             'documents.*' => 'nullable|file',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
         // Upload new documents
         $newDocuments = [];
@@ -411,12 +411,11 @@ class AdminController extends Controller
         if ($request->hasFile('documents')) {
             $existingDocuments = $support_agent->document;
 
-
             if (is_array($existingDocuments)) {
                 foreach ($existingDocuments as $document) {
                     $relativePath = parse_url($document, PHP_URL_PATH);
                     $relativePath = ltrim($relativePath, '/');
-                    if (!file_exists(public_path('uploads/documents'))) {
+                    if (! file_exists(public_path('uploads/documents'))) {
                         # code...
                         unlink(public_path($relativePath));
                     }
@@ -450,7 +449,7 @@ class AdminController extends Controller
             'documents.*' => 'nullable|file',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
         // Upload new documents
         $newDocuments = [];
@@ -548,27 +547,20 @@ class AdminController extends Controller
     //get all user
     public function userList(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
-        $search  = $request->input('search');
-        $filter  = $request->input('filter');
-        $sortBy  = $request->input('sort_by');
+        $search = $request->input('search');
+        $filter = $request->input('filter');
+        $sortBy = $request->input('sort_by');
 
-        // Get the authenticated user
         $currentUser = auth()->user();
-        $userlist = User::query();
+        $userlist    = User::query();
 
-        // Logic for 'super_admin': Exclude their own data
         if ($currentUser->role === 'super_admin') {
             $userlist->where('id', '!=', $currentUser->id);
-        }
-
-        // Logic for 'organization' or 'third_party': Show only their created users
-        elseif (in_array($currentUser->role, ['organization', 'third_party'])) {
+        } elseif (in_array($currentUser->role, ['organization', 'third_party'])) {
             $userlist->where('creator_id', $currentUser->id);
         }
 
-        // Apply search
-        if (!empty($search)) {
+        if (! empty($search)) {
             $userlist->where(function ($query) use ($search) {
                 $query->where('id', $search)
                     ->orWhere('name', 'like', "%$search%")
@@ -576,56 +568,50 @@ class AdminController extends Controller
             });
         }
 
-        // Apply sorting
-        if (!empty($sortBy)) {
-            if ($sortBy == 'id') {
-                $userlist->orderBy('id', 'desc');
-            } elseif ($sortBy == 'name') {
-                $userlist->orderBy('name', 'asc');
-            } elseif ($sortBy == 'address') {
-                $userlist->orderBy('address', 'asc');
-            } elseif ($sortBy == 'organization') {
-                $userlist->orderBy('organization', 'asc');
+        if (! empty($sortBy)) {
+            $allowedSorts = ['id', 'name', 'address', 'organization'];
+            if (in_array($sortBy, $allowedSorts)) {
+                $userlist->orderBy($sortBy, $sortBy === 'address' ? 'asc' : 'desc');
             }
+        } else {
+            $userlist->orderBy('id', 'asc');
         }
 
-        // Apply role filter
-        if (!empty($filter)) {
+        if (! empty($filter)) {
             $userlist->where('role', $filter);
         }
 
-        // Paginate the results
-        $users = $userlist->paginate($perPage);
+        $users = $userlist->paginate(10);
 
-        // Map the paginated data based on the role and filter
-        $data = $users->getCollection()->map(function ($user) use ($filter, $currentUser) {
-            if ($currentUser->role === 'organization' || $currentUser->role === 'third_party') {
-                // Organization/Third Party: Show counts of related roles
-                return [
-                    'id'                => $user->id,
-                    'name'              => $user->name,
-                    'image'             => $user->image,
-                    'address'           => $user->address,
+        $data = $users->getCollection()->map(function ($user) {
+            $commonData = [
+                'id'      => $user->id,
+                'name'    => $user->name,
+                'role'    => $user->role,
+                'address' => $user->address,
+                'image'   => $user->image,
+            ];
+
+            if ($user->role === 'organization' || $user->role === 'third_party') {
+                // Count all users created by this organization
+                $totalUsersCreated = User::where('creator_id', $user->id)->count();
+
+                return array_merge($commonData, [
+                    'total_users_created' => $totalUsersCreated,
                     // 'location_employee' => User::where('role', 'location_employee')->where('creator_id', $user->id)->count(),
-                    // 'support_agent'     => User::where('role', 'support_agent')->where('creator_id', $user->id)->count(),
-                    // 'technician'        => User::where('role', 'technician')->where('creator_id', $user->id)->count(),
-                ];
+                    // 'support_agent' => User::where('role', 'support_agent')->where('creator_id', $user->id)->count(),
+                    // 'technician' => User::where('role', 'technician')->where('creator_id', $user->id)->count(),
+                ]);
             } else {
-                // Default response for super_admin and others
-                return [
-                    'id'      => $user->id,
-                    'name'    => $user->name,
-                    'address' => $user->address,
-                    'image'   => $user->image,
+                return array_merge($commonData, [
                     'creator' => $user->creator->name ?? 'N/A',
-                ];
+                ]);
             }
         });
 
-        // Replace the original collection with the mapped data
         $users->setCollection(collect($data));
 
-        return response()->json(['status' => true, 'message' => $users]);
+        return response()->json(['status' => true, 'data' => $users]);
     }
 
     public function userDetails(Request $request, $id)
@@ -638,6 +624,7 @@ class AdminController extends Controller
         $data = [
             'id'      => $user->id,
             'name'    => $user->name,
+            'role'    => $user->role,
             'email'   => $user->email,
             'contact' => $user->phone,
             'address' => $user->address,
@@ -662,11 +649,9 @@ class AdminController extends Controller
 
     public function deleteUser($id)
     {
-        //  return $request;
-        $user = User::find($id);
-
+        $user = User::where('id', $id)->first();
         if (! $user) {
-            return response()->json(['status' => false, 'message' => 'User not found.'], 404);
+            return response()->json(['status' => false, 'message' => 'User not found.'], 401);
         }
 
         $user->delete();
