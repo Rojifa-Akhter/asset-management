@@ -201,7 +201,7 @@ class AssetController extends Controller
           ])->find($id);
 
           if (!$asset) {
-              return response()->json(['status' => false, 'message' => 'Asset Not Found'], 404);
+              return response()->json(['status' => false, 'message' => 'Asset Not Found'], 422);
           }
 
           $currentSpend = (float) $asset->current_spend;
