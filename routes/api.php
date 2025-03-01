@@ -94,7 +94,7 @@ Route::middleware(['auth:api', 'user'])->group(function () {
     Route::post('create-ticket', [TicketController::class, 'createTicket']);
     Route::get('ticket-list', [TicketController::class, 'ticketList']);
     Route::get('ticket-details/{id}', [TicketController::class, 'ticketDetails']);
-    Route::get('ticket-delete/{id}', [TicketController::class, 'deleteTicket']);
+    Route::delete('ticket-delete/{id}', [TicketController::class, 'deleteTicket']);
 
 });
 
@@ -133,7 +133,7 @@ Route::middleware(['auth:api', 'super_admin.third_party.organization'])->group(f
     Route::post('technician-update/{id}', [OrganizationController::class, 'updateTechnician']);
 
     //just delete supportagent, location employee and technician
-    Route::delete('delete-user/{id}', [OrganizationController::class, 'deleteUser']);
+    Route::delete('user-delete/{id}', [OrganizationController::class, 'deleteSpecificUser']);
     Route::get('all-user', [AdminController::class, 'userList']);
     Route::get('user-details/{id}', [AdminController::class, 'userDetails']);
     Route::get('get-user-details/{id}', [OrganizationController::class, 'getuserDetails']);

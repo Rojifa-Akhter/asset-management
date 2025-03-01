@@ -156,7 +156,7 @@ class TicketController extends Controller
         $ticket = Ticket::with('user:id,name,address', 'asset:id,product,brand,serial_number')->find($id);
 
         if (! $ticket) {
-            return response()->json(['status' => false, 'message' => 'Ticket Not Found'], 404);
+            return response()->json(['status' => true, 'message' => 'Ticket Not Found'], 200);
         }
         $data = [
             'id'            => $ticket->id,

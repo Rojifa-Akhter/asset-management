@@ -58,7 +58,7 @@ class OrganizationController extends Controller
             ->first();
 
         if (! $location_employee) {
-            return response()->json(['status' => false, 'message' => 'Unauthorized Access or User Not Found'], 403);
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
         }
 
         $validator = Validator::make($request->all(), [
@@ -171,7 +171,7 @@ class OrganizationController extends Controller
             ->first();
 
         if (! $support_agent) {
-            return response()->json(['status' => false, 'message' => 'Unauthorized Access or User Not Found'], 403);
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
         }
         // $support_agent = User::findOrFail($id);
 
@@ -182,7 +182,7 @@ class OrganizationController extends Controller
             'document' => 'nullable|file',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()], 401);
+            return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
         $validatedData          = $validator->validated();
         $support_agent->name    = $validatedData['name'] ?? $support_agent->name;
@@ -285,7 +285,7 @@ class OrganizationController extends Controller
             ->first();
 
         if (! $technician) {
-            return response()->json(['status' => false, 'message' => 'Unauthorized Access or User Not Found'], 403);
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 401);
         }
         $technician = User::findOrFail($id);
 
@@ -365,7 +365,7 @@ class OrganizationController extends Controller
 
         // Restrict access for "organization" and "third_party" roles
         if (in_array($currentUser->role, ['organization', 'third_party']) && $user->creator_id != $currentUser->id) {
-            return response()->json(['status' => false, 'message' => 'Unauthorized Access'], 403);
+            return response()->json(['status' => false, 'message' => 'Unauthorized Access'], 401);
         }
 
         $data = [
@@ -382,12 +382,12 @@ class OrganizationController extends Controller
     }
 
     //   delete location employee, technician and support agent
-    public function deleteUser($id)
+    public function deleteSpecificUser($id)
     {
         $user = User::find($id);
 
         if (! $user) {
-            return response()->json(['status' => 'error', 'message' => 'User not found.'], 404);
+            return response()->json(['status' => 'error', 'message' => 'User not found.'], 401);
         }
 
         if (! in_array($user->role, ['technician', 'location_employee', 'support_agent'])) {
