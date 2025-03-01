@@ -22,11 +22,11 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
-            return response()->json(['status'=>false,'message'=>'User Not Found'],422);
+        if (! $user) {
+            return response()->json(['status' => false, 'message' => 'User Not Found'], 422);
         }
 
-        return response()->json(['status'=>true, 'data'=>$user]);
+        return response()->json(['status' => true, 'data' => $user]);
     }
     //signup or registration
     public function signup(Request $request)
@@ -128,15 +128,23 @@ class AuthController extends Controller
     //login
     public function login(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'email'    => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
+        }
         $credentials = $request->only('email', 'password');
 
         $user = User::where('email', $request->email)->first();
         if (! $user) {
-            return response()->json(['status' => 'error', 'message' => 'Email not found.'], 404);
+            return response()->json(['status' => false, 'message' => 'Email not found.'], 403);
         }
 
         if (! $token = Auth::guard('api')->attempt($credentials)) {
-            return response()->json(['status' => 'error', 'message' => 'Invalid password.'], 401);
+            return response()->json(['status' => false, 'message' => 'Invalid password.'], 401);
         }
 
         return response()->json([
@@ -157,7 +165,7 @@ class AuthController extends Controller
     public function socialLogin(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'name'  => 'required|string|max:255',
             'email' => 'required|email|max:255',
         ]);
 
@@ -185,24 +193,24 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make(Str::random(16)),
-            'role' => 'user',
-            'google_id' => $request->google_id ?? null,
-            'address' => $request->address ?? null,
+            'name'         => $request->name,
+            'email'        => $request->email,
+            'password'     => Hash::make(Str::random(16)),
+            'role'         => 'user',
+            'google_id'    => $request->google_id ?? null,
+            'address'      => $request->address ?? null,
             'verify_email' => true,
-            'status' => 'active',
+            'status'       => 'active',
         ]);
 
+        // return $user;
         $token = JWTAuth::fromUser($user);
 
         return response()->json([
             'access_token' => $token,
-            'token_type' => 'bearer',
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
+            'token_type'   => 'bearer',
+            'data'         => $user,
+
         ]);
     }
 
@@ -340,7 +348,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user) {
-            return response()->json(['error' => 'Email not registered.'], 404);
+            return response()->json(['error' => 'Email not registered.'], 401);
         }
         $otp = rand(100000, 999999);
 
@@ -372,7 +380,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (! $user) {
-            return response()->json(['error' => 'User not found.'], 404);
+            return response()->json(['error' => 'User not found.'], 401);
         }
 
         $user->password = bcrypt($request->password);
@@ -391,7 +399,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user) {
-            return response()->json(['error' => 'Email not registered.'], 404);
+            return response()->json(['error' => 'Email not registered.'], 401);
         }
 
         $otp = rand(100000, 999999);

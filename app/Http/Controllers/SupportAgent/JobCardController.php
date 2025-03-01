@@ -18,12 +18,12 @@ class JobCardController extends Controller
                 'ticket_id'                   => 'nullable|string|exists:tickets,id',
                 'inspection_sheet_id'         => 'required|string|exists:inspection_sheets,id',
                 'job_card_type'               => 'nullable|string',
-                'support_agent_comment'       => 'nullable|string',
+                'support_agent_comment'       => 'required|string',
                 'technician_comment'          => 'nullable|string',
                 'location_employee_signature' => 'nullable|string',
                 'job_status'                  => 'nullable|string',
             ]);
-        if (! $validator) {
+        if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()], 422);
         }
         $job_card = JobCard::create([
@@ -140,7 +140,7 @@ class JobCardController extends Controller
             'inspectionSheet.technician:id,name,image',
             'inspectionSheet.ticket:id,asset_id,problem,order_number,cost,user_id',
             'inspectionSheet.ticket.asset:id,product,brand,serial_number',
-            'inspectionSheet.ticket.user:id,name,address,phone')->findOrFail($id);
+            'inspectionSheet.ticket.user:id,name,address,phone')->find($id);
         if (! $card_details) {
             return response()->json(['status' => false, 'message' => 'Job Card Not Found'], 422);
         }
@@ -148,22 +148,6 @@ class JobCardController extends Controller
         return response()->json([
             'status' => true,
             'data'   =>$card_details
-            // [
-            //     'job_card_details' => [
-            //         'id'              => $card_details->id ?? null,
-            //         'ticket_id'       => $card_details->inspectionSheet->ticket->id ?? null,
-            //         'asset_id'         => $card_details->inspectionSheet->ticket->asset->id ?? null,
-            //         'product'         => $card_details->inspectionSheet->ticket->asset->product ?? null,
-            //         'brand'           => $card_details->inspectionSheet->ticket->asset->brand ?? null,
-            //         'serial_number'   => $card_details->inspectionSheet->ticket->asset->serial_number ?? null,
-            //         'problem'         => $card_details->inspectionSheet->ticket->problem ?? null,
-            //         'location'        => $card_details->inspectionSheet->ticket->user->address ?? null,
-            //         'phone'           => $card_details->inspectionSheet->ticket->user->phone ?? null,
-            //         'technician_name' => $card_details->inspectionSheet->technician->name ?? null,
-            //         'order_number'    => $card_details->inspectionSheet->ticket->order_number ?? null,
-            //         'job card status' => $card_details->job_status ?? null,
-            //     ],
-            // ],
         ]);
 
     }
@@ -223,7 +207,7 @@ class JobCardController extends Controller
          $notifications = $user->unreadNotifications;
 
          if ($notifications->isEmpty()) {
-             return response()->json(['message' => 'No unread notifications found.'], 422);
+             return response()->json(['status'=>'true','message' => 'No unread notifications found.'], 200);
          }
 
          $notifications->markAsRead();

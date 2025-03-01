@@ -194,10 +194,10 @@ class InspectionSheetController extends Controller
     public function InspectionSheetDetails(Request $request, $id)
     {
         $sheet_details = InspectionSheet::with('assigned:id,name', 'ticket:id,asset_id,user_id,problem',
-            'ticket.asset:id,product,brand,serial_number', 'ticket.user:id,name,address,phone', 'technician:id,name,image')->findOrFail($id);
+            'ticket.asset:id,product,brand,serial_number', 'ticket.user:id,name,address,phone', 'technician:id,name,image')->find($id);
 
-        if (! $sheet_details) {
-            return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 422);
+        if (!$sheet_details) {
+            return response()->json(['status' => true, 'message' => 'Inspection Sheet Not Found'], 200);
         }
 
         return response()->json([

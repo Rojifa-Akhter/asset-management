@@ -17,7 +17,7 @@ class FAQController extends Controller
             'answer'=>'required|string',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status'=>false, 'message'=> $validator->errors()],401);
+            return response()->json(['status'=>false, 'message'=> $validator->errors()],422);
         }
         $faq = FAQ::create([
             'question'=>$request->question,
@@ -58,6 +58,9 @@ class FAQController extends Controller
     public function deleteFaq($id)
     {
         $faq = Faq::find($id);
+        if (!$faq) {
+            return response()->json(['status'=>true,'message'=>'Data not found!'],200);
+        }
         $faq->delete();
 
         return response()->json([
