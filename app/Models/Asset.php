@@ -18,5 +18,9 @@ class Asset extends Model
     {
         return $this->hasMany(Ticket::class, 'asset_id');
     }
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
 
 }

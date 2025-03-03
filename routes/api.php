@@ -5,6 +5,7 @@ use App\Http\Controllers\MaintainanceController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\Organization\AssetController;
 use App\Http\Controllers\Organization\FAQController;
+use App\Http\Controllers\Organization\ReportController;
 use App\Http\Controllers\Organization\SettingController;
 use App\Http\Controllers\Statistic\LocationEmployee;
 use App\Http\Controllers\Statistic\Organization;
@@ -85,6 +86,11 @@ Route::middleware(['auth:api', 'super_admin'])->group(function () {
     Route::post('create-faq', [FAQController::class, 'createFaq']);
     Route::post('update-faq/{id}', [FAQController::class, 'updateFaq']);
     Route::delete('delete-faq/{id}', [FAQController::class, 'deleteFaq']);
+
+    //report
+    Route::post('create-report',[ReportController::class,'createReport']);
+    Route::get('list-report',[ReportController::class,'listReports']);
+    Route::get('details-report/{id}',[ReportController::class,'detailsReports']);
 
 });
 
