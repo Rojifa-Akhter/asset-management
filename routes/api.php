@@ -219,6 +219,10 @@ Route::middleware(['auth:api', 'organization'])->group(function () {
     Route::get('inspaction-sheet-overview', [Organization::class, 'inspactionSheetOverview']);
     Route::get('job-card-overview', [Organization::class, 'jobCardOverview']);
 
+    //report
+    Route::post('add-report',[ReportController::class,'addReport']);
+    Route::get('get-report/{id}',[ReportController::class,'reportDetails']);
+
 });
 Route::middleware(['auth:api', 'support_agent'])->group(function () {
     Route::get('support-agent-dashboard', [SupportAgent::class, 'chartSupportAgent']);
