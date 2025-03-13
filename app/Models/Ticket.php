@@ -1,10 +1,12 @@
 <?php
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Ticket extends Model
 {
+    use HasFactory;
     protected $guarded = ['id'];
 
     // protected $cast = [
@@ -36,5 +38,5 @@ class Ticket extends Model
     {
         return $this->belongsTo(User::class, 'technician_id');
     }
-    
+
 }

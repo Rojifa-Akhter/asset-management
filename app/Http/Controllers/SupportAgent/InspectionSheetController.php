@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Notifications\InspectionSheetNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class InspectionSheetController extends Controller
@@ -22,7 +21,7 @@ class InspectionSheetController extends Controller
             'support_agent_comment'       => 'nullable|string',
             'technician_comment'          => 'nullable|string',
             'location_employee_signature' => 'nullable|string',
-            'image'                       => 'nullable|string',
+            'image'                       => 'nullable|',
             'video'                       => 'nullable',
             'status'                      => 'nullable',
         ]);
@@ -65,11 +64,11 @@ class InspectionSheetController extends Controller
 
         // Eager load the related user and asset
         $inspectionSheet->load('assigned:id,name', 'ticket:id,problem,asset_id,user_id', 'ticket.user:id,name,address', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name');
-         // Notify relevant users
-         $usersToNotify = User::whereIn('role', ['super_admin', 'organization', 'third_party', 'location_employee', 'technician'])->get();
-         foreach ($usersToNotify as $user) {
-             $user->notify(new InspectionSheetNotification($inspectionSheet));
-         }
+        // Notify relevant users
+        $usersToNotify = User::whereIn('role', ['super_admin', 'organization', 'third_party', 'location_employee', 'technician'])->get();
+        foreach ($usersToNotify as $user) {
+            $user->notify(new InspectionSheetNotification($inspectionSheet));
+        }
         return response()->json(['status' => true, 'message' => 'Inspection Sheet Created Successfully', 'data' => $inspectionSheet]);
     }
     public function updateInspectionSheet(Request $request, $id)
@@ -77,8 +76,9 @@ class InspectionSheetController extends Controller
         $inspection_sheet = InspectionSheet::with('assigned:id,name', 'ticket:id,problem,asset_id,user_id', 'ticket.user:id,name,address,phone', 'ticket.asset:id,product,brand,serial_number', 'technician:id,name')->findOrFail($id);
 
         if (! $inspection_sheet) {
-            return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 422);
+            return response()->json(['status' => false, 'message' => 'Inspection Sheet Not Found'], 200);
         }
+
         $validator = Validator::make($request->all(), [
             'inspection_sheet_type'       => 'nullable|string',
             'support_agent_comment'       => 'nullable|string',
@@ -88,6 +88,7 @@ class InspectionSheetController extends Controller
             'video'                       => 'nullable',
             'status'                      => 'nullable|string|in:New,Arrived in Location,Contract with user,View the problem,Solve the problem,Completed',
         ]);
+
         $validatedData = $validator->validated();
 
         if (isset($validatedData['status'])) {
@@ -97,17 +98,19 @@ class InspectionSheetController extends Controller
         } else {
             $validatedData['inspection_sheet_type'] = 'Open Sheets';
         }
-        //image add or update
+
+        // Handle image update or add
         if ($request->hasFile('images')) {
             $existingImages = $inspection_sheet->image;
 
             // Delete old images
-            foreach ($existingImages as $image) {
-                $relativePath = parse_url($image, PHP_URL_PATH);
-                $relativePath = ltrim($relativePath, '/');
-                // return $relativePath;
-                if (! file_exists(public_path('uploads/sheet_images'))) {
-                    unlink(public_path($relativePath));
+            if ($existingImages) {
+                foreach ($existingImages as $image) {
+                    $relativePath = parse_url($image, PHP_URL_PATH);
+                    $relativePath = ltrim($relativePath, '/');
+                    if (file_exists(public_path($relativePath))) {
+                        unlink(public_path($relativePath));
+                    }
                 }
             }
 
@@ -116,24 +119,25 @@ class InspectionSheetController extends Controller
             foreach ($request->file('images') as $image) {
                 $ImageName = time() . uniqid() . $image->getClientOriginalName();
                 $image->move(public_path('uploads/sheet_images'), $ImageName);
-
                 $newImages[] = $ImageName;
             }
 
-            $inspection_sheet->image = json_encode($newImages);
+            $validatedData['image'] = json_encode($newImages);
         }
-        // videos update or add
+
+        // Handle video update or add
         if ($request->hasFile('videos')) {
             $existingVideos = $inspection_sheet->video;
 
             // Delete old videos
-            foreach ($existingVideos as $video) {
-                $relativePath = parse_url($video, PHP_URL_PATH);
-                $relativePath = ltrim($relativePath, '/');
-                if (! file_exists(public_path('uploads/sheet_videos'))) {
-                    unlink(public_path($relativePath));
+            if ($existingVideos) {
+                foreach ($existingVideos as $video) {
+                    $relativePath = parse_url($video, PHP_URL_PATH);
+                    $relativePath = ltrim($relativePath, '/');
+                    if (file_exists(public_path($relativePath))) {
+                        unlink(public_path($relativePath));
+                    }
                 }
-
             }
 
             // Upload new videos
@@ -141,12 +145,12 @@ class InspectionSheetController extends Controller
             foreach ($request->file('videos') as $video) {
                 $VideoName = time() . uniqid() . $video->getClientOriginalName();
                 $video->move(public_path('uploads/sheet_videos'), $VideoName);
-
                 $newVideos[] = $VideoName;
             }
 
-            $inspection_sheet->video = json_encode($newVideos);
+            $validatedData['video'] = json_encode($newVideos);
         }
+
         $inspection_sheet->update($validatedData);
 
         return response()->json([
@@ -154,7 +158,6 @@ class InspectionSheetController extends Controller
             'message' => 'Inspection Sheet Update Successfully',
             'data'    => $inspection_sheet,
         ]);
-
     }
     //delete inspection sheet
     public function deleteInspectionSheet($id)
@@ -162,13 +165,39 @@ class InspectionSheetController extends Controller
         $inspection_sheet = InspectionSheet::find($id);
 
         if (! $inspection_sheet) {
-            return response()->json(['status' => 'error', 'message' => 'Inspection sheet not found.'], 422);
+            return response()->json(['status' => false, 'message' => 'Inspection sheet not found.'], 200);
+        }
+
+        // Delete associated images
+        $existingImages = $inspection_sheet->image;
+        if ($existingImages) {
+            foreach ($existingImages as $image) {
+                $relativePath = parse_url($image, PHP_URL_PATH);
+                $relativePath = ltrim($relativePath, '/');
+                if (file_exists(public_path($relativePath))) {
+                    unlink(public_path($relativePath));
+                }
+            }
+        }
+
+        // Delete associated videos
+        $existingVideos = $inspection_sheet->video;
+        if ($existingVideos) {
+            foreach ($existingVideos as $video) {
+                $relativePath = parse_url($video, PHP_URL_PATH);
+                $relativePath = ltrim($relativePath, '/');
+                if (file_exists(public_path($relativePath))) {
+                    unlink(public_path($relativePath));
+                }
+            }
         }
 
         $inspection_sheet->delete();
 
         return response()->json([
-            'status' => true, 'message' => 'Inspection Sheet deleted successfully'], 200);
+            'status'  => true,
+            'message' => 'Inspection Sheet deleted successfully',
+        ], 200);
     }
     //inspection sheet list
     public function InspectionSheetList(Request $request)
@@ -196,32 +225,32 @@ class InspectionSheetController extends Controller
         $sheet_details = InspectionSheet::with('assigned:id,name', 'ticket:id,asset_id,user_id,problem',
             'ticket.asset:id,product,brand,serial_number', 'ticket.user:id,name,address,phone', 'technician:id,name,image')->find($id);
 
-        if (!$sheet_details) {
+        if (! $sheet_details) {
             return response()->json(['status' => true, 'message' => 'Inspection Sheet Not Found'], 200);
         }
 
         return response()->json([
             'status' => true,
-            'data'   =>$sheet_details
+            'data'   => $sheet_details,
         ]);
     }
     //get all notification
     public function getAllNotifications(Request $request)
     {
         $perPage = $request->query('per_page', 10);
-        $user = Auth::user();
+        $user    = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['status' => false, 'message' => 'Authorization User Not Found'], 401);
         }
 
         $notifications = $user->notifications()->paginate($perPage);
-        $unreadCount = $user->unreadNotifications()->count();
+        $unreadCount   = $user->unreadNotifications()->count();
 
         return response()->json([
-            'status' => 'success',
+            'status'               => 'success',
             'unread_notifications' => $unreadCount,
-            'notifications' => $notifications,
+            'notifications'        => $notifications,
         ], 200);
     }
     //read one notification
@@ -229,22 +258,22 @@ class InspectionSheetController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
-            return response()->json(['status' => false,'message'=>'Authorization User Not Found'], 401);
+        if (! $user) {
+            return response()->json(['status' => false, 'message' => 'Authorization User Not Found'], 401);
         }
 
         $notification = $user->notifications()->find($notificationId);
 
-        if (!$notification) {
+        if (! $notification) {
             return response()->json(['message' => 'Notification not found.'], 401);
         }
 
-        if (!$notification->read_at) {
+        if (! $notification->read_at) {
             $notification->markAsRead();
         }
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Notification marked as read.'], 200);
     }
     //read all notification
@@ -252,8 +281,8 @@ class InspectionSheetController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
-            return response()->json(['status' => false,'message'=>'Authorization User Not Found'], 401);
+        if (! $user) {
+            return response()->json(['status' => false, 'message' => 'Authorization User Not Found'], 401);
         }
 
         $notifications = $user->unreadNotifications;
@@ -265,7 +294,7 @@ class InspectionSheetController extends Controller
         $notifications->markAsRead();
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'All notifications marked as read.',
         ], 200);
     }

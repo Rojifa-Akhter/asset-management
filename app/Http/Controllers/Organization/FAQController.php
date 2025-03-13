@@ -30,10 +30,10 @@ class FAQController extends Controller
     //update faq
     public function updateFaq(Request $request, $id)
     {
-        $faq = FAQ::findOrFail($id);
+        $faq = FAQ::find($id);
 
         if (!$faq) {
-            return response()->json(['status'=>false, 'message'=> 'FAQ Not Found'], 401);
+            return response()->json(['status'=>false, 'message'=> 'FAQ Not Found'], 200);
         }
 
         $validator = Validator::make($request->all(),[
@@ -50,7 +50,7 @@ class FAQController extends Controller
     // faq list get
     public function listFaq(Request $request)
     {
-        $faq = FAQ::all();
+        $faq = FAQ::paginate(10);
 
         return response()->json(['status'=>true, $faq],201);
     }

@@ -91,10 +91,10 @@ class AssetController extends Controller
     //asset update
     public function updateAsset(Request $request, $id)
     {
-        $asset = Asset::findOrFail($id);
+        $asset = Asset::find($id);
 
         if (! $asset) {
-            return response()->json(['status' => false, 'message' => 'Asset Not Found'], 404);
+            return response()->json(['status' => false, 'message' => 'Asset Not Found'], 200);
         }
 
         $validator = Validator::make($request->all(), [
@@ -222,7 +222,7 @@ class AssetController extends Controller
 
         return response()->json([
             'status'               => true,
-            'service_cost_history' => $serviceCostHistory ?? null, // ✅ Now correctly formatted
+            'service_cost_history' => $serviceCostHistory ?? null,
             'asset_details'        => $asset,
             'asset_Maturity'       => [
                 'id'            => $asset->id,
@@ -242,7 +242,7 @@ class AssetController extends Controller
         $asset = Asset::find($id);
 
         if (! $asset) {
-            return response()->json(['status' => 'error', 'message' => 'Asset not found.'], 404);
+            return response()->json(['status' => false, 'message' => 'Asset not found.'], 200);
         }
 
         $asset->delete();

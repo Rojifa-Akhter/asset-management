@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\InspectionSheet;
+use App\Models\JobCard;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -17,6 +19,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             UserSeeder::class,
+            TicketSeeder::class,
+            InspectionSheet::class,
     ]);
     }
 }
