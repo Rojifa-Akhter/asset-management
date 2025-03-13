@@ -1,17 +1,17 @@
 <?php
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class JobCard extends Model
 {
+    use HasFactory;
     protected $guarded = ['id'];
     public function supportAgent()
-{
-    return $this->belongsTo(User::class, 'user_id');
-}
-
-
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     public function inspectionSheet()
     {
@@ -29,8 +29,5 @@ class JobCard extends Model
     {
         return $this->belongsTo(User::class, 'support_agent_id');
     }
-
-
-
 
 }
