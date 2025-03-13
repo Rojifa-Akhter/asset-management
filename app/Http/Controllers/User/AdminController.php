@@ -51,7 +51,11 @@ class AdminController extends Controller
     //update organization
     public function updateOrganization(Request $request, $id)
     {
-        $organization = User::findOrFail($id);
+        $organization = User::find($id);
+
+        if (!$organization) {
+            return response()->json(['status' => false, 'message' => 'User not found'], 200);
+        }
 
         $validator = Validator::make($request->all(), [
             'name'     => 'nullable|string|max:255',
@@ -157,7 +161,10 @@ class AdminController extends Controller
     //update third party
     public function updateThirdParty(Request $request, $id)
     {
-        $third_party = User::findOrFail($id);
+        $third_party = User::find($id);
+        if (!$third_party) {
+            return response()->json(['status' => false, 'message' => 'User not found'], 200);
+        }
 
         $validator = Validator::make($request->all(), [
             'name'     => 'nullable|string|max:255',
@@ -263,7 +270,10 @@ class AdminController extends Controller
     //update location mployee
     public function updateEmployee(Request $request, $id)
     {
-        $location_employee = User::findOrFail($id);
+        $location_employee = User::find($id);
+        if (!$location_employee) {
+            return response()->json(['status' => false, 'message' => 'User not found'], 200);
+        }
 
         $validator = Validator::make($request->all(), [
             'name'     => 'nullable|string|max:255',
@@ -369,7 +379,10 @@ class AdminController extends Controller
     //update support_agent
     public function updateSAgent(Request $request, $id)
     {
-        $support_agent = User::findOrFail($id);
+        $support_agent = User::find($id);
+        if (!$support_agent) {
+            return response()->json(['status' => false, 'message' => 'User not found'], 200);
+        }
 
         $validator = Validator::make($request->all(), [
             'name'     => 'nullable|string|max:255',
@@ -481,6 +494,9 @@ class AdminController extends Controller
     {
         $technician = User::findOrFail($id);
 
+        if (!$technician) {
+            return response()->json(['status' => false, 'message' => 'User not found'], 200);
+        }
         $validator = Validator::make($request->all(), [
             'name'     => 'nullable|string|max:255',
             'password' => 'nullable|string|min:6',

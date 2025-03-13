@@ -60,10 +60,10 @@ class TicketController extends Controller
     //update ticket
     public function updateTicket(Request $request, $id)
     {
-        $ticket = Ticket::with('user:id,name,address,phone', 'asset:id,product,brand,serial_number')->findOrFail($id);
+        $ticket = Ticket::with('user:id,name,address,phone', 'asset:id,product,brand,serial_number')->find($id);
 
         if (! $ticket) {
-            return response()->json(['status' => false, 'message' => 'Ticket not Found'], 422);
+            return response()->json(['status' => false, 'message' => 'Ticket not Found'], 200);
         }
 
         $validator = Validator::make($request->all(), [
@@ -126,7 +126,7 @@ class TicketController extends Controller
         $ticket = Ticket::with('user:id,name,address', 'asset:id,product,brand,serial_number')->find($id);
 
         if (! $ticket) {
-            return response()->json(['status' => false, 'message' => 'Ticket Not Found'], 401);
+            return response()->json(['status' => false, 'message' => 'Ticket Not Found'], status: 200);
         }
 
         return response()->json([
@@ -142,7 +142,7 @@ class TicketController extends Controller
 
         // return $ticket;
         if (! $ticket) {
-            return response()->json(['status' => 'error', 'message' => 'Ticket not found.'], 422);
+            return response()->json(['status' => false, 'message' => 'Ticket not found.'], 200);
         }
 
         $ticket->delete();
