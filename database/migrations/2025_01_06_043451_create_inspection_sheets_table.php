@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('ticket_id')->nullable()->constrained('tickets')->onDelete('cascade');
             $table->foreignId('support_agent_id')->nullable()->constrained('users')->onDelete('cascade')->comment('support agent id');
             $table->foreignId('technician_id')->nullable()->constrained('users')->onDelete('cascade')->comment('technicaian id');
-            $table->string('inspection_sheet_type')->default('New Sheets');
+            $table->string('inspection_sheet_type')->default('New Sheets')->comment('New Sheets, Open Sheets, Past Sheets');
             $table->longText('support_agent_comment')->nullable();
             $table->longText('technician_comment')->nullable();
             $table->string('location_employee_signature')->nullable();
