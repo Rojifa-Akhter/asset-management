@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Asset;
 use App\Models\Ticket;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Asset;
 use Illuminate\Database\Seeder;
+use Carbon\Carbon;
 
 class TicketSeeder extends Seeder
 {
@@ -15,18 +15,43 @@ class TicketSeeder extends Seeder
      */
     public function run(): void
     {
+        // Fetch an existing user
         $user = User::first();
-        $asset = Asset::first();
+        $userId = $user ? $user->id : null;
 
-        if (!$user || !$asset) {
+        // Fetch an existing asset
+        $asset = Asset::first();
+        $assetId = $asset ? $asset->id : null;
+
+        // Ensure we have valid user and asset before creating tickets
+        if (!$userId || !$assetId) {
             return;
         }
 
-        // Create 10 dummy tickets
-        Ticket::factory()->count(10)->create([
-            'user_id' => $user->id,
-            'asset_id' => $asset->id,
+        Ticket::create([
+            'user_id'       => $userId,
+            'asset_id'      => $assetId,
+            'ticket_type'   => 'Maintenance',
+            'problem'       => 'The device is overheating frequently.',
+            'user_comment'  => 'Please resolve this as soon as possible.',
+            'ticket_status' => 'Open',
+            'cost'          => '1500',
+            'order_number'  => 'ORD-20240317-001',
+            'created_at'    => Carbon::now(),
+            'updated_at'    => Carbon::now(),
         ]);
 
+        Ticket::create([
+            'user_id'       => $userId,
+            'asset_id'      => $assetId,
+            'ticket_type'   => 'Repair',
+            'problem'       => 'The display screen is not working.',
+            'user_comment'  => 'Need urgent repair.',
+            'ticket_status' => 'In Progress',
+            'cost'          => '2500',
+            'order_number'  => 'ORD-20240317-002',
+            'created_at'    => Carbon::now(),
+            'updated_at'    => Carbon::now(),
+        ]);
     }
 }
